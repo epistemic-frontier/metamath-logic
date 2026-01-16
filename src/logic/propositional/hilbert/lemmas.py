@@ -1,4 +1,14 @@
 # logic/propositional/hilbert/lemmas.py
+"""Classic propositional lemmas for a Hilbert-style system.
+
+This module collects derived lemmas over implication, negation and the
+derived disjunction `Or`. Each `prove_L*` function constructs a `LemmaProof`
+value that records the statement and a debug-friendly sequence of steps.
+
+Families covered here include identity, disjunction introduction, De Morgan,
+contrapositive, double negation, excluded middle and Peirce's law.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -17,6 +27,7 @@ from .definitions import Or
 @dataclass(frozen=True)
 class ProofStep:
     """One proof step for debugging/introspection."""
+
     label: str
     wff: Wff
     note: str
@@ -25,6 +36,7 @@ class ProofStep:
 @dataclass(frozen=True)
 class LemmaProof:
     """A lemma proof artifact produced by the authoring/proof script."""
+
     name: str
     statement: Wff
     steps: tuple[ProofStep, ...]
@@ -35,23 +47,12 @@ class LemmaProof:
 # -----------------------------------------------------------------------------
 
 def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
-    """Prove L1: φ -> φ using Hilbert axioms A1/A2 and rule mp.
+    """Identity law: φ -> φ.
 
-    Standard Hilbert proof outline:
-      (1) A1 with ψ := φ
-          φ -> (φ -> φ)
-
-      (2) A2 with ψ := (φ -> φ), χ := φ
-          (φ -> ((φ -> φ) -> φ)) -> ((φ -> (φ -> φ)) -> (φ -> φ))
-
-      (3) A1 with ψ := (φ -> φ)
-          φ -> ((φ -> φ) -> φ)
-
-      (4) mp on (3) and (2)
-          (φ -> (φ -> φ)) -> (φ -> φ)
-
-      (5) mp on (1) and (4)
-          φ -> φ
+    Formula: φ -> φ
+    Reading: Every proposition implies itself.
+    Notes:
+    - The proof uses A1, A2 and modus ponens in a standard Hilbert derivation.
     """
     steps: list[ProofStep] = []
 
@@ -92,20 +93,13 @@ def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L2_or_intro_right(sys: HilbertSystem) -> LemmaProof:
-    """Prove L2: φ -> Or(ψ, φ) with Or(a,b) := ¬a -> b.
+    """Right disjunction introduction: φ -> Or(ψ, φ).
 
-    Expand:
-      Or(ψ, φ) = (¬ψ -> φ)
-
-    Then L2 is exactly an instance of A1:
-      A1: α -> (β -> α)
-    with:
-      α := φ
-      β := ¬ψ
-
-    Proof:
-      (1) compile goal statement
-      (2) instantiate A1
+    Formula: φ -> Or(ψ, φ)
+    Reading: From φ we can conclude Or(ψ, φ).
+    Notes:
+    - Or(a, b) is defined as ¬a -> b, so Or(ψ, φ) = (¬ψ -> φ).
+    - The lemma is an instance of A1 with α := φ and β := ¬ψ.
     """
     steps: list[ProofStep] = []
 
@@ -140,8 +134,10 @@ def prove_L2_or_intro_right(sys: HilbertSystem) -> LemmaProof:
 def prove_L4_demorgan(sys: HilbertSystem) -> LemmaProof:
     """De Morgan law (one direction): ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ).
 
-    With Or(a, b) defined as ¬a -> b, the statement expands to:
-        ¬(φ ∧ ψ) -> (¬¬φ -> ¬ψ)
+    Formula: ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ)
+    Reading: If not both φ and ψ hold, then either ¬φ or ¬ψ holds.
+    Notes:
+    - With Or(a, b) := ¬a -> b, the statement expands to ¬(φ ∧ ψ) -> (¬¬φ -> ¬ψ).
     """
     stmt_expr = Imp(Not(And(phi, psi)), Or.expand(Not(phi), Not(psi)))
     stmt_wff = sys.compile(stmt_expr, ctx="compile L4 De Morgan")
@@ -150,7 +146,11 @@ def prove_L4_demorgan(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L5_contrapositive(sys: HilbertSystem) -> LemmaProof:
-    """Contrapositive: (φ -> ψ) -> (¬ψ -> ¬φ)."""
+    """Contrapositive: (φ -> ψ) -> (¬ψ -> ¬φ).
+
+    Formula: (φ -> ψ) -> (¬ψ -> ¬φ)
+    Reading: If φ implies ψ, then from ¬ψ we may infer ¬φ.
+    """
     stmt_expr = Imp(Imp(phi, psi), Imp(Not(psi), Not(phi)))
     stmt_wff = sys.compile(stmt_expr, ctx="compile L5 contrapositive")
     steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Contrapositive")]
@@ -158,7 +158,11 @@ def prove_L5_contrapositive(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
-    """Double negation introduction: φ -> ¬¬φ."""
+    """Double negation introduction: φ -> ¬¬φ.
+
+    Formula: φ -> ¬¬φ
+    Reading: If φ holds then it is not the case that φ does not hold.
+    """
     stmt_expr = Imp(phi, Not(Not(phi)))
     stmt_wff = sys.compile(stmt_expr, ctx="compile L6 double neg intro")
     steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Double negation introduction")]
@@ -168,7 +172,13 @@ def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L7_double_neg_elim(sys: HilbertSystem) -> LemmaProof:
-    """Double negation elimination: ¬¬φ -> φ."""
+    """Double negation elimination: ¬¬φ -> φ.
+
+    Formula: ¬¬φ -> φ
+    Reading: From it not being the case that φ does not hold, infer φ.
+    Notes:
+    - This is a classical principle connecting double negation and affirmation.
+    """
     stmt_expr = Imp(Not(Not(phi)), phi)
     stmt_wff = sys.compile(stmt_expr, ctx="compile L7 double neg elim")
     steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Double negation elimination")]
@@ -180,13 +190,11 @@ def prove_L7_double_neg_elim(sys: HilbertSystem) -> LemmaProof:
 def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
     """Law of excluded middle (LEM): Or(φ, ¬φ).
 
-    Here Or acts as the disjunction connective, defined by:
-        Or(a, b) := ¬a -> b
-
-    So the internal expansion is:
-        Or(φ, ¬φ) = (¬φ -> ¬φ)
-    which is an instance of the identity schema at the level of the core
-    implication/negation language.
+    Formula: Or(φ, ¬φ)
+    Reading: Every proposition is either true or its negation is true.
+    Notes:
+    - Or(a, b) is defined as ¬a -> b, so Or(φ, ¬φ) = (¬φ -> ¬φ).
+    - Internally this is an instance of the identity schema in the core language.
     """
     stmt_expr = Or.expand(phi, Not(phi))
     stmt_wff = sys.compile(stmt_expr, ctx="compile L8 excluded middle")
@@ -197,7 +205,14 @@ def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
-    """Peirce's law: ((φ -> ψ) -> φ) -> φ."""
+    """Peirce's law: ((φ -> ψ) -> φ) -> φ.
+
+    Formula: ((φ -> ψ) -> φ) -> φ
+    Reading: If assuming (φ -> ψ) lets us derive φ, then φ already holds.
+    Notes:
+    - Characteristic of classical logic; interderivable with excluded middle over
+      suitable axiom bases.
+    """
     stmt_expr = Imp(Imp(Imp(phi, psi), phi), phi)
     stmt_wff = sys.compile(stmt_expr, ctx="compile L9 Peirce law")
     steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Peirce's law")]
@@ -205,17 +220,14 @@ def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
-    """Target lemma (requested): φ -> Or(φ, ψ), where Or(φ,ψ) := ¬φ -> ψ.
+    """Left disjunction introduction (deferred): φ -> Or(φ, ψ).
 
-    Expanded goal:
-      φ -> (¬φ -> ψ)
-
-    This lemma is valid in classical propositional logic, but proving it in this
-    Hilbert system typically requires additional derived lemmas (e.g. explosion,
-    permutation/exportation, etc.). We intentionally defer it until the lemma
-    library has those building blocks.
-
-    For now, raise to keep the framework honest.
+    Formula: φ -> Or(φ, ψ)
+    Reading: From φ we can conclude Or(φ, ψ).
+    Notes:
+    - This lemma is valid in classical propositional logic.
+    - Implementation is intentionally deferred until additional derived lemmas
+      (such as explosion or permutation principles) are available.
     """
     raise NotImplementedError(
         "L3 (φ -> Or(φ, ψ)) is deferred: needs additional derived lemmas "

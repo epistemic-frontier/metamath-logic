@@ -1,19 +1,19 @@
 # logic/propositional/hilbert/_structures.py
+"""Author-facing language skeleton for the Hilbert propositional system.
+
+This module declares:
+- formal variables (φ, ψ, χ, ...)
+- core constructors with arity (→, ¬, ∧)
+- require(...) declarations for signatures (wff discipline)
+
+No Builtins or SymbolInterner appear here; those are injected at system
+construction time by logic.propositional.hilbert.HilbertSystem.
+"""
+
 from __future__ import annotations
 
 from skfd.authoring.dsl import Constructor, Var, require
 from skfd.authoring.typing import WFF
-
-# -----------------------------------------------------------------------------
-# Language skeleton (author-facing)
-#
-# This module declares:
-# - formal variables (φ, ψ, χ, ...)
-# - core constructors with arity (→, ¬, ∧)
-# - require(...) declarations for signatures (wff discipline)
-#
-# No Builtins / SymbolInterner here.
-# -----------------------------------------------------------------------------
 
 # Formal variables
 phi = Var(name="φ")

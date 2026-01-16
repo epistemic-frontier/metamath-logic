@@ -17,6 +17,11 @@ from logic.propositional.hilbert.lemmas import (
 
 
 def manifest() -> dict[str, Any]:
+    """Declare build-time dependencies for the logic package.
+
+    Returns a dictionary describing which other packages this build unit
+    depends on. The driver uses this to wire dependency injection for build().
+    """
     return {"deps": ["prelude"]}
 
 
@@ -89,6 +94,21 @@ def _emit_rule_skeleton(mm: MMBuilder, system: HilbertSystem) -> None:
 
 
 def build(mm: MMBuilder, **deps: Any) -> Any:
+    """Emit the Hilbert propositional logic database into an MMBuilder.
+
+    Contract:
+    - Inputs:
+      - mm: an MMBuilder with a live SymbolInterner.
+      - deps["prelude"]: symbol handles for the shared prelude database.
+    - Effects:
+      - Imports core prelude symbols (wff, ph, wph, ax-1) into mm.
+      - Constructs a HilbertSystem bound to mm._interner.
+      - Emits author-level axioms and a rule skeleton (wi, wn, wa, mp).
+      - Emits classic propositional lemmas (L1, De Morgan, contrapositive,
+        double negation, LEM, Peirce, etc.).
+    - Returns:
+      - A dict reserved for future extension (currently empty).
+    """
     prelude = deps.get("prelude")
     if not prelude:
         raise RuntimeError("Dependency 'prelude' not found or failed to load")

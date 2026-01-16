@@ -1,4 +1,17 @@
 # logic/propositional/hilbert/axioms.py
+"""Author-facing Hilbert axiom schemas (Expr-level).
+
+The axioms here are written as Expr trees over the core constructors from
+_structures.py. They correspond to the usual Hilbert-style implicational
+calculus:
+- A1 (K): φ → (ψ → φ)
+- A2 (S): (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))
+- A3: (¬φ → ¬ψ) → (ψ → φ)
+
+These are not token-level formulas; compilation to Wff is done via
+HilbertSystem.compile(expr).
+"""
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -6,15 +19,6 @@ from collections.abc import Mapping
 from skfd.authoring.dsl import Expr
 
 from ._structures import Imp, Not, chi, phi, psi
-
-# -----------------------------------------------------------------------------
-# Axioms (author-facing)
-#
-# These are Expr trees built from the declared constructors and formal vars.
-# They are NOT token-level formulas.
-#
-# Compilation is performed via HilbertSystem.compile(expr).
-# -----------------------------------------------------------------------------
 
 # A1: φ → (ψ → φ)
 A1: Expr = Imp(phi, Imp(psi, phi))

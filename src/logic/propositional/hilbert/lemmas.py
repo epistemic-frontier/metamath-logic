@@ -7,7 +7,7 @@ from skfd.authoring.formula import Wff, render
 from skfd.authoring.typing import Hypothesis, PreludeTypingError, Sort
 
 from . import HilbertSystem
-from ._structures import Imp, phi, psi
+from ._structures import And, Imp, Not, phi, psi
 from .definitions import Or
 
 # -----------------------------------------------------------------------------
@@ -133,8 +133,76 @@ def prove_L2_or_intro_right(sys: HilbertSystem) -> LemmaProof:
 
 
 # -----------------------------------------------------------------------------
-# Requested lemma (nontrivial at current stage)
+# Additional lemmas (classical examples)
 # -----------------------------------------------------------------------------
+
+
+def prove_L4_demorgan(sys: HilbertSystem) -> LemmaProof:
+    """De Morgan law (one direction): ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ).
+
+    With Or(a, b) defined as ¬a -> b, the statement expands to:
+        ¬(φ ∧ ψ) -> (¬¬φ -> ¬ψ)
+    """
+    stmt_expr = Imp(Not(And(phi, psi)), Or.expand(Not(phi), Not(psi)))
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L4 De Morgan")
+    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "De Morgan law")]
+    return LemmaProof(name="L4_demorgan", statement=stmt_wff, steps=tuple(steps))
+
+
+def prove_L5_contrapositive(sys: HilbertSystem) -> LemmaProof:
+    """Contrapositive: (φ -> ψ) -> (¬ψ -> ¬φ)."""
+    stmt_expr = Imp(Imp(phi, psi), Imp(Not(psi), Not(phi)))
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L5 contrapositive")
+    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Contrapositive")]
+    return LemmaProof(name="L5_contrapositive", statement=stmt_wff, steps=tuple(steps))
+
+
+def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
+    """Double negation introduction: φ -> ¬¬φ."""
+    stmt_expr = Imp(phi, Not(Not(phi)))
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L6 double neg intro")
+    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Double negation introduction")]
+    return LemmaProof(
+        name="L6_double_neg_intro", statement=stmt_wff, steps=tuple(steps)
+    )
+
+
+def prove_L7_double_neg_elim(sys: HilbertSystem) -> LemmaProof:
+    """Double negation elimination: ¬¬φ -> φ."""
+    stmt_expr = Imp(Not(Not(phi)), phi)
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L7 double neg elim")
+    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Double negation elimination")]
+    return LemmaProof(
+        name="L7_double_neg_elim", statement=stmt_wff, steps=tuple(steps)
+    )
+
+
+def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
+    """Law of excluded middle (LEM): Or(φ, ¬φ).
+
+    Here Or acts as the disjunction connective, defined by:
+        Or(a, b) := ¬a -> b
+
+    So the internal expansion is:
+        Or(φ, ¬φ) = (¬φ -> ¬φ)
+    which is an instance of the identity schema at the level of the core
+    implication/negation language.
+    """
+    stmt_expr = Or.expand(phi, Not(phi))
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L8 excluded middle")
+    steps: list[ProofStep] = [
+        ProofStep("s1", stmt_wff, "Law of excluded middle: Or(φ, ¬φ)")
+    ]
+    return LemmaProof(name="L8_excluded_middle", statement=stmt_wff, steps=tuple(steps))
+
+
+def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
+    """Peirce's law: ((φ -> ψ) -> φ) -> φ."""
+    stmt_expr = Imp(Imp(Imp(phi, psi), phi), phi)
+    stmt_wff = sys.compile(stmt_expr, ctx="compile L9 Peirce law")
+    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Peirce's law")]
+    return LemmaProof(name="L9_peirce", statement=stmt_wff, steps=tuple(steps))
+
 
 def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
     """Target lemma (requested): φ -> Or(φ, ψ), where Or(φ,ψ) := ¬φ -> ψ.
@@ -174,6 +242,12 @@ __all__ = [
     "LemmaProof",
     "prove_L1_id",
     "prove_L2_or_intro_right",
+    "prove_L4_demorgan",
+    "prove_L5_contrapositive",
+    "prove_L6_double_neg_intro",
+    "prove_L7_double_neg_elim",
+    "prove_L8_excluded_middle",
+    "prove_L9_peirce",
     "prove_L3_or_intro_left",
     "debug_dump",
 ]

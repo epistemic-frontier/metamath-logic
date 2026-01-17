@@ -59,8 +59,23 @@ Or = Definition(
 )
 
 
+# Iff(φ, ψ) := ¬((φ → ψ) → ¬(ψ → φ))
+# This matches set.mm df-bi: ( ph <-> ps ) <-> -. ( ( ph -> ps ) -> -. ( ps -> ph ) )
+Iff = Definition(
+    name="Iff",
+    arity=2,
+    body=lambda a, b: Not(Imp(Imp(a, b), Not(Imp(b, a)))),
+    doc=(
+        "Biconditional: Iff(φ, ψ) := ¬((φ → ψ) → ¬(ψ → φ)).\n"
+        "Formula: Iff(φ, ψ) = (φ <-> ψ)\n"
+        "Reading: φ is equivalent to ψ."
+    ),
+)
+
+
 DEFINITIONS: Mapping[str, Definition] = {
     "Or": Or,
+    "Iff": Iff,
 }
 
-__all__ = ["Definition", "Or", "DEFINITIONS"]
+__all__ = ["Definition", "Or", "Iff", "DEFINITIONS"]

@@ -1,8 +1,9 @@
-from typing import Any
-
+# src/logic/build.py
+from skfd import mm, deps
 from skfd.authoring.emit import emit_axioms, emit_lemmas
 from skfd.builder import MMBuilder
 from logic.propositional.hilbert import HilbertSystem
+from logic.predicate.hilbert.system import PredicateSystem
 from logic.propositional.hilbert._structures import And, Not, Imp, phi, psi
 from logic.propositional.hilbert.lemmas import (
     prove_L1_id,
@@ -15,17 +16,22 @@ from logic.propositional.hilbert.lemmas import (
     prove_L9_peirce,
 )
 
+# 1. Import Dependencies
+prelude = deps.metamath_prelude
 
-def manifest() -> dict[str, Any]:
-    """Declare build-time dependencies for the logic package.
+# Explicitly import symbols we need from prelude
+# Note: ax-1 is not in prelude, so we don't import it.
+mm.import_symbols(
+    wff=prelude["wff"],
+    ph=prelude["ph"],
+    wph=prelude["wph"],
+)
 
-    Returns a dictionary describing which other packages this build unit
-    depends on. The driver uses this to wire dependency injection for build().
-    """
-    return {"deps": ["prelude"]}
-
-
+# 2. Logic Construction
 def _emit_rule_skeleton(mm: MMBuilder, system: HilbertSystem) -> None:
+    # This function manually constructs syntax rules.
+    # ideally we should reuse prelude's syntax, but for now we preserve existing behavior
+    # to avoid breaking the logic system's internal assumptions.
     axioms = system.compile_axioms()
     symtab = system.interner.symbol_table()
 
@@ -93,47 +99,34 @@ def _emit_rule_skeleton(mm: MMBuilder, system: HilbertSystem) -> None:
         mm.a("mp", "wff", psi_expr)
 
 
-def build(mm: MMBuilder, **deps: Any) -> Any:
-    """Emit the Hilbert propositional logic database into an MMBuilder.
+system = HilbertSystem.make(interner=mm._interner)
+emit_axioms(mm, system)
+_emit_rule_skeleton(mm, system)
 
-    Contract:
-    - Inputs:
-      - mm: an MMBuilder with a live SymbolInterner.
-      - deps["prelude"]: symbol handles for the shared prelude database.
-    - Effects:
-      - Imports core prelude symbols (wff, ph, wph, ax-1) into mm.
-      - Constructs a HilbertSystem bound to mm._interner.
-      - Emits author-level axioms and a rule skeleton (wi, wn, wa, mp).
-      - Emits classic propositional lemmas (L1, De Morgan, contrapositive,
-        double negation, LEM, Peirce, etc.).
-    - Returns:
-      - A dict reserved for future extension (currently empty).
-    """
-    prelude = deps.get("prelude")
-    if not prelude:
-        raise RuntimeError("Dependency 'prelude' not found or failed to load")
+lemmas = [
+    prove_L1_id(system),
+    prove_L2_or_intro_right(system),
+    prove_L4_demorgan(system),
+    prove_L5_contrapositive(system),
+    prove_L6_double_neg_intro(system),
+    prove_L7_double_neg_elim(system),
+    prove_L8_excluded_middle(system),
+    prove_L9_peirce(system),
+]
+emit_lemmas(mm, system, lemmas)
 
-    mm.import_symbols(
-        wff=prelude["wff"],
-        ph=prelude["ph"],
-        wph=prelude["wph"],
-        ax_1=prelude["ax-1"],
-    )
+# --- Predicate logic: emit AX5/AX6 via predicate system (unary forall scaffolding) ---
+pred = PredicateSystem.make(interner=mm._interner)
+emit_axioms(mm, pred)
 
-    system = HilbertSystem.make(interner=mm._interner)
-    emit_axioms(mm, system)
-    _emit_rule_skeleton(mm, system)
+# 3. Export API
+mm.export("wi", "wn", "wa", "mp")
 
-    lemmas = [
-        prove_L1_id(system),
-        prove_L2_or_intro_right(system),
-        prove_L4_demorgan(system),
-        prove_L5_contrapositive(system),
-        prove_L6_double_neg_intro(system),
-        prove_L7_double_neg_elim(system),
-        prove_L8_excluded_middle(system),
-        prove_L9_peirce(system),
-    ]
-    emit_lemmas(mm, system, lemmas)
+for label in system.axioms:
+    mm.export(label)
 
-    return {}
+for lemma in lemmas:
+    mm.export(lemma.name)
+    
+for label in pred.axioms:
+    mm.export(label)

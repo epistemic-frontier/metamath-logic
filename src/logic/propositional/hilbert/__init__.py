@@ -8,8 +8,9 @@ from typing import Any, TypeAlias
 from prelude.formula import Builtins
 from prelude.formula import imp as mk_imp
 from prelude.formula import wa as mk_wa
+from prelude.formula import wo as mk_wo
 from prelude.formula import wn as mk_wn
-from skfd.authoring.dsl import BuilderFn, CompileEnv, Expr, RequireRegistry, compile_wff
+from skfd.authoring.dsl import BuilderFn, CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry, compile_wff
 from skfd.authoring.formula import Wff
 from skfd.authoring.typing import HypothesisAny, PreludeTypingError, RuleApp
 from skfd.core.symbols import SymbolInterner
@@ -24,14 +25,8 @@ RuleFn: TypeAlias = Callable[..., Wff]
 # Builders for authoring -> token lowering
 # -----------------------------------------------------------------------------
 
-def _hilbert_builders() -> dict[str, BuilderFn]:
-    """Map authoring constructor names to token builders."""
-    # We match the names defined in _structures.py (→, ¬, ∧)
-    return {
-        "→": lambda b, xs: mk_imp(b, xs[0], xs[1]),
-        "¬": lambda b, xs: mk_wn(b, xs[0]),
-        "∧": lambda b, xs: mk_wa(b, xs[0], xs[1]),
-    }
+# Deprecated: _hilbert_builders
+# Builders are now registered via @logic_symbol in _structures.py
 
 
 # -----------------------------------------------------------------------------
@@ -94,7 +89,7 @@ class HilbertSystem:
         env = CompileEnv(
             interner=self.interner,
             builtins=self.builtins,
-            ctor_builders=_hilbert_builders(),  # Injected here!
+            ctor_builders=DEFAULT_BUILDERS.all(),
             origin_module_id=origin_module_id,
             origin_ref=origin_ref,
         )

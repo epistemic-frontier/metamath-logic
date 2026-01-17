@@ -16,32 +16,23 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from skfd.authoring.dsl import Expr
+from skfd.authoring.dsl import Axiom, Expr, export_axioms
+from skfd.authoring.parsing import wff
 
 from ._structures import Imp, Not, chi, phi, psi
 
 # A1: φ → (ψ → φ)
-A1: Expr = Imp(phi, Imp(psi, phi))
+A1: Axiom = wff("ph -> ( ps -> ph )")
 
 # A2: (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))
-A2: Expr = Imp(
-    Imp(phi, Imp(psi, chi)),
-    Imp(Imp(phi, psi), Imp(phi, chi)),
-)
+A2: Axiom = wff("( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )")
 
 # A3: (¬φ → ¬ψ) → (ψ → φ)
-A3: Expr = Imp(
-    Imp(Not(phi), Not(psi)),
-    Imp(psi, phi),
-)
+A3: Axiom = wff("( -. ph -> -. ps ) -> ( ps -> ph )")
 
 
-def make_axioms() -> Mapping[str, Expr]:
-    return  {
-        "A1": A1,
-        "A2": A2,
-        "A3": A3,
-    }
+def make_axioms() -> Mapping[str, Axiom]:
+    return export_axioms(globals())
 
 
 SETMM_TO_HILBERT_LABELS: Mapping[str, str] = {

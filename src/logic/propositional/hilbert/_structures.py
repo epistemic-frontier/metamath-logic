@@ -12,29 +12,22 @@ construction time by logic.propositional.hilbert.HilbertSystem.
 
 from __future__ import annotations
 
-from skfd.authoring.dsl import Constructor, Var, require
-from skfd.authoring.typing import WFF
+from skfd.authoring.dsl import Var
+from prelude.structures import (
+    Imp, Not, And, Or, Iff,
+    phi, psi, chi, th, ta
+)
 
-# Formal variables
-phi = Var(name="ph")
-psi = Var(name="ps")
-chi = Var(name="ch")
-
-# Core constructors (author-visible symbols)
-Imp = Constructor("→", 2)
-Not = Constructor("¬", 1)
-And = Constructor("∧", 2)
-
-# Signature declarations (arity/sort)
-require(Imp, in_sorts=(WFF, WFF), out_sort=WFF, notes="implication")
-require(Not, in_sorts=(WFF,), out_sort=WFF, notes="negation")
-require(And, in_sorts=(WFF, WFF), out_sort=WFF, notes="conjunction")
-
+# Re-export for compatibility
 __all__ = [
     "phi",
     "psi",
     "chi",
+    "th",
+    "ta",
     "Imp",
     "Not",
     "And",
+    "Or",
+    "Iff",
 ]

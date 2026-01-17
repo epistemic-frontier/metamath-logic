@@ -1,0 +1,18 @@
+active = ['mmverify', 'metamath', 'knife']
+
+[verifiers]
+
+[verifiers.mmverify]
+command = '/Users/mingli/MetaMath/metamath-logic/.venv/bin/python3'
+args = ['/Users/mingli/MetaMath/proof-scaffold/src/skfd/verifier/mmverify.py']
+
+[verifiers.metamath]
+command = 'env'
+args = [
+    'METAMATH_BIN=/Users/mingli/MetaMath/metamath/src/metamath',
+    '/Users/mingli/MetaMath/metamath-logic/.venv/bin/python3',
+    '/Users/mingli/MetaMath/proof-scaffold/src/skfd/verifier/shims/metamath.py',
+]
+
+[verifiers.knife]
+command = '/Users/mingli/MetaMath/metamath-knife/target/release/metamath-knife'

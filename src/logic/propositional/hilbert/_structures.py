@@ -16,9 +16,9 @@ from skfd.authoring.dsl import Constructor, Var, require
 from skfd.authoring.typing import WFF
 
 # Formal variables
-phi = Var(name="φ")
-psi = Var(name="ψ")
-chi = Var(name="χ")
+phi = Var(name="ph")
+psi = Var(name="ps")
+chi = Var(name="ch")
 
 # Core constructors (author-visible symbols)
 Imp = Constructor("→", 2)

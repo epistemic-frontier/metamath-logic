@@ -44,4 +44,11 @@ def make_axioms() -> Mapping[str, Expr]:
     }
 
 
-__all__ = ["A1", "A2", "A3", "make_axioms"]
+SETMM_TO_HILBERT_LABELS: Mapping[str, str] = {
+    "ax-1": "A1",
+    "ax-2": "A2",
+    "ax-3": "A3",
+}
+
+
+__all__ = ["A1", "A2", "A3", "make_axioms", "SETMM_TO_HILBERT_LABELS"]

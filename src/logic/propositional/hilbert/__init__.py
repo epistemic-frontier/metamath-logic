@@ -15,6 +15,7 @@ from skfd.authoring.typing import HypothesisAny, PreludeTypingError, RuleApp
 from skfd.core.symbols import SymbolInterner
 
 from ._syntactic import RuleBundle, make_rules
+from .axioms import SETMM_TO_HILBERT_LABELS as SETMM_TO_HILBERT_AXIOMS
 
 RuleFn: TypeAlias = Callable[..., Wff]
 
@@ -128,4 +129,20 @@ def make(*, interner: SymbolInterner, origin_ref: Any = None) -> HilbertSystem:
     return HilbertSystem.make(interner=interner, origin_ref=origin_ref)
 
 
-__all__ = ["HilbertSystem", "make"]
+SETMM_TO_HILBERT_RULES: Mapping[str, str] = {
+    "ax-mp": "mp",
+}
+
+SETMM_TO_HILBERT: Mapping[str, str] = {
+    **SETMM_TO_HILBERT_AXIOMS,
+    **SETMM_TO_HILBERT_RULES,
+}
+
+
+__all__ = [
+    "HilbertSystem",
+    "make",
+    "SETMM_TO_HILBERT_AXIOMS",
+    "SETMM_TO_HILBERT_RULES",
+    "SETMM_TO_HILBERT",
+]

@@ -3,6 +3,7 @@ from __future__ import annotations
 from skfd.api_v2 import BuildContextV2
 from skfd.authoring.emit import emit_axioms, emit_lemmas
 from skfd.builder_v2 import MMBuilderV2
+from skfd.core.symbols import SymbolId
 from logic.propositional.hilbert import HilbertSystem
 from logic.propositional.hilbert._structures import And, Imp, Not, phi, psi
 from logic.propositional.hilbert.lemmas import (
@@ -17,11 +18,9 @@ from logic.propositional.hilbert.lemmas import (
 )
 
 
-def manifest() -> dict[str, list[str]]:
-    return {"deps": ["metamath-prelude"]}
-
-
-def _emit_rule_skeleton(mm: MMBuilderV2, system: HilbertSystem, *, wff: int) -> None:
+def _emit_rule_skeleton(
+    mm: MMBuilderV2, system: HilbertSystem, *, wff: SymbolId
+) -> None:
     wi_wff = system.compile(Imp(phi, psi), ctx="rule[wi]")
     wn_wff = system.compile(Not(phi), ctx="rule[wn]")
     wa_wff = system.compile(And(phi, psi), ctx="rule[wa]")

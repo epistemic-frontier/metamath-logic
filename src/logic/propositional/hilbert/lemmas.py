@@ -305,19 +305,17 @@ def prove_modus_tollens(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
-    """Left disjunction introduction (deferred): φ -> Or(φ, ψ).
+    """Left disjunction introduction: φ -> Or(φ, ψ).
 
     Formula: φ -> Or(φ, ψ)
-    Reading: From φ we can conclude Or(φ, ψ).
+    Expanded: φ -> (¬φ -> ψ)
     Notes:
-    - This lemma is valid in classical propositional logic.
-    - Implementation is intentionally deferred until additional derived lemmas
-      (such as explosion or permutation principles) are available.
+    - Or(a, b) is defined as ¬a -> b.
+    - This matches set.mm theorem `pm2.24`.
     """
-    raise NotImplementedError(
-        "L3 (φ -> Or(φ, ψ)) is deferred: needs additional derived lemmas "
-        "(e.g. explosion / permutation). Use L2 to validate the framework first."
-    )
+    lb = LemmaBuilder(sys, "L3_or_intro_left")
+    s1 = lb.step("s1", "ph -> ( -. ph -> ps )", "pm2.24")
+    return lb.build(s1)
 
 
 # -----------------------------------------------------------------------------

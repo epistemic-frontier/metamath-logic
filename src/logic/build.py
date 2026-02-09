@@ -9,6 +9,7 @@ from logic.propositional.hilbert._structures import And, Imp, Not, phi, psi
 from logic.propositional.hilbert.lemmas import (
     prove_L1_id,
     prove_L2_or_intro_right,
+    prove_L3_or_intro_left,
     prove_L4_demorgan,
     prove_L5_contrapositive,
     prove_L6_double_neg_intro,
@@ -51,6 +52,7 @@ def build(ctx: BuildContextV2) -> None:
     lemmas = [
         prove_L1_id(system),
         prove_L2_or_intro_right(system),
+        prove_L3_or_intro_left(system),
         prove_L4_demorgan(system),
         prove_L5_contrapositive(system),
         prove_L6_double_neg_intro(system),

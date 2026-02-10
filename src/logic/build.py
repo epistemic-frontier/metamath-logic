@@ -7,6 +7,7 @@ from skfd.core.symbols import SymbolId
 from logic.propositional.hilbert import HilbertSystem
 from logic.propositional.hilbert._structures import And, Imp, Not, phi, psi
 from logic.propositional.hilbert.lemmas import (
+    LemmaProof,
     prove_L1_id,
     prove_L2_or_intro_right,
     prove_L3_or_intro_left,
@@ -65,7 +66,7 @@ def build(ctx: BuildContextV2) -> None:
     compiled_axioms = system.compile_axioms()
     reserved = {"wi", "wn", "wa", "mp"}
 
-    def _refs(p) -> set[str]:
+    def _refs(p: LemmaProof) -> set[str]:
         refs: set[str] = set()
         for st in getattr(p, "steps", ()):
             if getattr(st, "op", None) == "ref":
@@ -74,13 +75,11 @@ def build(ctx: BuildContextV2) -> None:
                     refs.add(r)
         return refs
 
-    queue = list(base_lemmas)
-    lemma_by_name: dict[str, object] = {}
+    queue: list[LemmaProof] = list(base_lemmas)
+    lemma_by_name: dict[str, LemmaProof] = {}
     while queue:
         p = queue.pop()
-        name = getattr(p, "name", None)
-        if not isinstance(name, str) or not name:
-            continue
+        name = p.name
         if name in lemma_by_name:
             continue
         lemma_by_name[name] = p

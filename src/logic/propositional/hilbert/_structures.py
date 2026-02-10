@@ -12,7 +12,6 @@ construction time by logic.propositional.hilbert.HilbertSystem.
 
 from __future__ import annotations
 
-from skfd.authoring.dsl import Var
 from prelude.structures import (
     Imp, Not, And, Or, Iff,
     phi, psi, chi, th, ta

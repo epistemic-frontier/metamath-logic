@@ -6,11 +6,7 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from prelude.formula import Builtins
-from prelude.formula import imp as mk_imp
-from prelude.formula import wa as mk_wa
-from prelude.formula import wo as mk_wo
-from prelude.formula import wn as mk_wn
-from skfd.authoring.dsl import BuilderFn, CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
+from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
 from skfd.authoring.formula import Wff
 from skfd.authoring.typing import HypothesisAny, RuleApp
 from skfd.core.symbols import SymbolInterner

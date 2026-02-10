@@ -14,11 +14,10 @@ These are not token-level formulas; compilation to Wff is handled by the logic b
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import cast
 
-from skfd.authoring.dsl import Axiom, Expr, export_axioms
+from skfd.authoring.dsl import Axiom, export_axioms
 from skfd.authoring.parsing import wff
-
-from ._structures import Imp, Not, chi, phi, psi
 
 # A1: φ → (ψ → φ)
 A1: Axiom = wff("φ → ( ψ → φ )")
@@ -31,7 +30,7 @@ A3: Axiom = wff("( ¬ φ → ¬ ψ ) → ( ψ → φ )")
 
 
 def make_axioms() -> Mapping[str, Axiom]:
-    return export_axioms(globals())
+    return cast(Mapping[str, Axiom], export_axioms(globals()))
 
 
 SETMM_TO_HILBERT_LABELS: Mapping[str, str] = {

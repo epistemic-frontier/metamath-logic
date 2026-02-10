@@ -18,19 +18,19 @@ w = Var(name="w")
 
 # Binary forall constructor (variable + body)
 @symbol("∀", 2, (WFF, WFF), WFF, notes="binary forall over wff (var placeholder)", precedence=40, assoc="right", aliases=["A."])
-def All(b, xs):
+def All(b: object, xs: tuple[object, object]) -> object:
     return mk_forall2(b, xs[0], xs[1])
 
 @symbol("∃", 2, (WFF, WFF), WFF, notes="binary exists over wff (var placeholder)", precedence=40, assoc="right", aliases=["E."])
-def Exists(b, xs):
+def Exists(b: object, xs: tuple[object, object]) -> object:
     return mk_exist(b, xs[0], xs[1])
 
 @symbol("=", 2, (WFF, WFF), WFF, op="eq", notes="equality", precedence=30, assoc="none")
-def Eq(b, xs):
+def Eq(b: object, xs: tuple[object, object]) -> object:
     return mk_eq(b, xs[0], xs[1])
 
 @symbol("e.", 2, (WFF, WFF), WFF, notes="membership", precedence=30, assoc="none")
-def Elem(b, xs):
+def Elem(b: object, xs: tuple[object, object]) -> object:
     return mk_elem(b, xs[0], xs[1])
 
 __all__ = [

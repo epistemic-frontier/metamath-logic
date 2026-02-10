@@ -6,12 +6,8 @@ from . import HilbertSystem
 from .lemmas import (
     LemmaProof,
     prove_L1_id,
-    prove_L2_or_intro_right,
-    prove_L4_demorgan,
-    prove_L5_contrapositive,
     prove_L6_double_neg_intro,
     prove_L7_double_neg_elim,
-    prove_L8_excluded_middle,
     prove_L9_peirce,
     prove_a1i,
     prove_a2i,

@@ -2,17 +2,15 @@ active = ['mmverify', 'metamath', 'knife']
 
 [verifiers]
 
-[verifiers.mmverify]
-command = '/Users/mingli/MetaMath/metamath-logic/.venv/bin/python3'
-args = ['/Users/mingli/MetaMath/proof-scaffold/src/skfd/verifier/mmverify.py']
-
 [verifiers.metamath]
-command = 'env'
+command = '/usr/bin/env'
 args = [
-    'METAMATH_BIN=/Users/mingli/MetaMath/metamath/src/metamath',
-    '/Users/mingli/MetaMath/metamath-logic/.venv/bin/python3',
-    '/Users/mingli/MetaMath/proof-scaffold/src/skfd/verifier/shims/metamath.py',
+    'METAMATH_BIN=/Users/mingli/MetaMath/metamath-exe/src/metamath',
+    'python',
+    '-m',
+    'skfd.verifier.shims.metamath',
 ]
 
 [verifiers.knife]
 command = '/Users/mingli/MetaMath/metamath-knife/target/release/metamath-knife'
+args = ['--verify']

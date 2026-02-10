@@ -112,9 +112,9 @@ class LemmaBuilder:
 
 
 def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
-    """Identity law: φ -> φ.
+    """Identity law: φ → φ.
 
-    Formula: φ -> φ
+    Formula: φ → φ
     Reading: Every proposition implies itself.
     Notes:
     - The proof uses A1, A2 and modus ponens in a standard Hilbert derivation.
@@ -125,21 +125,21 @@ def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
         "s1",
         "φ → ( φ → φ )",
         ref="A1",
-        note="A1 with (phi, psi) = (φ, φ)",
+        note="A1 with ( φ,  ψ) = (φ, φ)",
     )
 
     s2 = lb.ref(
         "s2",
-        "( φ → ( ( φ → φ ) → φ ) ) → ( ( φ → ( φ → φ ) ) → ( φ → φ ) )",
+        "( φ → ( ( φ → φ ) -> φ ) ) -> ( ( φ → ( φ → φ ) ) -> ( φ → φ ) )",
         ref="A2",
-        note="A2 with (phi, psi, chi) = (φ, (φ→φ), φ)",
+        note="A2 with ( φ,  ψ, χ) = (φ, (φ→φ), φ)",
     )
 
     s3 = lb.ref(
         "s3",
-        "φ → ( ( φ → φ ) → φ )",
+        "φ → ( ( φ → φ ) -> φ )",
         ref="A1",
-        note="A1 with (phi, psi) = (φ, (φ→φ))",
+        note="A1 with ( φ,  ψ) = (φ, (φ→φ))",
     )
 
     s4 = lb.mp("s4", s3, s2, "mp on s3 and s2")
@@ -150,12 +150,12 @@ def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L2_or_intro_right(sys: HilbertSystem) -> LemmaProof:
-    """Right disjunction introduction: φ -> Or(ψ, φ).
+    """Right disjunction introduction: φ → Or(ψ, φ).
 
-    Formula: φ -> Or(ψ, φ)
+    Formula: φ → Or(ψ, φ)
     Reading: From φ we can conclude Or(ψ, φ).
     Notes:
-    - Or(a, b) is defined as ¬a -> b, so Or(ψ, φ) = (¬ψ -> φ).
+    - Or(a, b) is defined as ¬a → b, so Or(ψ, φ) = (¬ψ → φ).
     - The lemma is an instance of A1 with α := φ and β := ¬ψ.
     """
     lb = LemmaBuilder(sys, "L2_or_intro_right")
@@ -181,28 +181,28 @@ def prove_L4_demorgan(sys: HilbertSystem) -> LemmaProof:
     Formula: ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ)
     Reading: If not both φ and ψ hold, then either ¬φ or ¬ψ holds.
     Notes:
-    - With Or(a, b) := ¬a -> b, the statement expands to ¬(φ ∧ ψ) -> (¬¬φ -> ¬ψ).
+    - With Or(a, b) := ¬a → b, the statement expands to ¬(φ ∧ ψ) -> (¬¬φ → ¬ψ).
     """
     lb = LemmaBuilder(sys, "L4_demorgan")
-    stmt = lb.raw("s1", "¬ ( φ ∧ ψ ) → ( ¬ ¬ φ → ¬ ψ )", note="De Morgan law")
+    stmt = lb.raw("s1", "¬ ( φ ∧ ψ ) -> ( ¬ ¬ φ → ¬ ψ )", note="De Morgan law")
     return lb.build(stmt)
 
 
 def prove_L5_contrapositive(sys: HilbertSystem) -> LemmaProof:
-    """Contrapositive: (φ -> ψ) -> (¬ψ -> ¬φ).
+    """Contrapositive: (φ → ψ) -> (¬ψ → ¬φ).
 
-    Formula: (φ -> ψ) -> (¬ψ -> ¬φ)
+    Formula: (φ → ψ) -> (¬ψ → ¬φ)
     Reading: If φ implies ψ, then from ¬ψ we may infer ¬φ.
     """
     lb = LemmaBuilder(sys, "L5_contrapositive")
-    stmt = lb.raw("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", note="Contrapositive")
+    stmt = lb.raw("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", note="Contrapositive")
     return lb.build(stmt)
 
 
 def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
-    """Double negation introduction: φ -> ¬¬φ.
+    """Double negation introduction: φ → ¬¬φ.
 
-    Formula: φ -> ¬¬φ
+    Formula: φ → ¬¬φ
     Reading: If φ holds then it is not the case that φ does not hold.
     """
     lb = LemmaBuilder(sys, "L6_double_neg_intro")
@@ -211,9 +211,9 @@ def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L7_double_neg_elim(sys: HilbertSystem) -> LemmaProof:
-    """Double negation elimination: ¬¬φ -> φ.
+    """Double negation elimination: ¬¬φ → φ.
 
-    Formula: ¬¬φ -> φ
+    Formula: ¬¬φ → φ
     Reading: From it not being the case that φ does not hold, infer φ.
     Notes:
     - This is a classical principle connecting double negation and affirmation.
@@ -229,7 +229,7 @@ def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
     Formula: Or(φ, ¬φ)
     Reading: Every proposition is either true or its negation is true.
     Notes:
-    - Or(a, b) is defined as ¬a -> b, so Or(φ, ¬φ) = (¬φ -> ¬φ).
+    - Or(a, b) is defined as ¬a → b, so Or(φ, ¬φ) = (¬φ → ¬φ).
     - Internally this is an instance of the identity schema in the core language.
     """
     lb = LemmaBuilder(sys, "L8_excluded_middle")
@@ -238,24 +238,24 @@ def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
-    """Peirce's law: ((φ -> ψ) -> φ) -> φ.
+    """Peirce's law: ((φ → ψ) -> φ) -> φ.
 
-    Formula: ((φ -> ψ) -> φ) -> φ
-    Reading: If assuming (φ -> ψ) lets us derive φ, then φ already holds.
+    Formula: ((φ → ψ) -> φ) -> φ
+    Reading: If assuming (φ → ψ) lets us derive φ, then φ already holds.
     Notes:
     - Characteristic of classical logic; interderivable with excluded middle over
       suitable axiom bases.
     """
     lb = LemmaBuilder(sys, "L9_peirce")
-    stmt = lb.raw("s1", "( ( φ → ψ ) → φ ) → φ", note="Peirce's law")
+    stmt = lb.raw("s1", "( ( φ → ψ ) -> φ ) -> φ", note="Peirce's law")
     return lb.build(stmt)
 
 
 def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
-    """Linearity: (φ -> ψ) ∨ (ψ -> φ).
+    """Linearity: (φ → ψ) ∨ (ψ → φ).
 
-    Formula: (φ -> ψ) ∨ (ψ -> φ)
-    Equivalent to: ¬(φ -> ψ) -> (ψ -> φ)
+    Formula: (φ → ψ) ∨ (ψ → φ)
+    Equivalent to: ¬(φ → ψ) -> (ψ → φ)
     Reading: For any two propositions, one implies the other.
     Notes:
     - This is a property of classical logic (and linear logic), but not intuitionistic logic.
@@ -267,7 +267,7 @@ def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
 
     s1_2 = lb.ref(
         "s1.2",
-        "( ¬ φ → ( φ → ψ ) ) → ( ¬ ( φ → ψ ) → ¬ ¬ φ )",
+        "( ¬ φ → ( φ → ψ ) ) -> ( ¬ ( φ → ψ ) -> ¬ ¬ φ )",
         ref="con3",
         note="con3 instance",
     )
@@ -278,14 +278,14 @@ def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
 
     s1_4_lift = lb.ref(
         "s1.4_lift",
-        "( ¬ ¬ φ → φ ) → ( ¬ ( φ → ψ ) → ( ¬ ¬ φ → φ ) )",
+        "( ¬ ¬ φ → φ ) -> ( ¬ ( φ → ψ ) -> ( ¬ ¬ φ → φ ) )",
         ref="A1",
         note="A1",
     )
     s1_5_pre = lb.mp("s1.5_pre", s1_4, s1_4_lift)
     s1_5_dist = lb.ref(
         "s1.5_dist",
-        "( ¬ ( φ → ψ ) → ( ¬ ¬ φ → φ ) ) → ( ( ¬ ( φ → ψ ) → ¬ ¬ φ ) → ( ¬ ( φ → ψ ) → φ ) )",
+        "( ¬ ( φ → ψ ) -> ( ¬ ¬ φ → φ ) ) -> ( ( ¬ ( φ → ψ ) -> ¬ ¬ φ ) -> ( ¬ ( φ → ψ ) -> φ ) )",
         ref="A2",
         note="A2",
     )
@@ -296,14 +296,14 @@ def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
 
     s2_lift = lb.ref(
         "s2_lift",
-        "( φ → ( ψ → φ ) ) → ( ¬ ( φ → ψ ) → ( φ → ( ψ → φ ) ) )",
+        "( φ → ( ψ → φ ) ) -> ( ¬ ( φ → ψ ) -> ( φ → ( ψ → φ ) ) )",
         ref="A1",
         note="A1",
     )
     s3_pre = lb.mp("s3_pre", s2, s2_lift)
     s3_dist = lb.ref(
         "s3_dist",
-        "( ¬ ( φ → ψ ) → ( φ → ( ψ → φ ) ) ) → ( ( ¬ ( φ → ψ ) → φ ) → ( ¬ ( φ → ψ ) → ( ψ → φ ) ) )",
+        "( ¬ ( φ → ψ ) -> ( φ → ( ψ → φ ) ) ) -> ( ( ¬ ( φ → ψ ) -> φ ) -> ( ¬ ( φ → ψ ) -> ( ψ → φ ) ) )",
         ref="A2",
         note="A2",
     )
@@ -314,9 +314,9 @@ def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_modus_tollens(sys: HilbertSystem) -> LemmaProof:
-    """Modus Tollens: φ -> ψ, ¬ψ ⊢ ¬φ.
+    """Modus Tollens: φ → ψ, ¬ψ ⊢ ¬φ.
 
-    Hyp 1: φ -> ψ
+    Hyp 1: φ → ψ
     Hyp 2: ¬ψ
     Concl: ¬φ
     """
@@ -325,7 +325,7 @@ def prove_modus_tollens(sys: HilbertSystem) -> LemmaProof:
     h1 = lb.hyp("h1", "φ → ψ")
     h2 = lb.hyp("h2", "¬ ψ")
 
-    s1 = lb.ref("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
+    s1 = lb.ref("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
 
     s2 = lb.mp("s2", h1, s1, "MP h1, s1")
 
@@ -335,12 +335,12 @@ def prove_modus_tollens(sys: HilbertSystem) -> LemmaProof:
 
 
 def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
-    """Left disjunction introduction: φ -> Or(φ, ψ).
+    """Left disjunction introduction: φ → Or(φ, ψ).
 
-    Formula: φ -> Or(φ, ψ)
-    Expanded: φ -> (¬φ -> ψ)
+    Formula: φ → Or(φ, ψ)
+    Expanded: φ → (¬φ → ψ)
     Notes:
-    - Or(a, b) is defined as ¬a -> b.
+    - Or(a, b) is defined as ¬a → b.
     - This matches set.mm theorem `pm2.24`.
     """
     lb = LemmaBuilder(sys, "L3_or_intro_left")
@@ -355,10 +355,10 @@ def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
 
 def prove_a1i(sys: HilbertSystem) -> LemmaProof:
     """
-    a1i: ph -> (ps -> ph).
+    a1i: φ → (ψ → φ).
 
-    Hyp: ph
-    Concl: ps -> ph
+    Hyp: φ
+    Concl: ψ → φ
 
     Inference introducing an antecedent.  Inference associated with ~ ax-1 .
            Its associated inference is ~ a1ii .  See ~ conventions for a definition
@@ -374,10 +374,10 @@ def prove_a1i(sys: HilbertSystem) -> LemmaProof:
 
 def prove_a2i(sys: HilbertSystem) -> LemmaProof:
     """
-    a2i: (ph -> ps) -> (ph -> ch).
+    a2i: (φ → ψ) -> (φ → χ).
 
-    Hyp: ph -> (ps -> ch)
-    Concl: (ph -> ps) -> (ph -> ch)
+    Hyp: φ → (ψ → χ)
+    Concl: (φ → ψ) -> (φ → χ)
 
     Inference distributing an antecedent.  Inference associated with
            ~ ax-2 .  Its associated inference is ~ mpd .  (Contributed by NM,
@@ -386,21 +386,21 @@ def prove_a2i(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "a2i")
     hyp = lb.hyp("a2i.1", "φ → ( ψ → χ )")
-    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) -> ( ( φ → ψ ) -> ( φ → χ ) )", ref="A2", note="A2")
     res = lb.mp("s2", hyp, a2, "MP a2i.1, s1")
     return lb.build(res)
 
 
 def prove_mpd(sys: HilbertSystem) -> LemmaProof:
     """
-    mpd: ph -> ch.
+    mpd: φ → χ.
 
-    Hyp 1: ph -> ps
-    Hyp 2: ph -> (ps -> ch)
-    Concl: ph -> ch
+    Hyp 1: φ → ψ
+    Hyp 2: φ → (ψ → χ)
+    Concl: φ → χ
 
     A modus ponens deduction.  A translation of natural deduction rule
-           ` -> ` E ( ` -> ` elimination), see ~ natded .  Deduction form of
+           ` → ` E ( ` → ` elimination), see ~ natded .  Deduction form of
            ~ ax-mp .  Inference associated with ~ a2i .  Commuted form of ~ mpcom .
            (Contributed by NM, 29-Dec-1992.)
 
@@ -408,7 +408,7 @@ def prove_mpd(sys: HilbertSystem) -> LemmaProof:
     lb = LemmaBuilder(sys, "mpd")
     h1 = lb.hyp("mpd.1", "φ → ψ")
     h2 = lb.hyp("mpd.2", "φ → ( ψ → χ )")
-    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) -> ( ( φ → ψ ) -> ( φ → χ ) )", ref="A2", note="A2")
     s2 = lb.mp("s2", h2, a2, "MP mpd.2, s1")
     s3 = lb.mp("s3", h1, s2, "MP mpd.1, s2")
     return lb.build(s3)
@@ -416,11 +416,11 @@ def prove_mpd(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl(sys: HilbertSystem) -> LemmaProof:
     """
-    syl: ph -> ch.
+    syl: φ → χ.
 
-    Hyp 1: ph -> ps
-    Hyp 2: ps -> ch
-    Concl: ph -> ch
+    Hyp 1: φ → ψ
+    Hyp 2: ψ → χ
+    Concl: φ → χ
 
     An inference version of the transitive laws for implication ~ imim2 and
            ~ imim1 (and ~ imim1i and ~ imim2i ), which Russell and Whitehead call
@@ -442,9 +442,9 @@ def prove_syl(sys: HilbertSystem) -> LemmaProof:
     lb = LemmaBuilder(sys, "syl")
     h1 = lb.hyp("syl.1", "φ → ψ")
     h2 = lb.hyp("syl.2", "ψ → χ")
-    a1 = lb.ref("s1", "( ψ → χ ) → ( φ → ( ψ → χ ) )", ref="A1", note="A1")
+    a1 = lb.ref("s1", "( ψ → χ ) -> ( φ → ( ψ → χ ) )", ref="A1", note="A1")
     s2 = lb.mp("s2", h2, a1, "MP syl.2, s1")
-    a2 = lb.ref("s3", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    a2 = lb.ref("s3", "( φ → ( ψ → χ ) ) -> ( ( φ → ψ ) -> ( φ → χ ) )", ref="A2", note="A2")
     s4 = lb.mp("s4", s2, a2, "MP s2, s3")
     s5 = lb.mp("s5", h1, s4, "MP syl.1, s4")
     return lb.build(s5)
@@ -452,11 +452,11 @@ def prove_syl(sys: HilbertSystem) -> LemmaProof:
 
 def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
     """
-    sylcom: ph -> (ps -> th).
+    sylcom: φ → (ψ → th).
 
-    Hyp 1: ph -> (ps -> ch)
-    Hyp 2: ps -> (ch -> th)
-    Concl: ph -> (ps -> th)
+    Hyp 1: φ → (ψ → χ)
+    Hyp 2: ψ → (χ → th)
+    Concl: φ → (ψ → th)
 
     Syllogism inference with commutation of antecedents.  (Contributed by
            NM, 29-Aug-2004.)  (Proof shortened by Mel L. O'Cat, 2-Feb-2006.)
@@ -470,15 +470,15 @@ def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
 
     s1 = lb.ref(
         "s1",
-        "( ψ → ( χ → θ ) ) → ( ( ψ → χ ) → ( ψ → θ ) )",
+        "( ψ → ( χ → θ ) ) -> ( ( ψ → χ ) -> ( ψ → θ ) )",
         ref="A2",
-        note="A2(ps,ch,th)",
+        note="A2(ψ,χ,th)",
     )
-    s2 = lb.mp("s2", hyp2_wff, s1, "(ps->ch)->(ps->th)")
+    s2 = lb.mp("s2", hyp2_wff, s1, "(ψ→χ)→(ψ→th)")
 
     s3 = lb.ref(
         "s3",
-        "( ( ψ → χ ) → ( ψ → θ ) ) → ( φ → ( ( ψ → χ ) → ( ψ → θ ) ) )",
+        "( ( ψ → χ ) -> ( ψ → θ ) ) -> ( φ → ( ( ψ → χ ) -> ( ψ → θ ) ) )",
         ref="A1",
         note="A1 lift",
     )
@@ -486,11 +486,11 @@ def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
 
     s5 = lb.ref(
         "s5",
-        "( φ → ( ( ψ → χ ) → ( ψ → θ ) ) ) → ( ( φ → ( ψ → χ ) ) → ( φ → ( ψ → θ ) ) )",
+        "( φ → ( ( ψ → χ ) -> ( ψ → θ ) ) ) -> ( ( φ → ( ψ → χ ) ) -> ( φ → ( ψ → θ ) ) )",
         ref="A2",
         note="A2 special",
     )
-    s6 = lb.mp("s6", s4, s5, "(ph->(ps->ch))->(ph->(ps->th))")
+    s6 = lb.mp("s6", s4, s5, "(φ→(ψ→χ))→(φ→(ψ→th))")
 
     s7 = lb.mp("s7", hyp1_wff, s6, "φ→(ψ→θ)")
 
@@ -499,10 +499,10 @@ def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
 
 def prove_com12(sys: HilbertSystem) -> LemmaProof:
     """
-    com12: ps -> (ph -> ch).
+    com12: ψ → (φ → χ).
 
-    Hyp: ph -> (ps -> ch)
-    Concl: ps -> (ph -> ch)
+    Hyp: φ → (ψ → χ)
+    Concl: ψ → (φ → χ)
 
     Inference that swaps (commutes) antecedents in an implication.
            Inference associated with ~ pm2.04 .  Its associated inference is
@@ -514,19 +514,19 @@ def prove_com12(sys: HilbertSystem) -> LemmaProof:
 
     hyp_wff = lb.hyp("com12.1", "φ → ( ψ → χ )")
 
-    s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1 ps->(ph->ps)")
+    s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1 ψ→(φ→ψ)")
     s2 = lb.ref(
         "s2",
-        "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )",
+        "( φ → ( ψ → χ ) ) -> ( ( φ → ψ ) -> ( φ → χ ) )",
         ref="A2",
-        note="A2 (ph,(ps->ch))",
+        note="A2 (φ,(ψ→χ))",
     )
 
-    s3 = lb.mp("s3", hyp_wff, s2, "(ph->ps)->(ph->ch)")
+    s3 = lb.mp("s3", hyp_wff, s2, "(φ→ψ)→(φ→χ)")
 
     s4 = lb.ref(
         "s4",
-        "( ( φ → ψ ) → ( φ → χ ) ) → ( ψ → ( ( φ → ψ ) → ( φ → χ ) ) )",
+        "( ( φ → ψ ) -> ( φ → χ ) ) -> ( ψ → ( ( φ → ψ ) -> ( φ → χ ) ) )",
         ref="A1",
         note="A1 lift",
     )
@@ -534,11 +534,11 @@ def prove_com12(sys: HilbertSystem) -> LemmaProof:
 
     s6 = lb.ref(
         "s6",
-        "( ψ → ( ( φ → ψ ) → ( φ → χ ) ) ) → ( ( ψ → ( φ → ψ ) ) → ( ψ → ( φ → χ ) ) )",
+        "( ψ → ( ( φ → ψ ) -> ( φ → χ ) ) ) -> ( ( ψ → ( φ → ψ ) ) -> ( ψ → ( φ → χ ) ) )",
         ref="A2",
-        note="A2(ps,...)",
+        note="A2(ψ,...)",
     )
-    s7 = lb.mp("s7", s5, s6, "(ps->(ph->ps))->(ps->(ph->ch))")
+    s7 = lb.mp("s7", s5, s6, "(ψ→(φ→ψ))→(ψ→(φ→χ))")
 
     s8 = lb.mp("s8", s1, s7, "ψ→(φ→χ)")
 
@@ -547,7 +547,7 @@ def prove_com12(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl5(sys: HilbertSystem) -> LemmaProof:
     """
-    syl5: ch -> (ph -> th).
+    syl5: χ → (φ → th).
 
     A syllogism rule of inference.  The first premise is used to replace the
            second antecedent of the second premise.  (Contributed by NM,
@@ -561,11 +561,11 @@ def prove_syl5(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl6(sys: HilbertSystem) -> LemmaProof:
     """
-    syl6: ph -> (ps -> th).
+    syl6: φ → (ψ → th).
 
-    Hyp 1: ph -> (ps -> ch)
-    Hyp 2: ch -> th
-    Concl: ph -> (ps -> th)
+    Hyp 1: φ → (ψ → χ)
+    Hyp 2: χ → th
+    Concl: φ → (ψ → th)
 
     A syllogism rule of inference.  The second premise is used to replace
            the consequent of the first premise.  (Contributed by NM, 5-Jan-1993.)
@@ -579,23 +579,23 @@ def prove_syl6(sys: HilbertSystem) -> LemmaProof:
 
     s1 = lb.ref(
         "s1",
-        "( χ → θ ) → ( ψ → ( χ → θ ) )",
+        "( χ → θ ) -> ( ψ → ( χ → θ ) )",
         ref="A1",
-        note="A1(ch->th, ps)",
+        note="A1(χ→th, ψ)",
     )
     s2 = lb.mp("s2", hyp2_wff, s1, "ψ→(χ→θ)")
 
     s3 = lb.ref(
         "s3",
-        "( ψ → ( χ → θ ) ) → ( ( ψ → χ ) → ( ψ → θ ) )",
+        "( ψ → ( χ → θ ) ) -> ( ( ψ → χ ) -> ( ψ → θ ) )",
         ref="A2",
-        note="A2(ps,ch,th)",
+        note="A2(ψ,χ,th)",
     )
-    s4 = lb.mp("s4", s2, s3, "(ps->ch)->(ps->th)")
+    s4 = lb.mp("s4", s2, s3, "(ψ→χ)→(ψ→th)")
 
     s5 = lb.ref(
         "s5",
-        "( ( ψ → χ ) → ( ψ → θ ) ) → ( φ → ( ( ψ → χ ) → ( ψ → θ ) ) )",
+        "( ( ψ → χ ) -> ( ψ → θ ) ) -> ( φ → ( ( ψ → χ ) -> ( ψ → θ ) ) )",
         ref="A1",
         note="A1 lift",
     )
@@ -603,11 +603,11 @@ def prove_syl6(sys: HilbertSystem) -> LemmaProof:
 
     s7 = lb.ref(
         "s7",
-        "( φ → ( ( ψ → χ ) → ( ψ → θ ) ) ) → ( ( φ → ( ψ → χ ) ) → ( φ → ( ψ → θ ) ) )",
+        "( φ → ( ( ψ → χ ) -> ( ψ → θ ) ) ) -> ( ( φ → ( ψ → χ ) ) -> ( φ → ( ψ → θ ) ) )",
         ref="A2",
         note="A2 special",
     )
-    s8 = lb.mp("s8", s6, s7, "(ph->(ps->ch))->(ph->(ps->th))")
+    s8 = lb.mp("s8", s6, s7, "(φ→(ψ→χ))→(φ→(ψ→th))")
 
     s9 = lb.mp("s9", hyp1_wff, s8, "φ→(ψ→θ)")
 
@@ -616,10 +616,10 @@ def prove_syl6(sys: HilbertSystem) -> LemmaProof:
 
 def prove_a1d(sys: HilbertSystem) -> LemmaProof:
     """
-    a1d: ph -> (ch -> ps).
+    a1d: φ → (χ → ψ).
 
-    Hyp: ph -> ps
-    Concl: ph -> (ch -> ps)
+    Hyp: φ → ψ
+    Concl: φ → (χ → ψ)
 
     Deduction introducing an embedded antecedent.  Deduction form of ~ ax-1
            and ~ a1i .  (Contributed by NM, 5-Jan-1993.)  (Proof shortened by
@@ -634,7 +634,7 @@ def prove_a1d(sys: HilbertSystem) -> LemmaProof:
 
     s2 = lb.ref(
         "s2",
-        "( ψ → ( χ → ψ ) ) → ( φ → ( ψ → ( χ → ψ ) ) )",
+        "( ψ → ( χ → ψ ) ) -> ( φ → ( ψ → ( χ → ψ ) ) )",
         ref="A1",
         note="A1 (syl)",
     )
@@ -642,7 +642,7 @@ def prove_a1d(sys: HilbertSystem) -> LemmaProof:
 
     s4 = lb.ref(
         "s4",
-        "( φ → ( ψ → ( χ → ψ ) ) ) → ( ( φ → ψ ) → ( φ → ( χ → ψ ) ) )",
+        "( φ → ( ψ → ( χ → ψ ) ) ) -> ( ( φ → ψ ) -> ( φ → ( χ → ψ ) ) )",
         ref="A2",
         note="A2 (syl)",
     )
@@ -660,7 +660,7 @@ def prove_a1d(sys: HilbertSystem) -> LemmaProof:
 
 def prove_idd(sys: HilbertSystem) -> LemmaProof:
     """
-    idd: ph -> (ps -> ps).
+    idd: φ → (ψ → ψ).
 
     Principle of identity ~ id with antecedent.  (Contributed by NM,
          26-Nov-1995.)
@@ -673,7 +673,7 @@ def prove_idd(sys: HilbertSystem) -> LemmaProof:
 
 def prove_a1i13(sys: HilbertSystem) -> LemmaProof:
     """
-    a1i13: ph -> (ps -> (ch -> th)). Hyp: ps -> th.
+    a1i13: φ → (ψ → (χ → th)). Hyp: ψ → th.
 
     Add two antecedents to a wff.  (Contributed by Jeff Hankins,
            4-Aug-2009.)
@@ -687,7 +687,7 @@ def prove_a1i13(sys: HilbertSystem) -> LemmaProof:
 
 def prove_2a1d(sys: HilbertSystem) -> LemmaProof:
     """
-    2a1d: ph -> (ch -> (th -> ps)). Hyp: ph -> ps.
+    2a1d: φ → (χ → (th → ψ)). Hyp: φ → ψ.
 
     Deduction introducing two antecedents.  Two applications of ~ a1d .
            Deduction associated with ~ 2a1 and ~ 2a1i .  (Contributed by BJ,
@@ -702,7 +702,7 @@ def prove_2a1d(sys: HilbertSystem) -> LemmaProof:
 
 def prove_2a1(sys: HilbertSystem) -> LemmaProof:
     """
-    2a1: ph -> (ps -> (ch -> ph)).
+    2a1: φ → (ψ → (χ → φ)).
 
     A double form of ~ ax-1 .  Its associated inference is ~ 2a1i .  Its
          associated deduction is ~ 2a1d .  (Contributed by BJ, 10-Aug-2020.)
@@ -716,7 +716,7 @@ def prove_2a1(sys: HilbertSystem) -> LemmaProof:
 
 def prove_a2d(sys: HilbertSystem) -> LemmaProof:
     """
-    a2d: ph -> ((ps -> ch) -> (ps -> th)). Hyp: ph -> (ps -> (ch -> th)).
+    a2d: φ → ((ψ → χ) -> (ψ → th)). Hyp: φ → (ψ → (χ → th)).
 
     Deduction distributing an embedded antecedent.  Deduction form of
            ~ ax-2 .  (Contributed by NM, 23-Jun-1994.)
@@ -724,13 +724,13 @@ def prove_a2d(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "a2d")
     lb.hyp("hyp", "φ → ( ψ → ( χ → θ ) )")
-    stmt = lb.raw("res", "φ → ( ( ψ → χ ) → ( ψ → θ ) )", note="Imported")
+    stmt = lb.raw("res", "φ → ( ( ψ → χ ) -> ( ψ → θ ) )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_syl5com(sys: HilbertSystem) -> LemmaProof:
     """
-    syl5com: ph -> (ch -> th). Hyp1: ph -> ps, Hyp2: ch -> (ps -> th).
+    syl5com: φ → (χ → th). Hyp1: φ → ψ, Hyp2: χ → (ψ → th).
 
     Syllogism inference with commuted antecedents.  (Contributed by NM,
            24-May-2005.)
@@ -745,7 +745,7 @@ def prove_syl5com(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl11(sys: HilbertSystem) -> LemmaProof:
     """
-    syl11: ps -> (th -> ch). Hyp1: ph -> (ps -> ch), Hyp2: th -> ph.
+    syl11: ψ → (th → χ). Hyp1: φ → (ψ → χ), Hyp2: th → φ.
 
     A syllogism inference.  Commuted form of an instance of ~ syl .
            (Contributed by BJ, 25-Oct-2021.)
@@ -760,7 +760,7 @@ def prove_syl11(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl56(sys: HilbertSystem) -> LemmaProof:
     """
-    syl56: ch -> (ph -> ta). Hyp1: ph -> ps, Hyp2: ch -> (ps -> th), Hyp3: th -> ta.
+    syl56: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → (ψ → th), Hyp3: θ → ta.
 
     Combine ~ syl5 and ~ syl6 .  (Contributed by NM, 14-Nov-2013.)
 
@@ -775,7 +775,7 @@ def prove_syl56(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl6com(sys: HilbertSystem) -> LemmaProof:
     """
-    syl6com: ps -> (ph -> th). Hyp1: ph -> (ps -> ch), Hyp2: ch -> th.
+    syl6com: ψ → (φ → th). Hyp1: φ → (ψ → χ), Hyp2: χ → th.
 
     Syllogism inference with commuted antecedents.  (Contributed by NM,
            25-May-2005.)
@@ -790,7 +790,7 @@ def prove_syl6com(sys: HilbertSystem) -> LemmaProof:
 
 def prove_mpcom(sys: HilbertSystem) -> LemmaProof:
     """
-    mpcom: ps -> ch. Hyp1: ps -> ph, Hyp2: ph -> (ps -> ch).
+    mpcom: ψ → χ. Hyp1: ψ → φ, Hyp2: φ → (ψ → χ).
 
     Modus ponens inference with commutation of antecedents.  Commuted form
            of ~ mpd .  (Contributed by NM, 17-Mar-1996.)
@@ -805,7 +805,7 @@ def prove_mpcom(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syli(sys: HilbertSystem) -> LemmaProof:
     """
-    syli: ps -> (ph -> th). Hyp1: ps -> (ph -> ch), Hyp2: ch -> (ph -> th).
+    syli: ψ → (φ → th). Hyp1: ψ → (φ → χ), Hyp2: χ → (φ → th).
 
     Syllogism inference with common nested antecedent.  (Contributed by NM,
            4-Nov-2004.)
@@ -820,7 +820,7 @@ def prove_syli(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl2im(sys: HilbertSystem) -> LemmaProof:
     """
-    syl2im: ph -> (ch -> ta). Hyp1: ph -> ps, Hyp2: ch -> th, Hyp3: ps -> (th -> ta).
+    syl2im: φ → (χ → ta). Hyp1: φ → ψ, Hyp2: χ → th, Hyp3: ψ → (th → ta).
 
     Replace two antecedents.  Implication-only version of ~ syl2an .
            (Contributed by Wolf Lammen, 14-May-2013.)
@@ -836,7 +836,7 @@ def prove_syl2im(sys: HilbertSystem) -> LemmaProof:
 
 def prove_syl2imc(sys: HilbertSystem) -> LemmaProof:
     """
-    syl2imc: ch -> (ph -> ta). Hyp1: ph -> ps, Hyp2: ch -> th, Hyp3: ps -> (th -> ta).
+    syl2imc: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → th, Hyp3: ψ → (th → ta).
 
     A commuted version of ~ syl2im .  Implication-only version of
            ~ syl2anr .  (Contributed by BJ, 20-Oct-2021.)
@@ -852,7 +852,7 @@ def prove_syl2imc(sys: HilbertSystem) -> LemmaProof:
 
 def prove_pm2_27(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.27: ph -> ((ph -> ps) -> ps).
+    pm2.27: φ → ((φ → ψ) -> ψ).
 
     This theorem, sometimes called "Assertion" or "Pon" (for "ponens"), can be
          thought of as a closed form of modus ponens ~ ax-mp .  Theorem *2.27 of
@@ -860,13 +860,13 @@ def prove_pm2_27(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "pm2.27")
-    stmt = lb.raw("res", "φ → ( ( φ → ψ ) → ψ )", note="Imported")
+    stmt = lb.raw("res", "φ → ( ( φ → ψ ) -> ψ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_mpdd(sys: HilbertSystem) -> LemmaProof:
     """
-    mpdd: ph -> (ps -> th). Hyp1: ph -> (ps -> ch), Hyp2: ph -> (ps -> (ch -> th)).
+    mpdd: φ → (ψ → th). Hyp1: φ → (ψ → χ), Hyp2: φ → (ψ → (χ → th)).
 
     A nested modus ponens deduction.  Double deduction associated with
            ~ ax-mp .  Deduction associated with ~ mpd .  (Contributed by NM,
@@ -882,7 +882,7 @@ def prove_mpdd(sys: HilbertSystem) -> LemmaProof:
 
 def prove_mpid(sys: HilbertSystem) -> LemmaProof:
     """
-    mpid: ph -> (ps -> th). Hyp1: ph -> ch, Hyp2: ph -> (ps -> (ch -> th)).
+    mpid: φ → (ψ → th). Hyp1: φ → χ, Hyp2: φ → (ψ → (χ → th)).
 
     A nested modus ponens deduction.  Deduction associated with ~ mpi .
            (Contributed by NM, 14-Dec-2004.)
@@ -897,7 +897,7 @@ def prove_mpid(sys: HilbertSystem) -> LemmaProof:
 
 def prove_con1(sys: HilbertSystem) -> LemmaProof:
     """
-    con1: ( -. ph -> ps ) -> ( -. ps -> ph ).
+    con1: ( ¬ φ → ψ ) -> ( ¬ ψ → φ ).
 
     Contraposition.  Theorem *2.15 of [WhiteheadRussell] p. 102.  Its
          associated inference is ~ con1i .  (Contributed by NM, 29-Dec-1992.)
@@ -905,26 +905,26 @@ def prove_con1(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "con1")
-    stmt = lb.raw("res", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", note="Imported")
+    stmt = lb.raw("res", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_con2(sys: HilbertSystem) -> LemmaProof:
     """
-    con2: ( ph -> -. ps ) -> ( ps -> -. ph ).
+    con2: ( φ → ¬ ψ ) -> ( ψ → ¬ φ ).
 
     Contraposition.  Theorem *2.03 of [WhiteheadRussell] p. 100.  (Contributed
          by NM, 29-Dec-1992.)  (Proof shortened by Wolf Lammen, 12-Feb-2013.)
 
     """
     lb = LemmaBuilder(sys, "con2")
-    stmt = lb.raw("res", "( φ → ¬ ψ ) → ( ψ → ¬ φ )", note="Imported")
+    stmt = lb.raw("res", "( φ → ¬ ψ ) -> ( ψ → ¬ φ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_con3(sys: HilbertSystem) -> LemmaProof:
     """
-    con3: ( ph -> ps ) -> ( -. ps -> -. ph ).
+    con3: ( φ → ψ ) -> ( ¬ ψ → ¬ φ ).
 
     Contraposition.  Theorem *2.16 of [WhiteheadRussell] p. 103.  This was the
          fourth axiom of Frege, specifically Proposition 28 of [Frege1879] p. 43.
@@ -933,13 +933,13 @@ def prove_con3(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "con3")
-    stmt = lb.raw("res", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", note="Imported")
+    stmt = lb.raw("res", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_con4(sys: HilbertSystem) -> LemmaProof:
     """
-    con4: ( -. ph -> -. ps ) -> ( ps -> ph ).
+    con4: ( ¬ φ → ¬ ψ ) -> ( ψ → φ ).
 
     Alias for ~ ax-3 to be used instead of it for labeling consistency.  Its
          associated inference is ~ con4i and its associated deduction is ~ con4d .
@@ -947,13 +947,13 @@ def prove_con4(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "con4")
-    stmt = lb.raw("res", "( ¬ φ → ¬ ψ ) → ( ψ → φ )", note="Imported")
+    stmt = lb.raw("res", "( ¬ φ → ¬ ψ ) -> ( ψ → φ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_pm2_21(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.21: -. ph -> ( ph -> ps ).
+    pm2.21: ¬ φ → ( φ → ψ ).
 
     From a wff and its negation, anything follows.  Theorem *2.21 of
          [WhiteheadRussell] p. 104.  Also called the Duns Scotus law.  Its commuted
@@ -968,7 +968,7 @@ def prove_pm2_21(sys: HilbertSystem) -> LemmaProof:
 
 def prove_pm2_24(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.24: ph -> ( -. ph -> ps ).
+    pm2.24: φ → ( ¬ φ → ψ ).
 
     Theorem *2.24 of [WhiteheadRussell] p. 104.  Its associated inference is
          ~ pm2.24i .  Commuted form of ~ pm2.21 .  (Contributed by NM,
@@ -982,7 +982,7 @@ def prove_pm2_24(sys: HilbertSystem) -> LemmaProof:
 
 def prove_pm2_43(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.43: ( ph -> ( ph -> ps ) ) -> ( ph -> ps ).
+    pm2.43: ( φ → ( φ → ψ ) ) -> ( φ → ψ ).
 
     Absorption of redundant antecedent.  Also called the "Contraction" or
          "Hilbert" axiom.  Theorem *2.43 of [WhiteheadRussell] p. 106.
@@ -991,13 +991,13 @@ def prove_pm2_43(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "pm2.43")
-    stmt = lb.raw("res", "( φ → ( φ → ψ ) ) → ( φ → ψ )", note="Imported")
+    stmt = lb.raw("res", "( φ → ( φ → ψ ) ) -> ( φ → ψ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_pm2_18(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.18: ( -. ph -> ph ) -> ph.
+    pm2.18: ( ¬ φ → φ ) -> φ.
 
     Clavius law, or "consequentia mirabilis" ("admirable consequence").  If a
          formula is implied by its negation, then it is true.  Can be used in
@@ -1007,13 +1007,13 @@ def prove_pm2_18(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "pm2.18")
-    stmt = lb.raw("res", "( ¬ φ → φ ) → φ", note="Imported")
+    stmt = lb.raw("res", "( ¬ φ → φ ) -> φ", note="Imported")
     return lb.build(stmt)
 
 
 def prove_mt2(sys: HilbertSystem) -> LemmaProof:
     """
-    mt2: -. ph. Hyp1: ps, Hyp2: ph -> -. ps.
+    mt2: ¬ φ. Hyp1: ψ, Hyp2: φ → ¬ ψ.
 
     A rule similar to modus tollens.  Inference associated with ~ con2i .
            (Contributed by NM, 19-Aug-1993.)  (Proof shortened by Wolf Lammen,
@@ -1029,7 +1029,7 @@ def prove_mt2(sys: HilbertSystem) -> LemmaProof:
 
 def prove_mt3(sys: HilbertSystem) -> LemmaProof:
     """
-    mt3: ph. Hyp1: -. ps, Hyp2: -. ph -> ps.
+    mt3: φ. Hyp1: ¬ ψ, Hyp2: ¬ φ → ψ.
 
     A rule similar to modus tollens.  Inference associated with ~ con1i .
            (Contributed by NM, 18-May-1994.)  (Proof shortened by Wolf Lammen,
@@ -1045,7 +1045,7 @@ def prove_mt3(sys: HilbertSystem) -> LemmaProof:
 
 def prove_nsyl(sys: HilbertSystem) -> LemmaProof:
     """
-    nsyl: ph -> -. ch. Hyp1: ph -> -. ps, Hyp2: ch -> ps.
+    nsyl: φ → ¬ χ. Hyp1: φ → ¬ ψ, Hyp2: χ → ψ.
 
     A negated syllogism inference.  (Contributed by NM, 31-Dec-1993.)
            (Proof shortened by Wolf Lammen, 2-Mar-2013.)
@@ -1060,7 +1060,7 @@ def prove_nsyl(sys: HilbertSystem) -> LemmaProof:
 
 def prove_nsyl2(sys: HilbertSystem) -> LemmaProof:
     """
-    nsyl2: ph -> ch. Hyp1: ph -> -. ps, Hyp2: -. ch -> ps.
+    nsyl2: φ → χ. Hyp1: φ → ¬ ψ, Hyp2: ¬ χ → ψ.
 
     A negated syllogism inference.  (Contributed by NM, 26-Jun-1994.)
            (Proof shortened by Wolf Lammen, 14-Nov-2023.)
@@ -1075,7 +1075,7 @@ def prove_nsyl2(sys: HilbertSystem) -> LemmaProof:
 
 def prove_nsyl3(sys: HilbertSystem) -> LemmaProof:
     """
-    nsyl3: ch -> -. ph. Hyp1: ph -> -. ps, Hyp2: ch -> ps.
+    nsyl3: χ → ¬ φ. Hyp1: φ → ¬ ψ, Hyp2: χ → ψ.
 
     A negated syllogism inference.  (Contributed by NM, 1-Dec-1995.)
 
@@ -1089,7 +1089,7 @@ def prove_nsyl3(sys: HilbertSystem) -> LemmaProof:
 
 def prove_pm2_61(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.61: ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps ).
+    pm2.61: ( φ → ψ ) -> ( ( ¬ φ → ψ ) -> ψ ).
 
     Theorem *2.61 of [WhiteheadRussell] p. 107.  Useful for eliminating an
          antecedent.  (Contributed by NM, 4-Jan-1993.)  (Proof shortened by Wolf
@@ -1097,13 +1097,13 @@ def prove_pm2_61(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "pm2.61")
-    stmt = lb.raw("res", "( φ → ψ ) → ( ( ¬ φ → ψ ) → ψ )", note="Imported")
+    stmt = lb.raw("res", "( φ → ψ ) -> ( ( ¬ φ → ψ ) -> ψ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_pm2_65(sys: HilbertSystem) -> LemmaProof:
     """
-    pm2.65: ( ph -> ps ) -> ( ( ph -> -. ps ) -> -. ph ).
+    pm2.65: ( φ → ψ ) -> ( ( φ → ¬ ψ ) -> ¬ φ ).
 
     Theorem *2.65 of [WhiteheadRussell] p. 107.  Proof by contradiction.
          (Contributed by NM, 21-Jun-1993.)  (Proof shortened by Wolf Lammen,
@@ -1111,13 +1111,13 @@ def prove_pm2_65(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "pm2.65")
-    stmt = lb.raw("res", "( φ → ψ ) → ( ( φ → ¬ ψ ) → ¬ φ )", note="Imported")
+    stmt = lb.raw("res", "( φ → ψ ) -> ( ( φ → ¬ ψ ) -> ¬ φ )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_imim1(sys: HilbertSystem) -> LemmaProof:
     """
-    imim1: ( ph -> ps ) -> ( ( ps -> ch ) -> ( ph -> ch ) ).
+    imim1: ( φ → ψ ) -> ( ( ψ → χ ) -> ( φ → χ ) ).
 
     A closed form of syllogism (see ~ syl ).  Theorem *2.06 of
          [WhiteheadRussell] p. 100.  Its associated inference is ~ imim1i .
@@ -1126,13 +1126,13 @@ def prove_imim1(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "imim1")
-    stmt = lb.raw("res", "( φ → ψ ) → ( ( ψ → χ ) → ( φ → χ ) )", note="Imported")
+    stmt = lb.raw("res", "( φ → ψ ) -> ( ( ψ → χ ) -> ( φ → χ ) )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_imim2(sys: HilbertSystem) -> LemmaProof:
     """
-    imim2: ( ph -> ps ) -> ( ( ch -> ph ) -> ( ch -> ps ) ).
+    imim2: ( φ → ψ ) -> ( ( χ → φ ) -> ( χ → ψ ) ).
 
     A closed form of syllogism (see ~ syl ).  Theorem *2.05 of
          [WhiteheadRussell] p. 100.  Its associated inference is ~ imim2i .  Its
@@ -1142,13 +1142,13 @@ def prove_imim2(sys: HilbertSystem) -> LemmaProof:
 
     """
     lb = LemmaBuilder(sys, "imim2")
-    stmt = lb.raw("res", "( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) )", note="Imported")
+    stmt = lb.raw("res", "( φ → ψ ) -> ( ( χ → φ ) -> ( χ → ψ ) )", note="Imported")
     return lb.build(stmt)
 
 
 def prove_con1i(sys: HilbertSystem) -> LemmaProof:
     """
-    con1i: -. ps -> ph. Hyp: -. ph -> ps.
+    con1i: ¬ ψ → φ. Hyp: ¬ φ → ψ.
 
     A contraposition inference.  Inference associated with ~ con1 .  Its
            associated inference is ~ mt3 .  (Contributed by NM, 3-Jan-1993.)
@@ -1164,7 +1164,7 @@ def prove_con1i(sys: HilbertSystem) -> LemmaProof:
 
 def prove_con2i(sys: HilbertSystem) -> LemmaProof:
     """
-    con2i: ps -> -. ph. Hyp: ph -> -. ps.
+    con2i: ψ → ¬ φ. Hyp: φ → ¬ ψ.
 
     A contraposition inference.  Its associated inference is ~ mt2 .
            (Contributed by NM, 10-Jan-1993.)  (Proof shortened by Mel L. O'Cat,
@@ -1179,7 +1179,7 @@ def prove_con2i(sys: HilbertSystem) -> LemmaProof:
 
 def prove_con3i(sys: HilbertSystem) -> LemmaProof:
     """
-    con3i: -. ps -> -. ph. Hyp: ph -> ps.
+    con3i: ¬ ψ → ¬ φ. Hyp: φ → ψ.
 
     A contraposition inference.  Inference associated with ~ con3 .  Its
            associated inference is ~ mto .  (Contributed by NM, 3-Jan-1993.)
@@ -1194,7 +1194,7 @@ def prove_con3i(sys: HilbertSystem) -> LemmaProof:
 
 def prove_con4i(sys: HilbertSystem) -> LemmaProof:
     """
-    con4i: ps -> ph. Hyp: -. ph -> -. ps.
+    con4i: ψ → φ. Hyp: ¬ φ → ¬ ψ.
 
     Inference associated with ~ con4 .  Its associated inference is ~ mt4 .
 

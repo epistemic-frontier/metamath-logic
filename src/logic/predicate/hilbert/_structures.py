@@ -17,11 +17,11 @@ z = Var(name="z")
 w = Var(name="w")
 
 # Binary forall constructor (variable + body)
-@symbol("∀", 2, (WFF, WFF), WFF, notes="binary forall over wff (var placeholder)", precedence=40, assoc="right", aliases=["A."])
+@symbol("A.", 2, (WFF, WFF), WFF, notes="binary forall over wff (var placeholder)", precedence=40, assoc="right", aliases=["∀"])
 def All(b: object, xs: tuple[object, object]) -> object:
     return mk_forall2(b, xs[0], xs[1])
 
-@symbol("∃", 2, (WFF, WFF), WFF, notes="binary exists over wff (var placeholder)", precedence=40, assoc="right", aliases=["E."])
+@symbol("E.", 2, (WFF, WFF), WFF, notes="binary exists over wff (var placeholder)", precedence=40, assoc="right", aliases=["∃"])
 def Exists(b: object, xs: tuple[object, object]) -> object:
     return mk_exist(b, xs[0], xs[1])
 

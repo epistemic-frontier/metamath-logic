@@ -16,17 +16,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
+from prelude.structures import Imp, Not, chi, phi, psi
 from skfd.authoring.dsl import Axiom, export_axioms
-from skfd.authoring.parsing import wff
 
 # A1: φ → (ψ → φ)
-A1: Axiom = wff("φ → ( ψ → φ )")
+A1: Axiom = Imp(phi, Imp(psi, phi))
 
 # A2: (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))
-A2: Axiom = wff("( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )")
+A2: Axiom = Imp(Imp(phi, Imp(psi, chi)), Imp(Imp(phi, psi), Imp(phi, chi)))
 
 # A3: (¬φ → ¬ψ) → (ψ → φ)
-A3: Axiom = wff("( ¬ φ → ¬ ψ ) → ( ψ → φ )")
+A3: Axiom = Imp(Imp(Not(phi), Not(psi)), Imp(psi, phi))
 
 
 def make_axioms() -> Mapping[str, Axiom]:

@@ -8,8 +8,7 @@ calculus:
 - A2 (S): (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))
 - A3: (¬φ → ¬ψ) → (ψ → φ)
 
-These are not token-level formulas; compilation to Wff is done via
-HilbertSystem.compile(expr).
+These are not token-level formulas; compilation to Wff is handled by the logic backend.
 """
 
 from __future__ import annotations
@@ -22,13 +21,13 @@ from skfd.authoring.parsing import wff
 from ._structures import Imp, Not, chi, phi, psi
 
 # A1: φ → (ψ → φ)
-A1: Axiom = wff("ph -> ( ps -> ph )")
+A1: Axiom = wff("φ → ( ψ → φ )")
 
 # A2: (φ → (ψ → χ)) → ((φ → ψ) → (φ → χ))
-A2: Axiom = wff("( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )")
+A2: Axiom = wff("( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )")
 
 # A3: (¬φ → ¬ψ) → (ψ → φ)
-A3: Axiom = wff("( -. ph -> -. ps ) -> ( ps -> ph )")
+A3: Axiom = wff("( ¬ φ → ¬ ψ ) → ( ψ → φ )")
 
 
 def make_axioms() -> Mapping[str, Axiom]:

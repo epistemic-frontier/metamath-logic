@@ -8,6 +8,7 @@ from prelude.formula import Builtins
 from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, RequireRegistry, compile_wff
 from skfd.authoring.typing import PreludeTypingError
 from skfd.core.symbols import SymbolInterner
+from skfd.names import NameResolver
 
 from ._structures import All
 from .axioms import make_axioms
@@ -20,14 +21,22 @@ from .axioms import make_axioms
 @dataclass(frozen=True)
 class PredicateSystem:
     interner: SymbolInterner
+    names: NameResolver
     builtins: Builtins
     axioms: Mapping[str, Any]
 
     @classmethod
-    def make(cls, *, interner: SymbolInterner, origin_ref: Any = None) -> PredicateSystem:
+    def make(
+        cls,
+        *,
+        interner: SymbolInterner,
+        names: NameResolver,
+        origin_ref: Any = None,
+    ) -> PredicateSystem:
         b = Builtins.ensure(interner, origin_ref=origin_ref)
         return cls(
             interner=interner,
+            names=names,
             builtins=b,
             axioms=make_axioms(),
         )
@@ -44,6 +53,7 @@ class PredicateSystem:
             registry = registry_default
         env = CompileEnv(
             interner=self.interner,
+            names=self.names,
             builtins=self.builtins,
             ctor_builders=DEFAULT_BUILDERS.all(),
             origin_module_id=origin_module_id,
@@ -63,7 +73,7 @@ class PredicateSystem:
 
 
 def make(*, interner: SymbolInterner, origin_ref: Any = None) -> PredicateSystem:
-    return PredicateSystem.make(interner=interner, origin_ref=origin_ref)
+    return PredicateSystem.make(interner=interner, names=NameResolver(), origin_ref=origin_ref)
 
 
 __all__ = ["PredicateSystem", "make", "All"]

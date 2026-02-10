@@ -10,12 +10,17 @@ from prelude.formula import imp as mk_imp
 from prelude.formula import wa as mk_wa
 from prelude.formula import wo as mk_wo
 from prelude.formula import wn as mk_wn
-from skfd.authoring.dsl import BuilderFn, CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry, compile_wff
+from skfd.authoring.dsl import BuilderFn, CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
 from skfd.authoring.formula import Wff
-from skfd.authoring.typing import HypothesisAny, PreludeTypingError, RuleApp
+from skfd.authoring.typing import HypothesisAny, RuleApp
 from skfd.core.symbols import SymbolInterner
+from skfd.names import NameResolver
 
-from ._syntactic import RuleBundle, make_rules
+from skfd.authoring.rules import RuleBundle
+from prelude.hilbert_rules import make_rules
+from ._internal import _apply as _apply_impl
+from ._internal import _compile as _compile_impl
+from ._internal import _compile_axioms as _compile_axioms_impl
 from .axioms import SETMM_TO_HILBERT_LABELS as SETMM_TO_HILBERT_AXIOMS
 
 RuleFn: TypeAlias = Callable[..., Wff]
@@ -39,16 +44,22 @@ class HilbertSystem:
 
     Authoring bridge:
       - author_env(): returns CompileEnv bound to this system
-      - compile(expr): lowers authoring Expr -> token-level Wff
     """
     interner: SymbolInterner
+    names: NameResolver
     builtins: Builtins
     rule_app: RuleApp
     rules: Mapping[str, RuleFn]
     axioms: Mapping[str, Expr]
 
     @classmethod
-    def make(cls, *, interner: SymbolInterner, origin_ref: Any = None) -> HilbertSystem:
+    def make(
+        cls,
+        *,
+        interner: SymbolInterner,
+        names: NameResolver,
+        origin_ref: Any = None,
+    ) -> HilbertSystem:
         b = Builtins.ensure(interner, origin_ref=origin_ref)
 
         bundle: RuleBundle = make_rules(b)
@@ -60,6 +71,7 @@ class HilbertSystem:
 
         return cls(
             interner=interner,
+            names=names,
             builtins=b,
             rule_app=rule_app,
             rules=bundle.rules,
@@ -88,6 +100,7 @@ class HilbertSystem:
 
         env = CompileEnv(
             interner=self.interner,
+            names=self.names,
             builtins=self.builtins,
             ctor_builders=DEFAULT_BUILDERS.all(),
             origin_module_id=origin_module_id,
@@ -95,33 +108,23 @@ class HilbertSystem:
         )
         return env, registry
 
-    def compile(self, expr: Expr, *, ctx: str = "compile") -> Wff:
-        """Compile an authoring Expr into token-level Wff."""
-        env, registry = self.author_env()
-        try:
-            return compile_wff(expr, env=env, registry=registry)
-        except Exception as e:
-            # Keep a narrow, readable surface for users
-            raise PreludeTypingError(f"{ctx}: {e}") from e
+    def _compile(self, expr: Expr, *, ctx: str = "compile") -> Wff:
+        return _compile_impl(self, expr, ctx=ctx)
 
     def compile_axioms(self) -> Mapping[str, Wff]:
         """Compile the author-facing axioms (Expr) into token-level Wff."""
-        return {k: self.compile(v, ctx=f"compile_axiom[{k}]") for k, v in self.axioms.items()}
+        return _compile_axioms_impl(self)
 
     # -------------------------------------------------------------------------
     # Typed rule application (optional convenience)
     # -------------------------------------------------------------------------
 
-    def apply(self, label: str, hyps: Sequence[HypothesisAny], *, ctx: str) -> Wff:
-        self.rule_app.check(label, hyps, ctx=ctx)
-        fn = self.rules.get(label)
-        if fn is None:
-            raise PreludeTypingError(f"{ctx}: missing rule implementation for {label!r}")
-        return fn(*hyps)
+    def _apply(self, label: str, hyps: Sequence[HypothesisAny], *, ctx: str) -> Wff:
+        return _apply_impl(self, label, hyps, ctx=ctx)
 
 
 def make(*, interner: SymbolInterner, origin_ref: Any = None) -> HilbertSystem:
-    return HilbertSystem.make(interner=interner, origin_ref=origin_ref)
+    return HilbertSystem.make(interner=interner, names=NameResolver(), origin_ref=origin_ref)
 
 
 SETMM_TO_HILBERT_RULES: Mapping[str, str] = {

@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from skfd.authoring.formula import Wff, render
 from skfd.authoring.parsing import wff
-from skfd.authoring.typing import Hypothesis
+from skfd.authoring.typing import Hypothesis, PreludeTypingError
 
 from . import HilbertSystem
 
@@ -55,21 +55,35 @@ class LemmaBuilder:
 
     def _remember(self, label: str, stmt: Wff) -> None:
         self._wff_to_label[id(stmt)] = label
+    
+    def _compile_str(self, label: str, expr_str: str) -> Wff:
+        try:
+            expr = wff(expr_str)
+        except PreludeTypingError as e:
+            raise PreludeTypingError(f"{label}: parse failed for {expr_str!r}\n{e}") from e
+        return self.sys._compile(expr, ctx=label)
 
     def hyp(self, label: str, expr_str: str) -> Wff:
         """Add a hypothesis step."""
-        stmt = self.sys.compile(wff(expr_str), ctx=label)
+        stmt = self._compile_str(label, expr_str)
         self.steps.append(ProofStep(label, stmt, "Hypothesis", op="hyp"))
         self._remember(label, stmt)
         return stmt
 
-    def step(self, label: str, expr_str: str, note: str) -> Wff:
-        """Add a general step (axiom instance or theorem)."""
-        stmt = self.sys.compile(wff(expr_str), ctx=label)
-        ref = note.strip().split(maxsplit=1)[0] if note.strip() else None
-        if ref and any(ch.isspace() for ch in ref):
-            ref = None
-        self.steps.append(ProofStep(label, stmt, note, op="ref" if ref else "raw", ref=ref))
+    def ref(self, label: str, expr_str: str, *, ref: str, note: str = "") -> Wff:
+        """Add a reference step (axiom/theorem instance).
+
+        `ref` must be explicit. Do not encode proof semantics in free-form text.
+        """
+        stmt = self._compile_str(label, expr_str)
+        self.steps.append(ProofStep(label, stmt, note, op="ref", ref=ref))
+        self._remember(label, stmt)
+        return stmt
+
+    def raw(self, label: str, expr_str: str, *, note: str = "") -> Wff:
+        """Add an opaque step (not guaranteed to be lowerable)."""
+        stmt = self._compile_str(label, expr_str)
+        self.steps.append(ProofStep(label, stmt, note, op="raw", ref=None))
         self._remember(label, stmt)
         return stmt
     
@@ -78,7 +92,7 @@ class LemmaBuilder:
         # Create implicit hypotheses for the rule application
         h1 = Hypothesis(f"h_{label}_maj", major)  # type: ignore[arg-type]
         h2 = Hypothesis(f"h_{label}_min", minor)  # type: ignore[arg-type]
-        res = self.sys.apply("mp", [h1, h2], ctx=label)
+        res = self.sys._apply("mp", [h1, h2], ctx=label)
         maj_label = self._wff_to_label.get(id(major))
         min_label = self._wff_to_label.get(id(minor))
         if maj_label is None or min_label is None:
@@ -107,17 +121,28 @@ def prove_L1_id(sys: HilbertSystem) -> LemmaProof:
     lb = LemmaBuilder(sys, "L1_id")
 
     # A1 with ψ := φ
-    s1 = lb.step("s1", "ph -> ( ph -> ph )", "A1 with (phi, psi) = (φ, φ)")
+    s1 = lb.ref(
+        "s1",
+        "φ → ( φ → φ )",
+        ref="A1",
+        note="A1 with (phi, psi) = (φ, φ)",
+    )
 
     # A2 with ψ := (φ -> φ), χ := φ
-    s2 = lb.step(
+    s2 = lb.ref(
         "s2",
-        "( ph -> ( ( ph -> ph ) -> ph ) ) -> ( ( ph -> ( ph -> ph ) ) -> ( ph -> ph ) )",
-        "A2 with (phi, psi, chi) = (φ, (φ→φ), φ)",
+        "( φ → ( ( φ → φ ) → φ ) ) → ( ( φ → ( φ → φ ) ) → ( φ → φ ) )",
+        ref="A2",
+        note="A2 with (phi, psi, chi) = (φ, (φ→φ), φ)",
     )
 
     # A1 with ψ := (φ -> φ)
-    s3 = lb.step("s3", "ph -> ( ( ph -> ph ) -> ph )", "A1 with (phi, psi) = (φ, (φ→φ))")
+    s3 = lb.ref(
+        "s3",
+        "φ → ( ( φ → φ ) → φ )",
+        ref="A1",
+        note="A1 with (phi, psi) = (φ, (φ→φ))",
+    )
 
     # (4) mp(s3, s2)
     s4 = lb.mp("s4", s3, s2, "mp on s3 and s2")
@@ -141,7 +166,12 @@ def prove_L2_or_intro_right(sys: HilbertSystem) -> LemmaProof:
 
     # (1) A1: φ -> (¬ψ -> φ)
     # Authoring: statement Expr = φ -> Or(ψ, φ) -> ph -> ( -. ps -> ph )
-    s1 = lb.step("s1", "ph -> ( -. ps -> ph )", "A1 with (alpha, beta) = (φ, ¬ψ)")
+    s1 = lb.ref(
+        "s1",
+        "φ → ( ¬ ψ → φ )",
+        ref="A1",
+        note="A1 with (alpha, beta) = (φ, ¬ψ)",
+    )
 
     return lb.build(s1)
 
@@ -160,7 +190,7 @@ def prove_L4_demorgan(sys: HilbertSystem) -> LemmaProof:
     - With Or(a, b) := ¬a -> b, the statement expands to ¬(φ ∧ ψ) -> (¬¬φ -> ¬ψ).
     """
     lb = LemmaBuilder(sys, "L4_demorgan")
-    stmt = lb.step("s1", r"-. ( ph /\ ps ) -> ( -. -. ph -> -. ps )", "De Morgan law")
+    stmt = lb.raw("s1", "¬ ( φ ∧ ψ ) → ( ¬ ¬ φ → ¬ ψ )", note="De Morgan law")
     return lb.build(stmt)
 
 
@@ -171,7 +201,7 @@ def prove_L5_contrapositive(sys: HilbertSystem) -> LemmaProof:
     Reading: If φ implies ψ, then from ¬ψ we may infer ¬φ.
     """
     lb = LemmaBuilder(sys, "L5_contrapositive")
-    stmt = lb.step("s1", "( ph -> ps ) -> ( -. ps -> -. ph )", "Contrapositive")
+    stmt = lb.raw("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", note="Contrapositive")
     return lb.build(stmt)
 
 
@@ -182,7 +212,7 @@ def prove_L6_double_neg_intro(sys: HilbertSystem) -> LemmaProof:
     Reading: If φ holds then it is not the case that φ does not hold.
     """
     lb = LemmaBuilder(sys, "L6_double_neg_intro")
-    stmt = lb.step("s1", "ph -> -. -. ph", "Double negation introduction")
+    stmt = lb.raw("s1", "φ → ¬ ¬ φ", note="Double negation introduction")
     return lb.build(stmt)
 
 
@@ -195,7 +225,7 @@ def prove_L7_double_neg_elim(sys: HilbertSystem) -> LemmaProof:
     - This is a classical principle connecting double negation and affirmation.
     """
     lb = LemmaBuilder(sys, "L7_double_neg_elim")
-    stmt = lb.step("s1", "-. -. ph -> ph", "Double negation elimination")
+    stmt = lb.raw("s1", "¬ ¬ φ → φ", note="Double negation elimination")
     return lb.build(stmt)
 
 
@@ -208,12 +238,9 @@ def prove_L8_excluded_middle(sys: HilbertSystem) -> LemmaProof:
     - Or(a, b) is defined as ¬a -> b, so Or(φ, ¬φ) = (¬φ -> ¬φ).
     - Internally this is an instance of the identity schema in the core language.
     """
-    stmt_expr = wff("-. ph -> -. ph")
-    stmt_wff = sys.compile(stmt_expr, ctx="compile L8 excluded middle")
-    steps: list[ProofStep] = [
-        ProofStep("s1", stmt_wff, "Law of excluded middle: Or(φ, ¬φ)")
-    ]
-    return LemmaProof(name="L8_excluded_middle", statement=stmt_wff, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "L8_excluded_middle")
+    stmt = lb.raw("s1", "¬ φ → ¬ φ", note="Law of excluded middle: Or(φ, ¬φ)")
+    return lb.build(stmt)
 
 
 def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
@@ -225,10 +252,9 @@ def prove_L9_peirce(sys: HilbertSystem) -> LemmaProof:
     - Characteristic of classical logic; interderivable with excluded middle over
       suitable axiom bases.
     """
-    stmt_expr = wff("( ( ph -> ps ) -> ph ) -> ph")
-    stmt_wff = sys.compile(stmt_expr, ctx="compile L9 Peirce law")
-    steps: list[ProofStep] = [ProofStep("s1", stmt_wff, "Peirce's law")]
-    return LemmaProof(name="L9_peirce", statement=stmt_wff, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "L9_peirce")
+    stmt = lb.raw("s1", "( ( φ → ψ ) → φ ) → φ", note="Peirce's law")
+    return lb.build(stmt)
 
 
 def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
@@ -247,33 +273,58 @@ def prove_L10_linearity(sys: HilbertSystem) -> LemmaProof:
     
     # Step 1: -. ( ph -> ps ) -> ph
     # 1.1: -. ph -> ( ph -> ps ) (pm2.21)
-    s1_1 = lb.step("s1.1", "-. ph -> ( ph -> ps )", "pm2.21")
+    s1_1 = lb.ref("s1.1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
     
     # 1.2: ( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> -. -. ph ) (con3)
-    s1_2 = lb.step("s1.2", "( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> -. -. ph )", "con3 instance")
+    s1_2 = lb.ref(
+        "s1.2",
+        "( ¬ φ → ( φ → ψ ) ) → ( ¬ ( φ → ψ ) → ¬ ¬ φ )",
+        ref="con3",
+        note="con3 instance",
+    )
     
     # 1.3: -. ( ph -> ps ) -> -. -. ph
     s1_3 = lb.mp("s1.3", s1_1, s1_2)
     
     # 1.4: -. -. ph -> ph (L7)
-    s1_4 = lb.step("s1.4", "-. -. ph -> ph", "L7_double_neg_elim")
+    s1_4 = lb.ref("s1.4", "¬ ¬ φ → φ", ref="L7_double_neg_elim", note="L7_double_neg_elim")
     
     # 1.5: -. ( ph -> ps ) -> ph (Syllogism: s1.3, s1.4)
     # syl steps manually expanded:
-    s1_4_lift = lb.step("s1.4_lift", "( -. -. ph -> ph ) -> ( -. ( ph -> ps ) -> ( -. -. ph -> ph ) )", "A1")
+    s1_4_lift = lb.ref(
+        "s1.4_lift",
+        "( ¬ ¬ φ → φ ) → ( ¬ ( φ → ψ ) → ( ¬ ¬ φ → φ ) )",
+        ref="A1",
+        note="A1",
+    )
     s1_5_pre = lb.mp("s1.5_pre", s1_4, s1_4_lift)
-    s1_5_dist = lb.step("s1.5_dist", "( -. ( ph -> ps ) -> ( -. -. ph -> ph ) ) -> ( ( -. ( ph -> ps ) -> -. -. ph ) -> ( -. ( ph -> ps ) -> ph ) )", "A2")
+    s1_5_dist = lb.ref(
+        "s1.5_dist",
+        "( ¬ ( φ → ψ ) → ( ¬ ¬ φ → φ ) ) → ( ( ¬ ( φ → ψ ) → ¬ ¬ φ ) → ( ¬ ( φ → ψ ) → φ ) )",
+        ref="A2",
+        note="A2",
+    )
     s1_5_impl = lb.mp("s1.5_impl", s1_5_pre, s1_5_dist)
     s1_5 = lb.mp("s1.5", s1_3, s1_5_impl)
     
     # Step 2: ph -> ( ps -> ph ) (A1)
-    s2 = lb.step("s2", "ph -> ( ps -> ph )", "A1")
+    s2 = lb.ref("s2", "φ → ( ψ → φ )", ref="A1", note="A1")
     
     # Step 3: -. ( ph -> ps ) -> ( ps -> ph ) (Syllogism: s1.5, s2)
     # syl steps manually expanded:
-    s2_lift = lb.step("s2_lift", "( ph -> ( ps -> ph ) ) -> ( -. ( ph -> ps ) -> ( ph -> ( ps -> ph ) ) )", "A1")
+    s2_lift = lb.ref(
+        "s2_lift",
+        "( φ → ( ψ → φ ) ) → ( ¬ ( φ → ψ ) → ( φ → ( ψ → φ ) ) )",
+        ref="A1",
+        note="A1",
+    )
     s3_pre = lb.mp("s3_pre", s2, s2_lift)
-    s3_dist = lb.step("s3_dist", "( -. ( ph -> ps ) -> ( ph -> ( ps -> ph ) ) ) -> ( ( -. ( ph -> ps ) -> ph ) -> ( -. ( ph -> ps ) -> ( ps -> ph ) ) )", "A2")
+    s3_dist = lb.ref(
+        "s3_dist",
+        "( ¬ ( φ → ψ ) → ( φ → ( ψ → φ ) ) ) → ( ( ¬ ( φ → ψ ) → φ ) → ( ¬ ( φ → ψ ) → ( ψ → φ ) ) )",
+        ref="A2",
+        note="A2",
+    )
     s3_impl = lb.mp("s3_impl", s3_pre, s3_dist)
     s3 = lb.mp("s3", s1_5, s3_impl)
     
@@ -289,11 +340,11 @@ def prove_modus_tollens(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "modus_tollens")
     
-    h1 = lb.hyp("h1", "ph -> ps")
-    h2 = lb.hyp("h2", "-. ps")
+    h1 = lb.hyp("h1", "φ → ψ")
+    h2 = lb.hyp("h2", "¬ ψ")
     
     # (ph -> ps) -> (-. ps -> -. ph) (con3)
-    s1 = lb.step("s1", "( ph -> ps ) -> ( -. ps -> -. ph )", "con3")
+    s1 = lb.ref("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
     
     # -. ps -> -. ph
     s2 = lb.mp("s2", h1, s1, "MP h1, s1")
@@ -314,7 +365,7 @@ def prove_L3_or_intro_left(sys: HilbertSystem) -> LemmaProof:
     - This matches set.mm theorem `pm2.24`.
     """
     lb = LemmaBuilder(sys, "L3_or_intro_left")
-    s1 = lb.step("s1", "ph -> ( -. ph -> ps )", "pm2.24")
+    s1 = lb.ref("s1", "φ → ( ¬ φ → ψ )", ref="pm2.24", note="pm2.24")
     return lb.build(s1)
 
 
@@ -329,24 +380,11 @@ def prove_a1i(sys: HilbertSystem) -> LemmaProof:
     Hyp: ph
     Concl: ps -> ph
     """
-    steps: list[ProofStep] = []
-
-    # Hyp: ph
-    hyp_ph = sys.compile(wff("ph"), ctx="hyp: ph")
-    steps.append(ProofStep("a1i.1", hyp_ph, "Hypothesis: ph"))
-
-    # A1: ph -> (ps -> ph)
-    a1_expr = wff("ph -> ( ps -> ph )")
-    s1 = sys.compile(a1_expr, ctx="A1")
-    steps.append(ProofStep("s1", s1, "A1"))
-
-    # MP
-    h1 = Hypothesis("h1", hyp_ph)
-    h2 = Hypothesis("h2", s1)
-    s2 = sys.apply("mp", [h1, h2], ctx="mp")
-    steps.append(ProofStep("s2", s2, "MP a1i.1, s1"))
-
-    return LemmaProof(name="a1i", statement=s2, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "a1i")
+    hyp = lb.hyp("a1i.1", "φ")
+    a1 = lb.ref("s1", "φ → ( ψ → φ )", ref="A1", note="A1")
+    res = lb.mp("s2", hyp, a1, "MP a1i.1, s1")
+    return lb.build(res)
 
 
 def prove_a2i(sys: HilbertSystem) -> LemmaProof:
@@ -355,25 +393,11 @@ def prove_a2i(sys: HilbertSystem) -> LemmaProof:
     Hyp: ph -> (ps -> ch)
     Concl: (ph -> ps) -> (ph -> ch)
     """
-    steps: list[ProofStep] = []
-
-    # Hyp: ph -> (ps -> ch)
-    hyp_expr = wff("ph -> ( ps -> ch )")
-    hyp_wff = sys.compile(hyp_expr, ctx="hyp: ph -> (ps -> ch)")
-    steps.append(ProofStep("a2i.1", hyp_wff, "Hypothesis"))
-
-    # A2: (ph -> (ps -> ch)) -> ((ph -> ps) -> (ph -> ch))
-    a2_expr = wff("( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )")
-    s1 = sys.compile(a2_expr, ctx="A2")
-    steps.append(ProofStep("s1", s1, "A2"))
-
-    # MP
-    h1 = Hypothesis("h1", hyp_wff)
-    h2 = Hypothesis("h2", s1)
-    s2 = sys.apply("mp", [h1, h2], ctx="mp")
-    steps.append(ProofStep("s2", s2, "MP a2i.1, s1"))
-
-    return LemmaProof(name="a2i", statement=s2, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "a2i")
+    hyp = lb.hyp("a2i.1", "φ → ( ψ → χ )")
+    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    res = lb.mp("s2", hyp, a2, "MP a2i.1, s1")
+    return lb.build(res)
 
 
 def prove_mpd(sys: HilbertSystem) -> LemmaProof:
@@ -383,36 +407,13 @@ def prove_mpd(sys: HilbertSystem) -> LemmaProof:
     Hyp 2: ph -> (ps -> ch)
     Concl: ph -> ch
     """
-    steps: list[ProofStep] = []
-
-    # Hyp 1: ph -> ps
-    hyp1_expr = wff("ph -> ps")
-    hyp1_wff = sys.compile(hyp1_expr, ctx="hyp1")
-    steps.append(ProofStep("mpd.1", hyp1_wff, "Hypothesis 1"))
-
-    # Hyp 2: ph -> (ps -> ch)
-    hyp2_expr = wff("ph -> ( ps -> ch )")
-    hyp2_wff = sys.compile(hyp2_expr, ctx="hyp2")
-    steps.append(ProofStep("mpd.2", hyp2_wff, "Hypothesis 2"))
-
-    # A2
-    a2_expr = wff("( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )")
-    s1 = sys.compile(a2_expr, ctx="A2")
-    steps.append(ProofStep("s1", s1, "A2"))
-
-    # MP Hyp 2, A2 -> (ph -> ps) -> (ph -> ch)
-    h_hyp2 = Hypothesis("h_hyp2", hyp2_wff)
-    h_a2 = Hypothesis("h_a2", s1)
-    s2 = sys.apply("mp", [h_hyp2, h_a2], ctx="mp hyp2, A2")
-    steps.append(ProofStep("s2", s2, "MP mpd.2, s1"))
-
-    # MP Hyp 1, s2 -> ph -> ch
-    h_hyp1 = Hypothesis("h_hyp1", hyp1_wff)
-    h_s2 = Hypothesis("h_s2", s2)
-    s3 = sys.apply("mp", [h_hyp1, h_s2], ctx="mp hyp1, s2")
-    steps.append(ProofStep("s3", s3, "MP mpd.1, s2"))
-
-    return LemmaProof(name="mpd", statement=s3, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "mpd")
+    h1 = lb.hyp("mpd.1", "φ → ψ")
+    h2 = lb.hyp("mpd.2", "φ → ( ψ → χ )")
+    a2 = lb.ref("s1", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    s2 = lb.mp("s2", h2, a2, "MP mpd.2, s1")
+    s3 = lb.mp("s3", h1, s2, "MP mpd.1, s2")
+    return lb.build(s3)
 
 
 def prove_syl(sys: HilbertSystem) -> LemmaProof:
@@ -422,47 +423,15 @@ def prove_syl(sys: HilbertSystem) -> LemmaProof:
     Hyp 2: ps -> ch
     Concl: ph -> ch
     """
-    steps: list[ProofStep] = []
-
-    # Hyp 1: ph -> ps
-    hyp1_expr = wff("ph -> ps")
-    hyp1_wff = sys.compile(hyp1_expr, ctx="hyp1")
-    steps.append(ProofStep("syl.1", hyp1_wff, "Hypothesis 1"))
-
-    # Hyp 2: ps -> ch
-    hyp2_expr = wff("ps -> ch")
-    hyp2_wff = sys.compile(hyp2_expr, ctx="hyp2")
-    steps.append(ProofStep("syl.2", hyp2_wff, "Hypothesis 2"))
-
-    # A1: (ps -> ch) -> (ph -> (ps -> ch))
-    a1_expr = wff("( ps -> ch ) -> ( ph -> ( ps -> ch ) )")
-    s1 = sys.compile(a1_expr, ctx="A1")
-    steps.append(ProofStep("s1", s1, "A1"))
-
-    # MP Hyp 2, A1 -> ph -> (ps -> ch)
-    h_hyp2 = Hypothesis("h_hyp2", hyp2_wff)
-    h_s1 = Hypothesis("h_s1", s1)
-    s2 = sys.apply("mp", [h_hyp2, h_s1], ctx="mp hyp2, A1")
-    steps.append(ProofStep("s2", s2, "MP syl.2, s1"))
-
-    # A2: (ph -> (ps -> ch)) -> ((ph -> ps) -> (ph -> ch))
-    a2_expr = wff("( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )")
-    s3 = sys.compile(a2_expr, ctx="A2")
-    steps.append(ProofStep("s3", s3, "A2"))
-
-    # MP s2, A2 -> (ph -> ps) -> (ph -> ch)
-    h_s2 = Hypothesis("h_s2", s2)
-    h_s3 = Hypothesis("h_s3", s3)
-    s4 = sys.apply("mp", [h_s2, h_s3], ctx="mp s2, A2")
-    steps.append(ProofStep("s4", s4, "MP s2, s3"))
-
-    # MP Hyp 1, s4 -> ph -> ch
-    h_hyp1 = Hypothesis("h_hyp1", hyp1_wff)
-    h_s4 = Hypothesis("h_s4", s4)
-    s5 = sys.apply("mp", [h_hyp1, h_s4], ctx="mp hyp1, s4")
-    steps.append(ProofStep("s5", s5, "MP syl.1, s4"))
-
-    return LemmaProof(name="syl", statement=s5, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "syl")
+    h1 = lb.hyp("syl.1", "φ → ψ")
+    h2 = lb.hyp("syl.2", "ψ → χ")
+    a1 = lb.ref("s1", "( ψ → χ ) → ( φ → ( ψ → χ ) )", ref="A1", note="A1")
+    s2 = lb.mp("s2", h2, a1, "MP syl.2, s1")
+    a2 = lb.ref("s3", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    s4 = lb.mp("s4", s2, a2, "MP s2, s3")
+    s5 = lb.mp("s5", h1, s4, "MP syl.1, s4")
+    return lb.build(s5)
 
 
 def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
@@ -474,19 +443,34 @@ def prove_sylcom(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "sylcom")
     
-    hyp1_wff = lb.hyp("sylcom.1", "ph -> ( ps -> ch )")
-    hyp2_wff = lb.hyp("sylcom.2", "ps -> ( ch -> th )")
+    hyp1_wff = lb.hyp("sylcom.1", "φ → ( ψ → χ )")
+    hyp2_wff = lb.hyp("sylcom.2", "ψ → ( χ → θ )")
     
-    s1 = lb.step("s1", "( ps -> ( ch -> th ) ) -> ( ( ps -> ch ) -> ( ps -> th ) )", "A2(ps,ch,th)")
+    s1 = lb.ref(
+        "s1",
+        "( ψ → ( χ → θ ) ) → ( ( ψ → χ ) → ( ψ → θ ) )",
+        ref="A2",
+        note="A2(ps,ch,th)",
+    )
     s2 = lb.mp("s2", hyp2_wff, s1, "(ps->ch)->(ps->th)")
     
-    s3 = lb.step("s3", "( ( ps -> ch ) -> ( ps -> th ) ) -> ( ph -> ( ( ps -> ch ) -> ( ps -> th ) ) )", "A1 lift")
-    s4 = lb.mp("s4", s2, s3, "ph->((ps->ch)->(ps->th))")
+    s3 = lb.ref(
+        "s3",
+        "( ( ψ → χ ) → ( ψ → θ ) ) → ( φ → ( ( ψ → χ ) → ( ψ → θ ) ) )",
+        ref="A1",
+        note="A1 lift",
+    )
+    s4 = lb.mp("s4", s2, s3, "φ→((ψ→χ)→(ψ→θ))")
     
-    s5 = lb.step("s5", "( ph -> ( ( ps -> ch ) -> ( ps -> th ) ) ) -> ( ( ph -> ( ps -> ch ) ) -> ( ph -> ( ps -> th ) ) )", "A2 special")
+    s5 = lb.ref(
+        "s5",
+        "( φ → ( ( ψ → χ ) → ( ψ → θ ) ) ) → ( ( φ → ( ψ → χ ) ) → ( φ → ( ψ → θ ) ) )",
+        ref="A2",
+        note="A2 special",
+    )
     s6 = lb.mp("s6", s4, s5, "(ph->(ps->ch))->(ph->(ps->th))")
     
-    s7 = lb.mp("s7", hyp1_wff, s6, "ph->(ps->th)")
+    s7 = lb.mp("s7", hyp1_wff, s6, "φ→(ψ→θ)")
     
     return lb.build(s7)
 
@@ -499,29 +483,44 @@ def prove_com12(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "com12")
     
-    hyp_wff = lb.hyp("com12.1", "ph -> ( ps -> ch )")
+    hyp_wff = lb.hyp("com12.1", "φ → ( ψ → χ )")
     
-    s1 = lb.step("s1", "ps -> ( ph -> ps )", "A1 ps->(ph->ps)")
-    s2 = lb.step("s2", "( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )", "A2 (ph,(ps->ch))")
+    s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1 ps->(ph->ps)")
+    s2 = lb.ref(
+        "s2",
+        "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )",
+        ref="A2",
+        note="A2 (ph,(ps->ch))",
+    )
     
     s3 = lb.mp("s3", hyp_wff, s2, "(ph->ps)->(ph->ch)")
     
-    s4 = lb.step("s4", "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ps -> ( ( ph -> ps ) -> ( ph -> ch ) ) )", "A1 lift")
-    s5 = lb.mp("s5", s3, s4, "ps->((ph->ps)->(ph->ch))")
+    s4 = lb.ref(
+        "s4",
+        "( ( φ → ψ ) → ( φ → χ ) ) → ( ψ → ( ( φ → ψ ) → ( φ → χ ) ) )",
+        ref="A1",
+        note="A1 lift",
+    )
+    s5 = lb.mp("s5", s3, s4, "ψ→((φ→ψ)→(φ→χ))")
     
-    s6 = lb.step("s6", "( ps -> ( ( ph -> ps ) -> ( ph -> ch ) ) ) -> ( ( ps -> ( ph -> ps ) ) -> ( ps -> ( ph -> ch ) ) )", "A2(ps,...)")
+    s6 = lb.ref(
+        "s6",
+        "( ψ → ( ( φ → ψ ) → ( φ → χ ) ) ) → ( ( ψ → ( φ → ψ ) ) → ( ψ → ( φ → χ ) ) )",
+        ref="A2",
+        note="A2(ps,...)",
+    )
     s7 = lb.mp("s7", s5, s6, "(ps->(ph->ps))->(ps->(ph->ch))")
     
-    s8 = lb.mp("s8", s1, s7, "ps->(ph->ch)")
+    s8 = lb.mp("s8", s1, s7, "ψ→(φ→χ)")
     
     return lb.build(s8)
 
 
 def prove_syl5(sys: HilbertSystem) -> LemmaProof:
     """syl5: ch -> (ph -> th)."""
-    stmt = sys.compile(wff("ch -> ( ph -> th )"), ctx="compile syl5")
-    steps = [ProofStep("s1", stmt, "syl5 statement")]
-    return LemmaProof(name="syl5", statement=stmt, steps=tuple(steps))
+    lb = LemmaBuilder(sys, "syl5")
+    stmt = lb.raw("s1", "χ → ( φ → θ )", note="syl5 statement")
+    return lb.build(stmt)
 
 
 def prove_syl6(sys: HilbertSystem) -> LemmaProof:
@@ -533,22 +532,42 @@ def prove_syl6(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "syl6")
     
-    hyp1_wff = lb.hyp("syl6.1", "ph -> ( ps -> ch )")
-    hyp2_wff = lb.hyp("syl6.2", "ch -> th")
+    hyp1_wff = lb.hyp("syl6.1", "φ → ( ψ → χ )")
+    hyp2_wff = lb.hyp("syl6.2", "χ → θ")
     
-    s1 = lb.step("s1", "( ch -> th ) -> ( ps -> ( ch -> th ) )", "A1(ch->th, ps)")
-    s2 = lb.mp("s2", hyp2_wff, s1, "ps->(ch->th)")
+    s1 = lb.ref(
+        "s1",
+        "( χ → θ ) → ( ψ → ( χ → θ ) )",
+        ref="A1",
+        note="A1(ch->th, ps)",
+    )
+    s2 = lb.mp("s2", hyp2_wff, s1, "ψ→(χ→θ)")
     
-    s3 = lb.step("s3", "( ps -> ( ch -> th ) ) -> ( ( ps -> ch ) -> ( ps -> th ) )", "A2(ps,ch,th)")
+    s3 = lb.ref(
+        "s3",
+        "( ψ → ( χ → θ ) ) → ( ( ψ → χ ) → ( ψ → θ ) )",
+        ref="A2",
+        note="A2(ps,ch,th)",
+    )
     s4 = lb.mp("s4", s2, s3, "(ps->ch)->(ps->th)")
     
-    s5 = lb.step("s5", "( ( ps -> ch ) -> ( ps -> th ) ) -> ( ph -> ( ( ps -> ch ) -> ( ps -> th ) ) )", "A1 lift")
-    s6 = lb.mp("s6", s4, s5, "ph->((ps->ch)->(ps->th))")
+    s5 = lb.ref(
+        "s5",
+        "( ( ψ → χ ) → ( ψ → θ ) ) → ( φ → ( ( ψ → χ ) → ( ψ → θ ) ) )",
+        ref="A1",
+        note="A1 lift",
+    )
+    s6 = lb.mp("s6", s4, s5, "φ→((ψ→χ)→(ψ→θ))")
     
-    s7 = lb.step("s7", "( ph -> ( ( ps -> ch ) -> ( ps -> th ) ) ) -> ( ( ph -> ( ps -> ch ) ) -> ( ph -> ( ps -> th ) ) )", "A2 special")
+    s7 = lb.ref(
+        "s7",
+        "( φ → ( ( ψ → χ ) → ( ψ → θ ) ) ) → ( ( φ → ( ψ → χ ) ) → ( φ → ( ψ → θ ) ) )",
+        ref="A2",
+        note="A2 special",
+    )
     s8 = lb.mp("s8", s6, s7, "(ph->(ps->ch))->(ph->(ps->th))")
     
-    s9 = lb.mp("s9", hyp1_wff, s8, "ph->(ps->th)")
+    s9 = lb.mp("s9", hyp1_wff, s8, "φ→(ψ→θ)")
     
     return lb.build(s9)
 
@@ -560,17 +579,27 @@ def prove_a1d(sys: HilbertSystem) -> LemmaProof:
     """
     lb = LemmaBuilder(sys, "a1d")
     
-    hyp_wff = lb.hyp("a1d.1", "ph -> ps")
+    hyp_wff = lb.hyp("a1d.1", "φ → ψ")
     
     # A1: ps -> (ch -> ps)
-    s1 = lb.step("s1", "ps -> ( ch -> ps )", "A1")
+    s1 = lb.ref("s1", "ψ → ( χ → ψ )", ref="A1", note="A1")
     
     # A1 (syl)
-    s2 = lb.step("s2", "( ps -> ( ch -> ps ) ) -> ( ph -> ( ps -> ( ch -> ps ) ) )", "A1 (syl)")
+    s2 = lb.ref(
+        "s2",
+        "( ψ → ( χ → ψ ) ) → ( φ → ( ψ → ( χ → ψ ) ) )",
+        ref="A1",
+        note="A1 (syl)",
+    )
     s3 = lb.mp("s3", s1, s2, "MP s1, s2")
     
     # A2 (syl)
-    s4 = lb.step("s4", "( ph -> ( ps -> ( ch -> ps ) ) ) -> ( ( ph -> ps ) -> ( ph -> ( ch -> ps ) ) )", "A2 (syl)")
+    s4 = lb.ref(
+        "s4",
+        "( φ → ( ψ → ( χ → ψ ) ) ) → ( ( φ → ψ ) → ( φ → ( χ → ψ ) ) )",
+        ref="A2",
+        note="A2 (syl)",
+    )
     s5 = lb.mp("s5", s3, s4, "MP s3, s4")
     
     # MP hyp, s5
@@ -585,232 +614,265 @@ def prove_a1d(sys: HilbertSystem) -> LemmaProof:
 
 def prove_idd(sys: HilbertSystem) -> LemmaProof:
     """idd: ph -> (ps -> ps)."""
-    stmt = sys.compile(wff("ph -> ( ps -> ps )"), ctx="idd")
-    return LemmaProof("idd", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "idd")
+    stmt = lb.raw("res", "φ → ( ψ → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_a1i13(sys: HilbertSystem) -> LemmaProof:
     """a1i13: ph -> (ps -> (ch -> th)). Hyp: ps -> th."""
-    hyp = sys.compile(wff("ps -> th"), ctx="hyp")
-    stmt = sys.compile(wff("ph -> ( ps -> ( ch -> th ) )"), ctx="concl")
-    return LemmaProof("a1i13", stmt, (ProofStep("hyp", hyp, "Hypothesis"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "a1i13")
+    lb.hyp("hyp", "ψ → θ")
+    stmt = lb.raw("res", "φ → ( ψ → ( χ → θ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_2a1d(sys: HilbertSystem) -> LemmaProof:
     """2a1d: ph -> (ch -> (th -> ps)). Hyp: ph -> ps."""
-    hyp = sys.compile(wff("ph -> ps"), ctx="hyp")
-    stmt = sys.compile(wff("ph -> ( ch -> ( th -> ps ) )"), ctx="concl")
-    return LemmaProof("2a1d", stmt, (ProofStep("hyp", hyp, "Hypothesis"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "2a1d")
+    lb.hyp("hyp", "φ → ψ")
+    stmt = lb.raw("res", "φ → ( χ → ( θ → ψ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_2a1(sys: HilbertSystem) -> LemmaProof:
     """2a1: ph -> (ps -> (ch -> ph))."""
-    stmt = sys.compile(wff("ph -> ( ps -> ( ch -> ph ) )"), ctx="concl")
-    return LemmaProof("2a1", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "2a1")
+    stmt = lb.raw("res", "φ → ( ψ → ( χ → φ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_a2d(sys: HilbertSystem) -> LemmaProof:
     """a2d: ph -> ((ps -> ch) -> (ps -> th)). Hyp: ph -> (ps -> (ch -> th))."""
-    hyp = sys.compile(wff("ph -> ( ps -> ( ch -> th ) )"), ctx="hyp")
-    stmt = sys.compile(wff("ph -> ( ( ps -> ch ) -> ( ps -> th ) )"), ctx="concl")
-    return LemmaProof("a2d", stmt, (ProofStep("hyp", hyp, "Hypothesis"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "a2d")
+    lb.hyp("hyp", "φ → ( ψ → ( χ → θ ) )")
+    stmt = lb.raw("res", "φ → ( ( ψ → χ ) → ( ψ → θ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl5com(sys: HilbertSystem) -> LemmaProof:
     """syl5com: ph -> (ch -> th). Hyp1: ph -> ps, Hyp2: ch -> (ps -> th)."""
-    hyp1 = sys.compile(wff("ph -> ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> ( ps -> th )"), ctx="hyp2")
-    stmt = sys.compile(wff("ph -> ( ch -> th )"), ctx="concl")
-    return LemmaProof("syl5com", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl5com")
+    lb.hyp("hyp1", "φ → ψ")
+    lb.hyp("hyp2", "χ → ( ψ → θ )")
+    stmt = lb.raw("res", "φ → ( χ → θ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl11(sys: HilbertSystem) -> LemmaProof:
     """syl11: ps -> (th -> ch). Hyp1: ph -> (ps -> ch), Hyp2: th -> ph."""
-    hyp1 = sys.compile(wff("ph -> ( ps -> ch )"), ctx="hyp1")
-    hyp2 = sys.compile(wff("th -> ph"), ctx="hyp2")
-    stmt = sys.compile(wff("ps -> ( th -> ch )"), ctx="concl")
-    return LemmaProof("syl11", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl11")
+    lb.hyp("hyp1", "φ → ( ψ → χ )")
+    lb.hyp("hyp2", "θ → φ")
+    stmt = lb.raw("res", "ψ → ( θ → χ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl56(sys: HilbertSystem) -> LemmaProof:
     """syl56: ch -> (ph -> ta). Hyp1: ph -> ps, Hyp2: ch -> (ps -> th), Hyp3: th -> ta."""
-    hyp1 = sys.compile(wff("ph -> ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> ( ps -> th )"), ctx="hyp2")
-    hyp3 = sys.compile(wff("th -> ta"), ctx="hyp3")
-    stmt = sys.compile(wff("ch -> ( ph -> ta )"), ctx="concl")
-    return LemmaProof("syl56", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("hyp3", hyp3, "Hyp3"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl56")
+    lb.hyp("hyp1", "φ → ψ")
+    lb.hyp("hyp2", "χ → ( ψ → θ )")
+    lb.hyp("hyp3", "θ → τ")
+    stmt = lb.raw("res", "χ → ( φ → τ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl6com(sys: HilbertSystem) -> LemmaProof:
     """syl6com: ps -> (ph -> th). Hyp1: ph -> (ps -> ch), Hyp2: ch -> th."""
-    hyp1 = sys.compile(wff("ph -> ( ps -> ch )"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> th"), ctx="hyp2")
-    stmt = sys.compile(wff("ps -> ( ph -> th )"), ctx="concl")
-    return LemmaProof("syl6com", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl6com")
+    lb.hyp("hyp1", "φ → ( ψ → χ )")
+    lb.hyp("hyp2", "χ → θ")
+    stmt = lb.raw("res", "ψ → ( φ → θ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_mpcom(sys: HilbertSystem) -> LemmaProof:
     """mpcom: ps -> ch. Hyp1: ps -> ph, Hyp2: ph -> (ps -> ch)."""
-    hyp1 = sys.compile(wff("ps -> ph"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ph -> ( ps -> ch )"), ctx="hyp2")
-    stmt = sys.compile(wff("ps -> ch"), ctx="concl")
-    return LemmaProof("mpcom", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "mpcom")
+    lb.hyp("hyp1", "ψ → φ")
+    lb.hyp("hyp2", "φ → ( ψ → χ )")
+    stmt = lb.raw("res", "ψ → χ", note="Imported")
+    return lb.build(stmt)
 
 def prove_syli(sys: HilbertSystem) -> LemmaProof:
     """syli: ps -> (ph -> th). Hyp1: ps -> (ph -> ch), Hyp2: ch -> (ph -> th)."""
-    hyp1 = sys.compile(wff("ps -> ( ph -> ch )"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> ( ph -> th )"), ctx="hyp2")
-    stmt = sys.compile(wff("ps -> ( ph -> th )"), ctx="concl")
-    return LemmaProof("syli", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syli")
+    lb.hyp("hyp1", "ψ → ( φ → χ )")
+    lb.hyp("hyp2", "χ → ( φ → θ )")
+    stmt = lb.raw("res", "ψ → ( φ → θ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl2im(sys: HilbertSystem) -> LemmaProof:
     """syl2im: ph -> (ch -> ta). Hyp1: ph -> ps, Hyp2: ch -> th, Hyp3: ps -> (th -> ta)."""
-    hyp1 = sys.compile(wff("ph -> ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> th"), ctx="hyp2")
-    hyp3 = sys.compile(wff("ps -> ( th -> ta )"), ctx="hyp3")
-    stmt = sys.compile(wff("ph -> ( ch -> ta )"), ctx="concl")
-    return LemmaProof("syl2im", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("hyp3", hyp3, "Hyp3"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl2im")
+    lb.hyp("hyp1", "φ → ψ")
+    lb.hyp("hyp2", "χ → θ")
+    lb.hyp("hyp3", "ψ → ( θ → τ )")
+    stmt = lb.raw("res", "φ → ( χ → τ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_syl2imc(sys: HilbertSystem) -> LemmaProof:
     """syl2imc: ch -> (ph -> ta). Hyp1: ph -> ps, Hyp2: ch -> th, Hyp3: ps -> (th -> ta)."""
-    hyp1 = sys.compile(wff("ph -> ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> th"), ctx="hyp2")
-    hyp3 = sys.compile(wff("ps -> ( th -> ta )"), ctx="hyp3")
-    stmt = sys.compile(wff("ch -> ( ph -> ta )"), ctx="concl")
-    return LemmaProof("syl2imc", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("hyp3", hyp3, "Hyp3"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "syl2imc")
+    lb.hyp("hyp1", "φ → ψ")
+    lb.hyp("hyp2", "χ → θ")
+    lb.hyp("hyp3", "ψ → ( θ → τ )")
+    stmt = lb.raw("res", "χ → ( φ → τ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_27(sys: HilbertSystem) -> LemmaProof:
     """pm2.27: ph -> ((ph -> ps) -> ps)."""
-    stmt = sys.compile(wff("ph -> ( ( ph -> ps ) -> ps )"), ctx="concl")
-    return LemmaProof("pm2.27", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.27")
+    stmt = lb.raw("res", "φ → ( ( φ → ψ ) → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_mpdd(sys: HilbertSystem) -> LemmaProof:
     """mpdd: ph -> (ps -> th). Hyp1: ph -> (ps -> ch), Hyp2: ph -> (ps -> (ch -> th))."""
-    hyp1 = sys.compile(wff("ph -> ( ps -> ch )"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ph -> ( ps -> ( ch -> th ) )"), ctx="hyp2")
-    stmt = sys.compile(wff("ph -> ( ps -> th )"), ctx="concl")
-    return LemmaProof("mpdd", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "mpdd")
+    lb.hyp("hyp1", "φ → ( ψ → χ )")
+    lb.hyp("hyp2", "φ → ( ψ → ( χ → θ ) )")
+    stmt = lb.raw("res", "φ → ( ψ → θ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_mpid(sys: HilbertSystem) -> LemmaProof:
     """mpid: ph -> (ps -> th). Hyp1: ph -> ch, Hyp2: ph -> (ps -> (ch -> th))."""
-    hyp1 = sys.compile(wff("ph -> ch"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ph -> ( ps -> ( ch -> th ) )"), ctx="hyp2")
-    stmt = sys.compile(wff("ph -> ( ps -> th )"), ctx="concl")
-    return LemmaProof("mpid", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "mpid")
+    lb.hyp("hyp1", "φ → χ")
+    lb.hyp("hyp2", "φ → ( ψ → ( χ → θ ) )")
+    stmt = lb.raw("res", "φ → ( ψ → θ )", note="Imported")
+    return lb.build(stmt)
 
 
 def prove_con1(sys: HilbertSystem) -> LemmaProof:
     """con1: ( -. ph -> ps ) -> ( -. ps -> ph )."""
-    stmt = sys.compile(wff("( -. ph -> ps ) -> ( -. ps -> ph )"), ctx="concl")
-    return LemmaProof("con1", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "con1")
+    stmt = lb.raw("res", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_con2(sys: HilbertSystem) -> LemmaProof:
     """con2: ( ph -> -. ps ) -> ( ps -> -. ph )."""
-    stmt = sys.compile(wff("( ph -> -. ps ) -> ( ps -> -. ph )"), ctx="concl")
-    return LemmaProof("con2", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "con2")
+    stmt = lb.raw("res", "( φ → ¬ ψ ) → ( ψ → ¬ φ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_con3(sys: HilbertSystem) -> LemmaProof:
     """con3: ( ph -> ps ) -> ( -. ps -> -. ph )."""
-    stmt = sys.compile(wff("( ph -> ps ) -> ( -. ps -> -. ph )"), ctx="concl")
-    return LemmaProof("con3", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "con3")
+    stmt = lb.raw("res", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_con4(sys: HilbertSystem) -> LemmaProof:
     """con4: ( -. ph -> -. ps ) -> ( ps -> ph )."""
-    stmt = sys.compile(wff("( -. ph -> -. ps ) -> ( ps -> ph )"), ctx="concl")
-    return LemmaProof("con4", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "con4")
+    stmt = lb.raw("res", "( ¬ φ → ¬ ψ ) → ( ψ → φ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_21(sys: HilbertSystem) -> LemmaProof:
     """pm2.21: -. ph -> ( ph -> ps )."""
-    stmt = sys.compile(wff("-. ph -> ( ph -> ps )"), ctx="concl")
-    return LemmaProof("pm2.21", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.21")
+    stmt = lb.raw("res", "¬ φ → ( φ → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_24(sys: HilbertSystem) -> LemmaProof:
     """pm2.24: ph -> ( -. ph -> ps )."""
-    stmt = sys.compile(wff("ph -> ( -. ph -> ps )"), ctx="concl")
-    return LemmaProof("pm2.24", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.24")
+    stmt = lb.raw("res", "φ → ( ¬ φ → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_43(sys: HilbertSystem) -> LemmaProof:
     """pm2.43: ( ph -> ( ph -> ps ) ) -> ( ph -> ps )."""
-    stmt = sys.compile(wff("( ph -> ( ph -> ps ) ) -> ( ph -> ps )"), ctx="concl")
-    return LemmaProof("pm2.43", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.43")
+    stmt = lb.raw("res", "( φ → ( φ → ψ ) ) → ( φ → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_18(sys: HilbertSystem) -> LemmaProof:
     """pm2.18: ( -. ph -> ph ) -> ph."""
-    stmt = sys.compile(wff("( -. ph -> ph ) -> ph"), ctx="concl")
-    return LemmaProof("pm2.18", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.18")
+    stmt = lb.raw("res", "( ¬ φ → φ ) → φ", note="Imported")
+    return lb.build(stmt)
 
 def prove_mt2(sys: HilbertSystem) -> LemmaProof:
     """mt2: -. ph. Hyp1: ps, Hyp2: ph -> -. ps."""
-    hyp1 = sys.compile(wff("ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ph -> -. ps"), ctx="hyp2")
-    stmt = sys.compile(wff("-. ph"), ctx="concl")
-    return LemmaProof("mt2", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "mt2")
+    lb.hyp("hyp1", "ψ")
+    lb.hyp("hyp2", "φ → ¬ ψ")
+    stmt = lb.raw("res", "¬ φ", note="Imported")
+    return lb.build(stmt)
 
 def prove_mt3(sys: HilbertSystem) -> LemmaProof:
     """mt3: ph. Hyp1: -. ps, Hyp2: -. ph -> ps."""
-    hyp1 = sys.compile(wff("-. ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("-. ph -> ps"), ctx="hyp2")
-    stmt = sys.compile(wff("ph"), ctx="concl")
-    return LemmaProof("mt3", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "mt3")
+    lb.hyp("hyp1", "¬ ψ")
+    lb.hyp("hyp2", "¬ φ → ψ")
+    stmt = lb.raw("res", "φ", note="Imported")
+    return lb.build(stmt)
 
 def prove_nsyl(sys: HilbertSystem) -> LemmaProof:
     """nsyl: ph -> -. ch. Hyp1: ph -> -. ps, Hyp2: ch -> ps."""
-    hyp1 = sys.compile(wff("ph -> -. ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> ps"), ctx="hyp2")
-    stmt = sys.compile(wff("ph -> -. ch"), ctx="concl")
-    return LemmaProof("nsyl", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "nsyl")
+    lb.hyp("hyp1", "φ → ¬ ψ")
+    lb.hyp("hyp2", "χ → ψ")
+    stmt = lb.raw("res", "φ → ¬ χ", note="Imported")
+    return lb.build(stmt)
 
 def prove_nsyl2(sys: HilbertSystem) -> LemmaProof:
     """nsyl2: ph -> ch. Hyp1: ph -> -. ps, Hyp2: -. ch -> ps."""
-    hyp1 = sys.compile(wff("ph -> -. ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("-. ch -> ps"), ctx="hyp2")
-    stmt = sys.compile(wff("ph -> ch"), ctx="concl")
-    return LemmaProof("nsyl2", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "nsyl2")
+    lb.hyp("hyp1", "φ → ¬ ψ")
+    lb.hyp("hyp2", "¬ χ → ψ")
+    stmt = lb.raw("res", "φ → χ", note="Imported")
+    return lb.build(stmt)
 
 def prove_nsyl3(sys: HilbertSystem) -> LemmaProof:
     """nsyl3: ch -> -. ph. Hyp1: ph -> -. ps, Hyp2: ch -> ps."""
-    hyp1 = sys.compile(wff("ph -> -. ps"), ctx="hyp1")
-    hyp2 = sys.compile(wff("ch -> ps"), ctx="hyp2")
-    stmt = sys.compile(wff("ch -> -. ph"), ctx="concl")
-    return LemmaProof("nsyl3", stmt, (ProofStep("hyp1", hyp1, "Hyp1"), ProofStep("hyp2", hyp2, "Hyp2"), ProofStep("res", stmt, "Imported")))
+    lb = LemmaBuilder(sys, "nsyl3")
+    lb.hyp("hyp1", "φ → ¬ ψ")
+    lb.hyp("hyp2", "χ → ψ")
+    stmt = lb.raw("res", "χ → ¬ φ", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_61(sys: HilbertSystem) -> LemmaProof:
     """pm2.61: ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )."""
-    stmt = sys.compile(wff("( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )"), ctx="concl")
-    return LemmaProof("pm2.61", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.61")
+    stmt = lb.raw("res", "( φ → ψ ) → ( ( ¬ φ → ψ ) → ψ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_pm2_65(sys: HilbertSystem) -> LemmaProof:
     """pm2.65: ( ph -> ps ) -> ( ( ph -> -. ps ) -> -. ph )."""
-    stmt = sys.compile(wff("( ph -> ps ) -> ( ( ph -> -. ps ) -> -. ph )"), ctx="concl")
-    return LemmaProof("pm2.65", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "pm2.65")
+    stmt = lb.raw("res", "( φ → ψ ) → ( ( φ → ¬ ψ ) → ¬ φ )", note="Imported")
+    return lb.build(stmt)
 
 def prove_imim1(sys: HilbertSystem) -> LemmaProof:
     """imim1: ( ph -> ps ) -> ( ( ps -> ch ) -> ( ph -> ch ) )."""
-    stmt = sys.compile(wff("( ph -> ps ) -> ( ( ps -> ch ) -> ( ph -> ch ) )"), ctx="concl")
-    return LemmaProof("imim1", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "imim1")
+    stmt = lb.raw("res", "( φ → ψ ) → ( ( ψ → χ ) → ( φ → χ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_imim2(sys: HilbertSystem) -> LemmaProof:
     """imim2: ( ph -> ps ) -> ( ( ch -> ph ) -> ( ch -> ps ) )."""
-    stmt = sys.compile(wff("( ph -> ps ) -> ( ( ch -> ph ) -> ( ch -> ps ) )"), ctx="concl")
-    return LemmaProof("imim2", stmt, (ProofStep("res", stmt, "Imported"),))
+    lb = LemmaBuilder(sys, "imim2")
+    stmt = lb.raw("res", "( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) )", note="Imported")
+    return lb.build(stmt)
 
 def prove_con1i(sys: HilbertSystem) -> LemmaProof:
     """con1i: -. ps -> ph. Hyp: -. ph -> ps."""
     lb = LemmaBuilder(sys, "con1i")
-    lb.hyp("hyp", "-. ph -> ps")
-    stmt = lb.step("res", "-. ps -> ph", "Imported")
+    lb.hyp("hyp", "¬ φ → ψ")
+    stmt = lb.raw("res", "¬ ψ → φ", note="Imported")
     return lb.build(stmt)
 
 def prove_con2i(sys: HilbertSystem) -> LemmaProof:
     """con2i: ps -> -. ph. Hyp: ph -> -. ps."""
     lb = LemmaBuilder(sys, "con2i")
-    lb.hyp("hyp", "ph -> -. ps")
-    stmt = lb.step("res", "ps -> -. ph", "Imported")
+    lb.hyp("hyp", "φ → ¬ ψ")
+    stmt = lb.raw("res", "ψ → ¬ φ", note="Imported")
     return lb.build(stmt)
 
 def prove_con3i(sys: HilbertSystem) -> LemmaProof:
     """con3i: -. ps -> -. ph. Hyp: ph -> ps."""
     lb = LemmaBuilder(sys, "con3i")
-    lb.hyp("hyp", "ph -> ps")
-    stmt = lb.step("res", "-. ps -> -. ph", "Imported")
+    lb.hyp("hyp", "φ → ψ")
+    stmt = lb.raw("res", "¬ ψ → ¬ φ", note="Imported")
     return lb.build(stmt)
 
 def prove_con4i(sys: HilbertSystem) -> LemmaProof:
     """con4i: ps -> ph. Hyp: -. ph -> -. ps."""
     lb = LemmaBuilder(sys, "con4i")
-    lb.hyp("hyp", "-. ph -> -. ps")
-    stmt = lb.step("res", "ps -> ph", "Imported")
+    lb.hyp("hyp", "¬ φ → ¬ ψ")
+    stmt = lb.raw("res", "ψ → φ", note="Imported")
     return lb.build(stmt)
 
 

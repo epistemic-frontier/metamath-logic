@@ -10,7 +10,7 @@ from prelude.formula import elem as mk_elem
 from prelude.formula import exist as mk_exist
 
 # Formal variable placeholder (reuse wff sort discipline)
-phi = Var(name="ph")
+phi = Var(name="φ")
 x = Var(name="x")
 y = Var(name="y")
 z = Var(name="z")

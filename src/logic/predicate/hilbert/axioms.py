@@ -7,31 +7,31 @@ from skfd.authoring.parsing import wff
 from logic.predicate.hilbert._structures import All, Elem, Eq, phi, x, y, z
 
 # AX5: phi -> A. x phi
-AX5: Axiom = wff("ph -> A. x ph")
+AX5: Axiom = wff("φ → ∀ x φ")
 
 # AX6: -. A. x -. x = y
-AX6: Axiom = wff("-. A. x -. x = y")
+AX6: Axiom = wff("¬ ∀ x ¬ x = y")
 
 # AX7: x = y -> ( x = z -> y = z )
-AX7: Axiom = wff("x = y -> ( x = z -> y = z )")
+AX7: Axiom = wff("x = y → ( x = z → y = z )")
 
 # AX8: x = y -> ( x e. z -> y e. z )
-AX8: Axiom = wff("x = y -> ( x e. z -> y e. z )")
+AX8: Axiom = wff("x = y → ( x e. z → y e. z )")
 
 # AX9: x = y -> ( z e. x -> z e. y )
-AX9: Axiom = wff("x = y -> ( z e. x -> z e. y )")
+AX9: Axiom = wff("x = y → ( z e. x → z e. y )")
 
 # AX10: -. A. x phi -> A. x -. A. x phi
-AX10: Axiom = wff("-. A. x ph -> A. x -. A. x ph")
+AX10: Axiom = wff("¬ ∀ x φ → ∀ x ¬ ∀ x φ")
 
 # AX11: A. x A. y phi -> A. y A. x phi
-AX11: Axiom = wff("A. x A. y ph -> A. y A. x ph")
+AX11: Axiom = wff("∀ x ∀ y φ → ∀ y ∀ x φ")
 
 # AX12: x = y -> ( A. y phi -> A. x ( x = y -> phi ) )
-AX12: Axiom = wff("x = y -> ( A. y ph -> A. x ( x = y -> ph ) )")
+AX12: Axiom = wff("x = y → ( ∀ y φ → ∀ x ( x = y → φ ) )")
 
 # AX13 (ax-13): ( -. x = y -> ( y = z -> A. x y = z ) )
-AX13: Axiom = wff("-. x = y -> ( y = z -> A. x y = z )")
+AX13: Axiom = wff("¬ x = y → ( y = z → ∀ x y = z )")
 
 def make_axioms() -> Mapping[str, Axiom]:
     return export_axioms(globals())

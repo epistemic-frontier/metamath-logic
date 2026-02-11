@@ -28,7 +28,7 @@ def _emit_rule_skeleton(
 
 def build(ctx: BuildContextV2) -> None:
     mm = ctx.mm
-    prelude = ctx.deps.prelude
+    prelude = ctx.deps["metamath-prelude"]
 
     system = System.make(interner=mm.interner, names=ctx.names)
     wff = prelude["wff"]

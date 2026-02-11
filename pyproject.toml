@@ -51,9 +51,6 @@ dev = [
     "ruff>=0.6",
 ]
 
-[tool.uv.sources]
-metamath-prelude = { path = "../metamath-prelude", editable = true }
-
 [tool.setuptools.packages.find]
 where = ["src"]
 

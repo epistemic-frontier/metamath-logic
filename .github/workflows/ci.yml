@@ -38,5 +38,4 @@ jobs:
         run: uv run --frozen python -m pytest
 
       - name: Verify (skfd)
-        run: uv run --frozen skfd verify --level 1 metamath-logic
-
+        run: uv run --frozen python tools/run_skfd.py verify --level 1 metamath-logic

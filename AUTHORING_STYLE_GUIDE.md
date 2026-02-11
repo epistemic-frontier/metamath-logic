@@ -67,7 +67,7 @@ logic/propositional/hilbert/
   _syntactic.py      # Token-level rule skeleton (mp/wi/wn/wa) if needed
   lemmas/*.py        # Lemma proof scripts (author-facing)
   theorems.py        # set.mm label → local lemma constructor registry
-  __init__.py        # HilbertSystem facade (author_env/compile/apply)
+  __init__.py        # System facade (author_env/compile/apply)
 ```
 
 Current code references:

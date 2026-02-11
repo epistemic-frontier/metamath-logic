@@ -4,10 +4,10 @@ from skfd.api_v2 import BuildContextV2
 from skfd.authoring.emit import emit_axioms, emit_lowered_lemmas
 from skfd.builder_v2 import MMBuilderV2
 from skfd.core.symbols import SymbolId
-from logic.propositional.hilbert import HilbertSystem
+from logic.propositional.hilbert import System
 from logic.propositional.hilbert._structures import And, Imp, Not, phi, psi
 from logic.propositional.hilbert.lemmas import (
-    LemmaProof,
+    Proof,
     prove_L1_id,
     prove_L2_or_intro_right,
     prove_L3_or_intro_left,
@@ -22,14 +22,14 @@ from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 
 def _emit_rule_skeleton(
-    mm: MMBuilderV2, system: HilbertSystem, *, wff: SymbolId
+    mm: MMBuilderV2, system: System, *, wff: SymbolId
 ) -> None:
-    wi_wff = system._compile(Imp(phi, psi), ctx="rule[wi]")
-    wn_wff = system._compile(Not(phi), ctx="rule[wn]")
-    wa_wff = system._compile(And(phi, psi), ctx="rule[wa]")
-    phi_wff = system._compile(phi, ctx="rule[mp.phi]")
-    psi_wff = system._compile(psi, ctx="rule[mp.psi]")
-    imp_wff = system._compile(Imp(phi, psi), ctx="rule[mp.imp]")
+    wi_wff = system.compile(Imp(phi, psi), ctx="rule[wi]")
+    wn_wff = system.compile(Not(phi), ctx="rule[wn]")
+    wa_wff = system.compile(And(phi, psi), ctx="rule[wa]")
+    phi_wff = system.compile(phi, ctx="rule[mp.phi]")
+    psi_wff = system.compile(psi, ctx="rule[mp.psi]")
+    imp_wff = system.compile(Imp(phi, psi), ctx="rule[mp.imp]")
 
     mm.a(mm.sym.label("wi"), tc=wff, expr=wi_wff.tokens)
     mm.a(mm.sym.label("wn"), tc=wff, expr=wn_wff.tokens)
@@ -45,7 +45,7 @@ def build(ctx: BuildContextV2) -> None:
     mm = ctx.mm
     prelude = ctx.deps.prelude
 
-    system = HilbertSystem.make(interner=mm.interner, names=ctx.names)
+    system = System.make(interner=mm.interner, names=ctx.names)
     wff = prelude["wff"]
 
     emit_axioms(mm, system, typecode=wff)
@@ -59,7 +59,7 @@ def build(ctx: BuildContextV2) -> None:
     compiled_axioms = system.compile_axioms()
     reserved = {"wi", "wn", "wa", "mp"}
 
-    def _refs(p: LemmaProof) -> set[str]:
+    def _refs(p: Proof) -> set[str]:
         refs: set[str] = set()
         for st in getattr(p, "steps", ()):
             if getattr(st, "op", None) == "ref":
@@ -68,8 +68,8 @@ def build(ctx: BuildContextV2) -> None:
                     refs.add(r)
         return refs
 
-    queue: list[LemmaProof] = list(base_lemmas)
-    lemma_by_name: dict[str, LemmaProof] = {}
+    queue: list[Proof] = list(base_lemmas)
+    lemma_by_name: dict[str, Proof] = {}
     while queue:
         p = queue.pop()
         name = p.name

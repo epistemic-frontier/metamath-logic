@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 
-from . import HilbertSystem
+from . import System
 from .lemmas import (
-    LemmaProof,
+    Proof,
     prove_L1_id,
     prove_notnot,
     prove_a1i,
@@ -62,7 +62,7 @@ from .lemmas import (
 )
 
 
-LemmaCtor = Callable[[HilbertSystem], LemmaProof]
+LemmaCtor = Callable[[System], Proof]
 
 
 SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {

@@ -7,7 +7,7 @@ This module declares:
 - require(...) declarations for signatures (wff discipline)
 
 No Builtins or SymbolInterner appear here; those are injected at system
-construction time by logic.propositional.hilbert.HilbertSystem.
+construction time by logic.propositional.hilbert.System.
 """
 
 from __future__ import annotations

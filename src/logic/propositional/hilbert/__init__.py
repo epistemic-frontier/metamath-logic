@@ -11,6 +11,7 @@ from skfd.authoring.formula import Wff
 from skfd.authoring.typing import HypothesisAny, RuleApp
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
+from skfd.proof import TacticRegistry
 
 from skfd.authoring.rules import RuleBundle
 from prelude.hilbert_rules import make_rules
@@ -35,7 +36,7 @@ RuleFn: TypeAlias = Callable[..., Wff]
 # -----------------------------------------------------------------------------
 
 @dataclass(frozen=True)
-class HilbertSystem:
+class System:
     """Hilbert propositional logic bundle.
 
     Authoring bridge:
@@ -55,7 +56,7 @@ class HilbertSystem:
         interner: SymbolInterner,
         names: NameResolver,
         origin_ref: Any = None,
-    ) -> HilbertSystem:
+    ) -> System:
         b = Builtins.ensure(interner, origin_ref=origin_ref)
 
         bundle: RuleBundle = make_rules(b)
@@ -107,6 +108,9 @@ class HilbertSystem:
     def _compile(self, expr: Expr, *, ctx: str = "compile") -> Wff:
         return _compile_impl(self, expr, ctx=ctx)
 
+    def compile(self, expr: Expr, *, ctx: str = "compile") -> Wff:
+        return _compile_impl(self, expr, ctx=ctx)
+
     def compile_axioms(self) -> Mapping[str, Wff]:
         """Compile the author-facing axioms (Expr) into token-level Wff."""
         return _compile_axioms_impl(self)
@@ -118,9 +122,15 @@ class HilbertSystem:
     def _apply(self, label: str, hyps: Sequence[HypothesisAny], *, ctx: str) -> Wff:
         return _apply_impl(self, label, hyps, ctx=ctx)
 
+    def apply(self, rule: str, hyps: Sequence[HypothesisAny], *, ctx: str) -> Wff:
+        return _apply_impl(self, rule, hyps, ctx=ctx)
 
-def make(*, interner: SymbolInterner, origin_ref: Any = None) -> HilbertSystem:
-    return HilbertSystem.make(interner=interner, names=NameResolver(), origin_ref=origin_ref)
+    def tactics(self) -> TacticRegistry:
+        return {}
+
+
+def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
+    return System.make(interner=interner, names=NameResolver(), origin_ref=origin_ref)
 
 
 SETMM_TO_HILBERT_RULES: Mapping[str, str] = {
@@ -134,7 +144,7 @@ SETMM_TO_HILBERT: Mapping[str, str] = {
 
 
 __all__ = [
-    "HilbertSystem",
+    "System",
     "make",
     "SETMM_TO_HILBERT_AXIOMS",
     "SETMM_TO_HILBERT_RULES",

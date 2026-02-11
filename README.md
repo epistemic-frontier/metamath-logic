@@ -44,4 +44,3 @@ uv run --frozen skfd verify --level 1 metamath-logic
 ```
 
 `skfd verify` builds the package into a verification monolith (under `target/`) and checks it with the configured verifiers.
-

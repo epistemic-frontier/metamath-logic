@@ -5,7 +5,7 @@ from skfd.authoring.emit import emit_axioms, emit_lowered_lemmas
 from skfd.builder_v2 import MMBuilderV2
 from skfd.core.symbols import SymbolId
 from logic.propositional.hilbert import System
-from logic.propositional.hilbert._structures import And, Imp, Not, phi, psi
+from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.lemmas import (
     Proof,
     prove_L1_id,
@@ -15,23 +15,16 @@ from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 
 def _emit_rule_skeleton(
-    mm: MMBuilderV2, system: System, *, wff: SymbolId
+    mm: MMBuilderV2, system: System, *, provable: SymbolId
 ) -> None:
-    wi_wff = system.compile(Imp(phi, psi), ctx="rule[wi]")
-    wn_wff = system.compile(Not(phi), ctx="rule[wn]")
-    wa_wff = system.compile(And(phi, psi), ctx="rule[wa]")
     phi_wff = system.compile(phi, ctx="rule[mp.phi]")
     psi_wff = system.compile(psi, ctx="rule[mp.psi]")
     imp_wff = system.compile(Imp(phi, psi), ctx="rule[mp.imp]")
 
-    mm.a(mm.sym.label("wi"), tc=wff, expr=wi_wff.tokens)
-    mm.a(mm.sym.label("wn"), tc=wff, expr=wn_wff.tokens)
-    mm.a(mm.sym.label("wa"), tc=wff, expr=wa_wff.tokens)
-
     with mm.block():
-        mm.e(mm.sym.label("mp.1"), tc=wff, expr=phi_wff.tokens)
-        mm.e(mm.sym.label("mp.2"), tc=wff, expr=imp_wff.tokens)
-        mm.a(mm.sym.label("mp"), tc=wff, expr=psi_wff.tokens)
+        mm.e(mm.sym.label("ax-mp.1"), tc=provable, expr=phi_wff.tokens)
+        mm.e(mm.sym.label("ax-mp.2"), tc=provable, expr=imp_wff.tokens)
+        mm.a(mm.sym.label("ax-mp"), tc=provable, expr=psi_wff.tokens)
 
 
 def build(ctx: BuildContextV2) -> None:
@@ -40,9 +33,20 @@ def build(ctx: BuildContextV2) -> None:
 
     system = System.make(interner=mm.interner, names=ctx.names)
     wff = prelude["wff"]
+    provable = prelude["|-"]
 
-    emit_axioms(mm, system, typecode=wff)
-    _emit_rule_skeleton(mm, system, wff=wff)
+    ax_1 = mm.sym.label("ax-1")
+    ax_2 = mm.sym.label("ax-2")
+    ax_3 = mm.sym.label("ax-3")
+    ax_mp = mm.sym.label("ax-mp")
+
+    emit_axioms(
+        mm,
+        system,
+        typecode=provable,
+        label_ids={"A1": ax_1, "A2": ax_2, "A3": ax_3},
+    )
+    _emit_rule_skeleton(mm, system, provable=provable)
 
     base_lemmas = [
         prove_L1_id(system),
@@ -88,16 +92,33 @@ def build(ctx: BuildContextV2) -> None:
         raise ValueError(f"unresolved lemma references: {sorted(unresolved)}")
 
     lemmas = list(lemma_by_name.values())
-    emit_lowered_lemmas(mm, system, lemmas, typecode=wff)
+    emit_lowered_lemmas(
+        mm,
+        system,
+        lemmas,
+        typecode=provable,
+        wff_typecode=wff,
+        label_ids={
+            "wi": prelude["wi"],
+            "wn": prelude["wn"],
+            "wa": prelude["wa"],
+            "mp": ax_mp,
+            "A1": ax_1,
+            "A2": ax_2,
+            "A3": ax_3,
+        },
+        floating_by_var={
+            prelude["ph"]: prelude["wph"],
+            prelude["ps"]: prelude["wps"],
+            prelude["ch"]: prelude["wch"],
+        },
+    )
 
     export_labels = [
-        "A1",
-        "A2",
-        "A3",
-        "wi",
-        "wn",
-        "wa",
-        "mp",
+        "ax-1",
+        "ax-2",
+        "ax-3",
+        "ax-mp",
         *sorted(lemma_by_name.keys()),
     ]
     mm.export(*(mm.sym.label(n) for n in export_labels))

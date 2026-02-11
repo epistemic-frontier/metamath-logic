@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from prelude.formula import Builtins
+from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
 from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
 from skfd.authoring.formula import Wff
 from skfd.authoring.typing import HypothesisAny, RuleApp
@@ -82,7 +83,7 @@ class System:
     def author_env(
         self,
         *,
-        origin_module_id: str = "hilbert",
+        origin_module_id: str = GLOBAL_PRELUDE_MODULE_ID,
         origin_ref: Any = None,
         registry: RequireRegistry | None = None,
     ) -> tuple[CompileEnv, RequireRegistry]:

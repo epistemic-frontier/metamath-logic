@@ -6,7 +6,9 @@ from . import System
 from .lemmas import (
     Proof,
     prove_L1_id,
+    prove_id,
     prove_notnot,
+    prove_notnotr,
     prove_a1i,
     prove_a2i,
     prove_mpd,
@@ -37,12 +39,18 @@ from .lemmas import (
     prove_con2,
     prove_con2d,
     prove_con3,
+    prove_con3d,
     prove_con4,
     prove_con4d,
+    prove_conax1,
     prove_pm2_21,
     prove_pm2_21d,
     prove_pm2_24,
     prove_pm2_43,
+    prove_pm2_18,
+    prove_pm2_18d,
+    prove_pm2_521,
+    prove_pm2_521g,
     prove_mt2,
     prove_mt3,
     prove_mt4d,
@@ -59,6 +67,7 @@ from .lemmas import (
     prove_con2i,
     prove_con3i,
     prove_con4i,
+    prove_jarli,
 )
 
 
@@ -66,8 +75,10 @@ LemmaCtor = Callable[[System], Proof]
 
 
 SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
-    "id": prove_L1_id,
+    "id": prove_id,
+    "L1_id": prove_L1_id,
     "notnot": prove_notnot,
+    "notnotr": prove_notnotr,
     "a1i": prove_a1i,
     "a2i": prove_a2i,
     "mpd": prove_mpd,
@@ -98,12 +109,18 @@ SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "con2": prove_con2,
     "con2d": prove_con2d,
     "con3": prove_con3,
+    "con3d": prove_con3d,
     "con4": prove_con4,
     "con4d": prove_con4d,
+    "conax1": prove_conax1,
     "pm2.21": prove_pm2_21,
     "pm2.21d": prove_pm2_21d,
     "pm2.24": prove_pm2_24,
     "pm2.43": prove_pm2_43,
+    "pm2.18": prove_pm2_18,
+    "pm2.18d": prove_pm2_18d,
+    "pm2.521": prove_pm2_521,
+    "pm2.521g": prove_pm2_521g,
     "mt2": prove_mt2,
     "mt3": prove_mt3,
     "mt4d": prove_mt4d,
@@ -120,6 +137,7 @@ SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "con2i": prove_con2i,
     "con3i": prove_con3i,
     "con4i": prove_con4i,
+    "jarli": prove_jarli,
 }
 
 

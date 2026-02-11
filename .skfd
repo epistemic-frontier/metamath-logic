@@ -5,7 +5,7 @@ active = ['mmverify', 'metamath', 'knife']
 [verifiers.metamath]
 command = '/usr/bin/env'
 args = [
-    'METAMATH_BIN=/Users/mingli/MetaMath/metamath-exe/src/metamath',
+    'METAMATH_BIN=/Users/mingli/MetaMath/metamath/src/metamath',
     'python',
     '-m',
     'skfd.verifier.shims.metamath',

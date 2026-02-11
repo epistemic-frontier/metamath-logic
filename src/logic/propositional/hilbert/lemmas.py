@@ -117,9 +117,8 @@ def prove_notnot(sys: System) -> Proof:
     Double negation introduction.
     """
     lb = ProofBuilder(sys, "notnot")
-    s1 = lb.ref("s1", "φ → φ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "( φ → φ ) -> ( ¬ φ → ¬ φ )", ref="con2i", note="con2i")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "¬ φ → ¬ φ", ref="id", note="id")
+    res = lb.ref("res", "φ → ¬ ¬ φ", s1, ref="con2i", note="con2i")
     return lb.build(res)
 
 
@@ -131,13 +130,7 @@ def prove_notnotr(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "notnotr")
     s1 = lb.ref("s1", "( ¬ φ → φ ) -> φ", ref="pm2.18", note="pm2.18")
-    s2 = lb.ref(
-        "s2",
-        "( ( ¬ φ → φ ) -> φ ) -> ( ¬ ¬ φ → φ )",
-        ref="jarli",
-        note="jarli",
-    )
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    res = lb.ref("res", "¬ ¬ φ → φ", s1, ref="jarli", note="jarli")
     return lb.build(res)
 
 
@@ -151,14 +144,7 @@ def prove_jarli(sys: System) -> Proof:
     h1 = lb.hyp("jarli.1", "( φ → ψ ) -> χ")
 
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
-    s2 = lb.ref(
-        "s2",
-        "( ¬ φ → ( φ → ψ ) ) -> ( ( ( φ → ψ ) -> χ ) -> ( ¬ φ → χ ) )",
-        ref="syl",
-        note="syl",
-    )
-    s3 = lb.mp("s3", s1, s2, "MP s1, s2")
-    res = lb.mp("res", h1, s3, "MP jarli.1, s3")
+    res = lb.ref("res", "¬ φ → χ", s1, h1, ref="syl", note="syl")
     return lb.build(res)
 
 
@@ -576,13 +562,7 @@ def prove_syl5(sys: System) -> Proof:
         note="A1",
     )
     s2 = lb.mp("s2", h2, s1, "MP syl5.2, s1")
-    s3 = lb.ref(
-        "s3",
-        "( φ → ( χ → ( ψ → θ ) ) ) -> ( χ → ( φ → ( ψ → θ ) ) )",
-        ref="com12",
-        note="com12",
-    )
-    s4 = lb.mp("s4", s2, s3, "MP s2, s3")
+    s3 = lb.ref("s3", "χ → ( φ → ( ψ → θ ) )", s2, ref="com12", note="com12")
 
     s5 = lb.ref(
         "s5",
@@ -604,7 +584,7 @@ def prove_syl5(sys: System) -> Proof:
         note="A2",
     )
     s9 = lb.mp("s9", s7, s8, "MP s7, s8")
-    s10 = lb.mp("s10", s4, s9, "MP s4, s9")
+    s10 = lb.mp("s10", s3, s9, "MP s3, s9")
 
     s11 = lb.ref(
         "s11",
@@ -1009,9 +989,8 @@ def prove_con1(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con1")
-    s1 = lb.ref("s1", "¬ φ → ψ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", ref="con1d", note="con1d")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ φ → ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( ¬ φ → ψ ) -> ( ¬ ψ → φ ) )", s1, ref="con1d", note="con1d")
     return lb.build(res)
 
 
@@ -1024,23 +1003,25 @@ def prove_con1d(sys: System) -> Proof:
     lb = ProofBuilder(sys, "con1d")
     h1 = lb.hyp("con1d.1", "φ → ( ¬ ψ → χ )")
 
-    s1 = lb.ref("s1", "¬ ψ → ¬ ¬ ψ", ref="notnot", note="notnot")
+    s1 = lb.ref("s1", "χ → ¬ ¬ χ", ref="notnot", note="notnot")
+    s2 = lb.ref("s2", "φ → ( ¬ ψ → ¬ ¬ χ )", h1, s1, ref="syl6", note="syl6")
+    res = lb.ref("res", "φ → ( ¬ χ → ψ )", s2, ref="con4d", note="con4d")
+    return lb.build(res)
+
+
+def prove_id(sys: System) -> Proof:
+    lb = ProofBuilder(sys, "id")
+
+    s1 = lb.ref("s1", "φ → ( φ → φ )", ref="A1", note="A1")
     s2 = lb.ref(
         "s2",
-        "( ¬ ψ → ¬ ¬ ψ ) -> ( ( φ → ( ¬ ψ → χ ) ) -> ( φ → ( ¬ ¬ ψ → χ ) ) )",
-        ref="syl6",
-        note="syl6",
+        "( φ → ( ( φ → φ ) -> φ ) ) -> ( ( φ → ( φ → φ ) ) -> ( φ → φ ) )",
+        ref="A2",
+        note="A2",
     )
-    s3 = lb.mp("s3", s1, s2, "MP s1, s2")
-    s4 = lb.mp("s4", h1, s3, "MP con1d.1, s3")
-
-    s5 = lb.ref(
-        "s5",
-        "( φ → ( ¬ ¬ ψ → χ ) ) -> ( φ → ( ¬ χ → ψ ) )",
-        ref="con4d",
-        note="con4d",
-    )
-    res = lb.mp("res", s4, s5, "MP s4, s5")
+    s3 = lb.ref("s3", "φ → ( ( φ → φ ) -> φ )", ref="A1", note="A1")
+    s4 = lb.mp("s4", s3, s2, "MP s3, s2")
+    res = lb.mp("res", s1, s4, "MP s1, s4")
     return lb.build(res)
 
 
@@ -1053,9 +1034,8 @@ def prove_con2(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con2")
-    s1 = lb.ref("s1", "φ → ¬ ψ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "( φ → ¬ ψ ) -> ( ψ → ¬ φ )", ref="con2d", note="con2d")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "( φ → ¬ ψ ) -> ( φ → ¬ ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( φ → ¬ ψ ) -> ( ψ → ¬ φ ) )", s1, ref="con2d", note="con2d")
     return lb.build(res)
 
 
@@ -1068,23 +1048,22 @@ def prove_con2d(sys: System) -> Proof:
     lb = ProofBuilder(sys, "con2d")
     h1 = lb.hyp("con2d.1", "φ → ( ψ → ¬ χ )")
 
-    s1 = lb.ref("s1", "¬ ¬ χ → χ", ref="notnotr", note="notnotr")
-    s2 = lb.ref(
-        "s2",
-        "( ¬ ¬ χ → χ ) -> ( ( φ → ( ψ → ¬ χ ) ) -> ( φ → ( ¬ ¬ χ → ¬ ψ ) ) )",
-        ref="syl5",
-        note="syl5",
-    )
-    s3 = lb.mp("s3", s1, s2, "MP s1, s2")
-    s4 = lb.mp("s4", h1, s3, "MP con2d.1, s3")
+    s1 = lb.ref("s1", "¬ ¬ ψ → ψ", ref="notnotr", note="notnotr")
+    s2 = lb.ref("s2", "φ → ( ¬ ¬ ψ → ¬ χ )", s1, h1, ref="syl5", note="syl5")
+    res = lb.ref("res", "φ → ( χ → ¬ ψ )", s2, ref="con4d", note="con4d")
+    return lb.build(res)
 
-    s5 = lb.ref(
-        "s5",
-        "( φ → ( ¬ ¬ χ → ¬ ψ ) ) -> ( φ → ( χ → ψ ) )",
-        ref="con4d",
-        note="con4d",
-    )
-    res = lb.mp("res", s4, s5, "MP s4, s5")
+
+def prove_con3d(sys: System) -> Proof:
+    """
+    con3d: φ → ( ¬ χ → ¬ ψ ). Hyp: φ → ( ψ → χ ).
+    """
+    lb = ProofBuilder(sys, "con3d")
+    h1 = lb.hyp("con3d.1", "φ → ( ψ → χ )")
+
+    s1 = lb.ref("s1", "¬ ¬ ψ → ψ", ref="notnotr", note="notnotr")
+    s2 = lb.ref("s2", "φ → ( ¬ ¬ ψ → χ )", s1, h1, ref="syl5", note="syl5")
+    res = lb.ref("res", "φ → ( ¬ χ → ¬ ψ )", s2, ref="con1d", note="con1d")
     return lb.build(res)
 
 
@@ -1099,9 +1078,8 @@ def prove_con3(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con3")
-    s1 = lb.ref("s1", "φ → ψ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", ref="con3d", note="con3d")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "( φ → ψ ) -> ( φ → ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( φ → ψ ) -> ( ¬ ψ → ¬ φ ) )", s1, ref="con3d", note="con3d")
     return lb.build(res)
 
 
@@ -1163,9 +1141,8 @@ def prove_pm2_21(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "pm2.21")
-    s1 = lb.ref("s1", "¬ φ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "¬ φ → ( φ → ψ )", ref="pm2.21d", note="pm2.21d")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "¬ φ → ¬ φ", ref="id", note="id")
+    res = lb.ref("res", "¬ φ → ( φ → ψ )", s1, ref="pm2.21d", note="pm2.21d")
     return lb.build(res)
 
 
@@ -1177,17 +1154,8 @@ def prove_pm2_21d(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm2.21d")
     h1 = lb.hyp("pm2.21d.1", "φ → ¬ ψ")
-
-    s1 = lb.ref("s1", "( φ → ¬ ψ ) -> ( φ → ( χ → ¬ ψ ) )", ref="a1d", note="a1d")
-    s2 = lb.mp("s2", h1, s1, "MP pm2.21d.1, s1")
-
-    s3 = lb.ref(
-        "s3",
-        "( φ → ( χ → ¬ ψ ) ) -> ( φ → ( ψ → χ ) )",
-        ref="con4d",
-        note="con4d",
-    )
-    res = lb.mp("res", s2, s3, "MP s2, s3")
+    s1 = lb.ref("s1", "φ → ( ¬ χ → ¬ ψ )", h1, ref="a1d", note="a1d")
+    res = lb.ref("res", "φ → ( ψ → χ )", s1, ref="con4d", note="con4d")
     return lb.build(res)
 
 
@@ -1204,6 +1172,41 @@ def prove_pm2_24(sys: System) -> Proof:
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
     s2 = lb.ref("s2", "( ¬ φ → ( φ → ψ ) ) -> ( φ → ( ¬ φ → ψ ) )", ref="com12", note="com12")
     res = lb.mp("res", s1, s2, "MP s1, s2")
+    return lb.build(res)
+
+
+def prove_conax1(sys: System) -> Proof:
+    """
+    conax1: ¬ ( φ → ψ ) → ¬ ψ.
+    """
+    lb = ProofBuilder(sys, "conax1")
+    s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1")
+    s2 = lb.ref(
+        "s2",
+        "( ψ → ( φ → ψ ) ) -> ( ¬ ( φ → ψ ) -> ¬ ψ )",
+        ref="con3",
+        note="con3",
+    )
+    res = lb.mp("res", s1, s2, "MP s1, s2")
+    return lb.build(res)
+
+
+def prove_pm2_521g(sys: System) -> Proof:
+    """
+    pm2.521g: ¬ ( φ → ψ ) -> ( ψ → χ ).
+    """
+    lb = ProofBuilder(sys, "pm2.521g")
+    h1 = lb.ref("h1", "¬ ( φ → ψ ) -> ¬ ψ", ref="conax1", note="conax1")
+    res = lb.ref("res", "¬ ( φ → ψ ) -> ( ψ → χ )", h1, ref="pm2.21d", note="pm2.21d")
+    return lb.build(res)
+
+
+def prove_pm2_521(sys: System) -> Proof:
+    """
+    pm2.521: ¬ ( φ → ψ ) -> ( ψ → φ ).
+    """
+    lb = ProofBuilder(sys, "pm2.521")
+    res = lb.ref("res", "¬ ( φ → ψ ) -> ( ψ → φ )", ref="pm2.521g", note="pm2.521g")
     return lb.build(res)
 
 
@@ -1234,104 +1237,28 @@ def prove_pm2_18(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "pm2.18")
-    s1 = lb.ref("s1", "¬ φ → φ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "( ¬ φ → φ ) -> φ", ref="pm2.18d", note="pm2.18d")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    s1 = lb.ref("s1", "( ¬ φ → φ ) -> ( ¬ φ → φ )", ref="id", note="id")
+    res = lb.ref("res", "( ( ¬ φ → φ ) -> φ )", s1, ref="pm2.18d", note="pm2.18d")
     return lb.build(res)
 
 
 def prove_pm2_18d(sys: System) -> Proof:
     """
     pm2.18d: φ → ψ. Hyp: φ → ( ¬ ψ → ψ ).
-
-    Deduction form of pm2.18.
     """
     lb = ProofBuilder(sys, "pm2.18d")
     h1 = lb.hyp("pm2.18d.1", "φ → ( ¬ ψ → ψ )")
 
-    s1 = lb.ref("s1", "φ", ref="L1_id", note="id")
-    s2 = lb.ref("s2", "¬ ψ → ( ψ → φ )", ref="pm2.21", note="pm2.21")
-    s3 = lb.ref(
-        "s3",
-        "( ¬ ψ → ( ψ → φ ) ) -> ( φ → ( ¬ ψ → ( ψ → φ ) ) )",
-        ref="A1",
-        note="A1",
+    s1 = lb.ref("s1", "¬ ψ → ( ψ → ¬ ( ¬ ψ → ψ ) )", ref="pm2.21", note="pm2.21")
+    s2 = lb.ref(
+        "s2",
+        "φ → ( ¬ ψ → ¬ ( ¬ ψ → ψ ) )",
+        h1,
+        s1,
+        ref="sylcom",
+        note="sylcom",
     )
-    s4 = lb.mp("s4", s2, s3, "MP s2, s3")
-
-    s5 = lb.ref(
-        "s5",
-        "( φ → ( ¬ ψ → ( ψ → φ ) ) ) -> ( ( φ → ¬ ψ ) -> ( φ → ( ψ → φ ) ) )",
-        ref="A2",
-        note="A2",
-    )
-    s6 = lb.mp("s6", s4, s5, "MP s4, s5")
-
-    s7 = lb.ref(
-        "s7",
-        "( φ → ( ψ → φ ) ) -> ( ( φ → ψ ) -> ( φ → φ ) )",
-        ref="A2",
-        note="A2",
-    )
-    s8 = lb.ref(
-        "s8",
-        "( ( φ → ψ ) -> ( φ → φ ) ) -> ( φ → ( ( φ → ψ ) -> ( φ → φ ) ) )",
-        ref="A1",
-        note="A1",
-    )
-    s9 = lb.mp("s9", s7, s8, "MP s7, s8")
-    s10 = lb.mp("s10", s1, s9, "MP s1, s9")
-
-    s11 = lb.ref(
-        "s11",
-        "( φ → ( ( φ → ψ ) -> ( φ → φ ) ) ) -> ( ( φ → ( φ → ψ ) ) -> ( φ → ( φ → φ ) ) )",
-        ref="A2",
-        note="A2",
-    )
-    s12 = lb.mp("s12", s10, s11, "MP s10, s11")
-
-    s13 = lb.ref(
-        "s13",
-        "( φ → ( φ → ψ ) ) -> ( ( φ → φ ) -> ( φ → ψ ) )",
-        ref="A2",
-        note="A2",
-    )
-    s14 = lb.ref(
-        "s14",
-        "( ( φ → φ ) -> ( φ → ψ ) ) -> ( φ → ( ( φ → φ ) -> ( φ → ψ ) ) )",
-        ref="A1",
-        note="A1",
-    )
-    s15 = lb.mp("s15", s13, s14, "MP s13, s14")
-    s16 = lb.mp("s16", s1, s15, "MP s1, s15")
-
-    s17 = lb.ref(
-        "s17",
-        "( φ → ( ( φ → φ ) -> ( φ → ψ ) ) ) -> ( ( φ → ( φ → φ ) ) -> ( φ → ( φ → ψ ) ) )",
-        ref="A2",
-        note="A2",
-    )
-    s18 = lb.mp("s18", s16, s17, "MP s16, s17")
-
-    s19 = lb.ref(
-        "s19",
-        "( φ → ( φ → φ ) ) -> ( ( φ → φ ) -> ( φ → φ ) )",
-        ref="A2",
-        note="A2",
-    )
-    s20 = lb.ref(
-        "s20",
-        "( ( φ → φ ) -> ( φ → φ ) ) -> ( φ → ( ( φ → φ ) -> ( φ → φ ) ) )",
-        ref="A1",
-        note="A1",
-    )
-    s21 = lb.mp("s21", s19, s20, "MP s19, s20")
-    s22 = lb.mp("s22", s1, s21, "MP s1, s21")
-
-    s23 = lb.mp("s23", h1, s6, "MP pm2.18d.1, s6")
-    s24 = lb.mp("s24", s23, s12, "MP s23, s12")
-    s25 = lb.mp("s25", s24, s18, "MP s24, s18")
-    res = lb.mp("res", s25, s22, "MP s25, s22")
+    res = lb.ref("res", "φ → ψ", h1, s2, ref="mt4d", note="mt4d")
     return lb.build(res)
 
 
@@ -1546,15 +1473,8 @@ def prove_mt4d(sys: System) -> Proof:
     lb = ProofBuilder(sys, "mt4d")
     h1 = lb.hyp("mt4d.1", "φ → ψ")
     h2 = lb.hyp("mt4d.2", "φ → ( ¬ χ → ¬ ψ )")
-
-    s1 = lb.ref(
-        "s1",
-        "( φ → ψ ) -> ( ( φ → ( ¬ χ → ¬ ψ ) ) -> ( φ → χ ) )",
-        ref="mpd",
-        note="mpd",
-    )
-    s2 = lb.mp("s2", h2, s1, "MP mt4d.2, s1")
-    res = lb.mp("res", h1, s2, "MP mt4d.1, s2")
+    s1 = lb.ref("s1", "φ → ( ψ → χ )", h2, ref="con4d", note="con4d")
+    res = lb.ref("res", "φ → χ", h1, s1, ref="mpd", note="mpd")
     return lb.build(res)
 
 

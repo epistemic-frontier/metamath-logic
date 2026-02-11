@@ -6,21 +6,52 @@ build-backend = "setuptools.build_meta"
 name = "metamath-logic"
 version = "0.0.1"
 description = "Logic definitions for Metamath projects"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = "GPL-2.0-or-later"
 
+keywords = ["metamath", "proof", "proof-scaffold", "logic"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Build Tools",
+]
+
 authors = [
-  { name = "Mingli Yuan" }
+  { name = "Mingli Yuan", email = "mingli.yuan@gmail.com" }
+]
+
+maintainers = [
+  { name = "Mingli Yuan", email = "mingli.yuan@gmail.com" }
 ]
 
 dependencies = [
-    "proof-scaffold",
-    "metamath-prelude",
+    "proof-scaffold==0.0.4",
+    "metamath-prelude==0.0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/epistemic-frontier/metamath-logic"
+Repository = "https://github.com/epistemic-frontier/metamath-logic"
+Issues = "https://github.com/epistemic-frontier/metamath-logic/issues"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.8",
+    "pytest>=8",
+    "ruff>=0.6",
 ]
 
 [tool.uv.sources]
-proof-scaffold = { path = "../proof-scaffold", editable = true }
 metamath-prelude = { path = "../metamath-prelude", editable = true }
 
 [tool.setuptools.packages.find]
@@ -28,7 +59,8 @@ where = ["src"]
 
 [tool.mypy]
 python_version = "3.10"
-mypy_path = "src:../metamath-prelude/src:../proof-scaffold/src"
+mypy_path = "src"
+files = ["src"]
 strict = true
 disallow_untyped_decorators = false
 
@@ -43,3 +75,10 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = ["skfd.*", "prelude.*"]
 follow_imports = "skip"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

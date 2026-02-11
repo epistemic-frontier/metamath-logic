@@ -6,12 +6,12 @@ derived disjunction `Or`. Each `prove_*` function constructs a `Proof`
 value that records the statement and a debug-friendly sequence of steps.
 
 Families covered here include identity, disjunction introduction, contraposition,
-double negation, excluded middle and Peirce's law.
+double negation, and related classical equivalences.
 """
 
 from __future__ import annotations
 
-from skfd.authoring.formula import Wff, render
+from skfd.authoring.formula import render
 from skfd.proof import Proof, ProofBuilder, Step
 
 from . import System
@@ -58,34 +58,6 @@ def prove_jarli(sys: System) -> Proof:
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
     res = lb.ref("res", "¬ φ → χ", s1, h1, ref="syl", note="syl")
     return lb.build(res)
-
-
-def prove_L8_excluded_middle(sys: System) -> Proof:
-    """Law of excluded middle (LEM): Or(φ, ¬φ).
-
-    Formula: Or(φ, ¬φ)
-    Reading: Every proposition is either true or its negation is true.
-    Notes:
-    - Or(a, b) is defined as ¬a → b, so Or(φ, ¬φ) = (¬φ → ¬φ).
-    - This is an instance of identity (id) with φ := ¬φ.
-    """
-    lb = ProofBuilder(sys, "L8_excluded_middle")
-    stmt = lb.ref("s1", "¬ φ → ¬ φ", ref="id", note="id with φ := ¬φ")
-    return lb.build(stmt)
-
-
-def prove_L9_peirce(sys: System) -> Proof:
-    """Peirce's law: ((φ → ψ) -> φ) -> φ.
-
-    Formula: ((φ → ψ) -> φ) -> φ
-    Reading: If assuming (φ → ψ) lets us derive φ, then φ already holds.
-    Notes:
-    - Characteristic of classical logic; interderivable with excluded middle over
-      suitable axiom bases.
-    """
-    lb = ProofBuilder(sys, "L9_peirce")
-    stmt = lb.ref("s1", "( ( φ → ψ ) -> φ ) -> φ", ref="peirce", note="set.mm peirce")
-    return lb.build(stmt)
 
 
 def prove_simplim(sys: System) -> Proof:
@@ -158,68 +130,6 @@ def prove_peirce(sys: System) -> Proof:
     )
     res = lb.mp("res", s1, s4, "MP s1, s4")
     return lb.build(res)
-
-
-def prove_L10_linearity(sys: System) -> Proof:
-    """Linearity: (φ → ψ) ∨ (ψ → φ).
-
-    Formula: (φ → ψ) ∨ (ψ → φ)
-    Equivalent to: ¬(φ → ψ) -> (ψ → φ)
-    Reading: For any two propositions, one implies the other.
-    Notes:
-    - This is a property of classical logic (and linear logic), but not intuitionistic logic.
-    - Also known as Dummett's Law in intermediate logics.
-    """
-    lb = ProofBuilder(sys, "L10_linearity")
-
-    s1_1 = lb.ref("s1.1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
-
-    s1_2 = lb.ref(
-        "s1.2",
-        "( ¬ φ → ( φ → ψ ) ) -> ( ¬ ( φ → ψ ) -> ¬ ¬ φ )",
-        ref="con3",
-        note="con3 instance",
-    )
-
-    s1_3 = lb.mp("s1.3", s1_1, s1_2)
-
-    s1_4 = lb.ref("s1.4", "¬ ¬ φ → φ", ref="L7_double_neg_elim", note="L7_double_neg_elim")
-
-    s1_4_lift = lb.ref(
-        "s1.4_lift",
-        "( ¬ ¬ φ → φ ) -> ( ¬ ( φ → ψ ) -> ( ¬ ¬ φ → φ ) )",
-        ref="A1",
-        note="A1",
-    )
-    s1_5_pre = lb.mp("s1.5_pre", s1_4, s1_4_lift)
-    s1_5_dist = lb.ref(
-        "s1.5_dist",
-        "( ¬ ( φ → ψ ) -> ( ¬ ¬ φ → φ ) ) -> ( ( ¬ ( φ → ψ ) -> ¬ ¬ φ ) -> ( ¬ ( φ → ψ ) -> φ ) )",
-        ref="A2",
-        note="A2",
-    )
-    s1_5_impl = lb.mp("s1.5_impl", s1_5_pre, s1_5_dist)
-    s1_5 = lb.mp("s1.5", s1_3, s1_5_impl)
-
-    s2 = lb.ref("s2", "φ → ( ψ → φ )", ref="A1", note="A1")
-
-    s2_lift = lb.ref(
-        "s2_lift",
-        "( φ → ( ψ → φ ) ) -> ( ¬ ( φ → ψ ) -> ( φ → ( ψ → φ ) ) )",
-        ref="A1",
-        note="A1",
-    )
-    s3_pre = lb.mp("s3_pre", s2, s2_lift)
-    s3_dist = lb.ref(
-        "s3_dist",
-        "( ¬ ( φ → ψ ) -> ( φ → ( ψ → φ ) ) ) -> ( ( ¬ ( φ → ψ ) -> φ ) -> ( ¬ ( φ → ψ ) -> ( ψ → φ ) ) )",
-        ref="A2",
-        note="A2",
-    )
-    s3_impl = lb.mp("s3_impl", s3_pre, s3_dist)
-    s3 = lb.mp("s3", s1_5, s3_impl)
-
-    return lb.build(s3)
 
 
 def prove_modus_tollens(sys: System) -> Proof:
@@ -1395,11 +1305,6 @@ __all__ = [
     "Step",
     "Proof",
     "ProofBuilder",
-    "prove_L6_double_neg_intro",
-    "prove_L7_double_neg_elim",
-    "prove_L8_excluded_middle",
-    "prove_L9_peirce",
-    "prove_L10_linearity",
     "prove_modus_tollens",
     "prove_a1i",
     "prove_a2i",

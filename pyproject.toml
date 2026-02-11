@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metamath-logic"
-version = "0.0.1"
+version = "0.0.2"
 description = "Logic definitions for Metamath projects"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
@@ -35,8 +35,8 @@ maintainers = [
 ]
 
 dependencies = [
-    "proof-scaffold==0.0.4",
-    "metamath-prelude==0.0.1",
+    "proof-scaffold==0.0.5",
+    "metamath-prelude==0.0.2",
 ]
 
 [project.urls]

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, TypeAlias
+from typing import Any, TypeAlias, cast
 
 from prelude.formula import Builtins
 from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
@@ -72,7 +72,7 @@ class System:
             names=names,
             builtins=b,
             rule_app=rule_app,
-            rules=bundle.rules,
+            rules=cast(Mapping[str, RuleFn], bundle.rules),
             axioms=make_axioms(),
         )
 

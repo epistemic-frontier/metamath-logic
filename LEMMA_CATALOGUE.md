@@ -22,7 +22,7 @@
 | con3i | prove_con3i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1983 | ✔️ 实现 |
 | con4 | prove_con4 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1635 | ✔️ 实现 |
 | con4i | prove_con4i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1645 | ✔️ 实现 |
-| id | prove_L1_id | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L870 | ✔️ 实现 |
+| id | prove_id | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L870 | ✔️ 实现 |
 | idd | prove_idd | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L891 | ✔️ 实现 |
 | imim1 | prove_imim1 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1431 | ✔️ 实现 |
 | imim2 | prove_imim2 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1187 | ✔️ 实现 |

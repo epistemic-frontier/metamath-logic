@@ -5,7 +5,6 @@ from collections.abc import Callable, Mapping
 from . import System
 from .lemmas import (
     Proof,
-    prove_L1_id,
     prove_id,
     prove_notnot,
     prove_notnotr,
@@ -76,7 +75,6 @@ LemmaCtor = Callable[[System], Proof]
 
 SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "id": prove_id,
-    "L1_id": prove_L1_id,
     "notnot": prove_notnot,
     "notnotr": prove_notnotr,
     "a1i": prove_a1i,

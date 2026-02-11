@@ -2,11 +2,11 @@
 """Classic propositional lemmas for a Hilbert-style system.
 
 This module collects derived lemmas over implication, negation and the
-derived disjunction `Or`. Each `prove_L*` function constructs a `Proof`
+derived disjunction `Or`. Each `prove_*` function constructs a `Proof`
 value that records the statement and a debug-friendly sequence of steps.
 
-Families covered here include identity, disjunction introduction, De Morgan,
-contrapositive, double negation, excluded middle and Peirce's law.
+Families covered here include identity, disjunction introduction, contraposition,
+double negation, excluded middle and Peirce's law.
 """
 
 from __future__ import annotations
@@ -20,94 +20,6 @@ from . import System
 # -----------------------------------------------------------------------------
 # Lemma proofs
 # -----------------------------------------------------------------------------
-
-
-def prove_L1_id(sys: System) -> Proof:
-    """Identity law: φ → φ.
-
-    Formula: φ → φ
-    Reading: Every proposition implies itself.
-    Notes:
-    - The proof uses A1, A2 and modus ponens in a standard Hilbert derivation.
-    """
-    lb = ProofBuilder(sys, "L1_id")
-
-    s1 = lb.ref(
-        "s1",
-        "φ → ( φ → φ )",
-        ref="A1",
-        note="A1 with ( φ,  ψ) = (φ, φ)",
-    )
-
-    s2 = lb.ref(
-        "s2",
-        "( φ → ( ( φ → φ ) -> φ ) ) -> ( ( φ → ( φ → φ ) ) -> ( φ → φ ) )",
-        ref="A2",
-        note="A2 with ( φ,  ψ, χ) = (φ, (φ→φ), φ)",
-    )
-
-    s3 = lb.ref(
-        "s3",
-        "φ → ( ( φ → φ ) -> φ )",
-        ref="A1",
-        note="A1 with ( φ,  ψ) = (φ, (φ→φ))",
-    )
-
-    s4 = lb.mp("s4", s3, s2, "mp on s3 and s2")
-
-    s5 = lb.mp("s5", s1, s4, "mp on s1 and s4")
-
-    return lb.build(s5)
-
-
-def prove_L2_or_intro_right(sys: System) -> Proof:
-    """Right disjunction introduction: φ → Or(ψ, φ).
-
-    Formula: φ → Or(ψ, φ)
-    Reading: From φ we can conclude Or(ψ, φ).
-    Notes:
-    - Or(a, b) is defined as ¬a → b, so Or(ψ, φ) = (¬ψ → φ).
-    - The lemma is an instance of A1 with α := φ and β := ¬ψ.
-    """
-    lb = ProofBuilder(sys, "L2_or_intro_right")
-
-    s1 = lb.ref(
-        "s1",
-        "φ → ( ¬ ψ → φ )",
-        ref="A1",
-        note="A1 with (alpha, beta) = (φ, ¬ψ)",
-    )
-
-    return lb.build(s1)
-
-
-# -----------------------------------------------------------------------------
-# Additional lemmas (classical examples)
-# -----------------------------------------------------------------------------
-
-
-def prove_L4_demorgan(sys: System) -> Proof:
-    """De Morgan law (one direction): ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ).
-
-    Formula: ¬(φ ∧ ψ) -> Or(¬φ, ¬ψ)
-    Reading: If not both φ and ψ hold, then either ¬φ or ¬ψ holds.
-    Notes:
-    - With Or(a, b) := ¬a → b, the statement expands to ¬(φ ∧ ψ) -> (¬¬φ → ¬ψ).
-    """
-    lb = ProofBuilder(sys, "L4_demorgan")
-    stmt = lb.raw("s1", "¬ ( φ ∧ ψ ) -> ( ¬ ¬ φ → ¬ ψ )", note="De Morgan law")
-    return lb.build(stmt)
-
-
-def prove_L5_contrapositive(sys: System) -> Proof:
-    """Contrapositive: (φ → ψ) -> (¬ψ → ¬φ).
-
-    Formula: (φ → ψ) -> (¬ψ → ¬φ)
-    Reading: If φ implies ψ, then from ¬ψ we may infer ¬φ.
-    """
-    lb = ProofBuilder(sys, "L5_contrapositive")
-    stmt = lb.raw("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", note="Contrapositive")
-    return lb.build(stmt)
 
 
 def prove_notnot(sys: System) -> Proof:
@@ -155,10 +67,10 @@ def prove_L8_excluded_middle(sys: System) -> Proof:
     Reading: Every proposition is either true or its negation is true.
     Notes:
     - Or(a, b) is defined as ¬a → b, so Or(φ, ¬φ) = (¬φ → ¬φ).
-    - This is an instance of identity (L1_id) with φ := ¬φ.
+    - This is an instance of identity (id) with φ := ¬φ.
     """
     lb = ProofBuilder(sys, "L8_excluded_middle")
-    stmt = lb.ref("s1", "¬ φ → ¬ φ", ref="L1_id", note="L1_id with φ := ¬φ")
+    stmt = lb.ref("s1", "¬ φ → ¬ φ", ref="id", note="id with φ := ¬φ")
     return lb.build(stmt)
 
 
@@ -236,7 +148,7 @@ def prove_peirce(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "peirce")
     s1 = lb.ref("s1", "¬ ( φ → ψ ) -> φ", ref="simplim", note="simplim")
-    lb.ref("s2", "φ → φ", ref="L1_id", note="id")
+    lb.ref("s2", "φ → φ", ref="id", note="id")
     lb.ref("s3", "( ( φ → ψ ) -> φ ) -> φ", ref="ja", note="ja")
     s4 = lb.ref(
         "s4",
@@ -329,20 +241,6 @@ def prove_modus_tollens(sys: System) -> Proof:
     s3 = lb.mp("s3", h2, s2, "MP h2, s2")
 
     return lb.build(s3)
-
-
-def prove_L3_or_intro_left(sys: System) -> Proof:
-    """Left disjunction introduction: φ → Or(φ, ψ).
-
-    Formula: φ → Or(φ, ψ)
-    Expanded: φ → (¬φ → ψ)
-    Notes:
-    - Or(a, b) is defined as ¬a → b.
-    - This matches set.mm theorem `pm2.24`.
-    """
-    lb = ProofBuilder(sys, "L3_or_intro_left")
-    s1 = lb.ref("s1", "φ → ( ¬ φ → ψ )", ref="pm2.24", note="pm2.24")
-    return lb.build(s1)
 
 
 # -----------------------------------------------------------------------------
@@ -1497,16 +1395,11 @@ __all__ = [
     "Step",
     "Proof",
     "ProofBuilder",
-    "prove_L1_id",
-    "prove_L2_or_intro_right",
-    "prove_L4_demorgan",
-    "prove_L5_contrapositive",
     "prove_L6_double_neg_intro",
     "prove_L7_double_neg_elim",
     "prove_L8_excluded_middle",
     "prove_L9_peirce",
     "prove_L10_linearity",
-    "prove_L3_or_intro_left",
     "prove_modus_tollens",
     "prove_a1i",
     "prove_a2i",

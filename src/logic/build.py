@@ -8,8 +8,7 @@ from logic.propositional.hilbert import System
 from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.lemmas import (
     Proof,
-    prove_L1_id,
-    prove_L2_or_intro_right,
+    prove_id,
 )
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
@@ -49,8 +48,7 @@ def build(ctx: BuildContextV2) -> None:
     _emit_rule_skeleton(mm, system, provable=provable)
 
     base_lemmas = [
-        prove_L1_id(system),
-        prove_L2_or_intro_right(system),
+        prove_id(system),
     ]
 
     compiled_axioms = system.compile_axioms()

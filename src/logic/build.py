@@ -54,7 +54,7 @@ def build(ctx: BuildContextV2) -> None:
     ]
 
     compiled_axioms = system.compile_axioms()
-    reserved = {"wi", "wn", "wa", "mp"}
+    reserved = {"wi", "wn"}
 
     def _refs(p: Proof) -> set[str]:
         refs: set[str] = set()
@@ -101,7 +101,6 @@ def build(ctx: BuildContextV2) -> None:
         label_ids={
             "wi": prelude["wi"],
             "wn": prelude["wn"],
-            "wa": prelude["wa"],
             "mp": ax_mp,
             "A1": ax_1,
             "A2": ax_2,

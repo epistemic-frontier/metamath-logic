@@ -10,13 +10,6 @@ from logic.propositional.hilbert.lemmas import (
     Proof,
     prove_L1_id,
     prove_L2_or_intro_right,
-    prove_L3_or_intro_left,
-    prove_L4_demorgan,
-    prove_L5_contrapositive,
-    prove_L6_double_neg_intro,
-    prove_L7_double_neg_elim,
-    prove_L8_excluded_middle,
-    prove_L9_peirce,
 )
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 

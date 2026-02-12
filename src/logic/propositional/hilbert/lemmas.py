@@ -257,11 +257,11 @@ def prove_syl(sys: System) -> Proof:
 
 def prove_sylcom(sys: System) -> Proof:
     """
-    sylcom: φ → (ψ → th).
+    sylcom: φ → (ψ → θ).
 
     Hyp 1: φ → (ψ → χ)
-    Hyp 2: ψ → (χ → th)
-    Concl: φ → (ψ → th)
+    Hyp 2: ψ → (χ → θ)
+    Concl: φ → (ψ → θ)
 
     Syllogism inference with commutation of antecedents.  (Contributed by
            NM, 29-Aug-2004.)  (Proof shortened by Mel L. O'Cat, 2-Feb-2006.)
@@ -277,9 +277,9 @@ def prove_sylcom(sys: System) -> Proof:
         "s1",
         "( ψ → ( χ → θ ) ) -> ( ( ψ → χ ) -> ( ψ → θ ) )",
         ref="A2",
-        note="A2(ψ,χ,th)",
+        note="A2(ψ,χ,θ)",
     )
-    s2 = lb.mp("s2", hyp2_wff, s1, "(ψ→χ)→(ψ→th)")
+    s2 = lb.mp("s2", hyp2_wff, s1, "(ψ→χ)→(ψ→θ)")
 
     s3 = lb.ref(
         "s3",
@@ -295,7 +295,7 @@ def prove_sylcom(sys: System) -> Proof:
         ref="A2",
         note="A2 special",
     )
-    s6 = lb.mp("s6", s4, s5, "(φ→(ψ→χ))→(φ→(ψ→th))")
+    s6 = lb.mp("s6", s4, s5, "(φ→(ψ→χ))→(φ→(ψ→θ))")
 
     s7 = lb.mp("s7", hyp1_wff, s6, "φ→(ψ→θ)")
 
@@ -352,7 +352,7 @@ def prove_com12(sys: System) -> Proof:
 
 def prove_syl5(sys: System) -> Proof:
     """
-    syl5: χ → (φ → th).
+    syl5: χ → (φ → θ).
 
     A syllogism rule of inference.  The first premise is used to replace the
            second antecedent of the second premise.  (Contributed by NM,
@@ -414,11 +414,11 @@ def prove_syl5(sys: System) -> Proof:
 
 def prove_syl6(sys: System) -> Proof:
     """
-    syl6: φ → (ψ → th).
+    syl6: φ → (ψ → θ).
 
     Hyp 1: φ → (ψ → χ)
-    Hyp 2: χ → th
-    Concl: φ → (ψ → th)
+    Hyp 2: χ → θ
+    Concl: φ → (ψ → θ)
 
     A syllogism rule of inference.  The second premise is used to replace
            the consequent of the first premise.  (Contributed by NM, 5-Jan-1993.)
@@ -529,7 +529,7 @@ def prove_idd(sys: System) -> Proof:
 
 def prove_a1i13(sys: System) -> Proof:
     """
-    a1i13: φ → (ψ → (χ → th)). Hyp: ψ → th.
+    a1i13: φ → (ψ → (χ → θ)). Hyp: ψ → θ.
 
     Add two antecedents to a wff.  (Contributed by Jeff Hankins,
            4-Aug-2009.)
@@ -543,7 +543,7 @@ def prove_a1i13(sys: System) -> Proof:
 
 def prove_2a1d(sys: System) -> Proof:
     """
-    2a1d: φ → (χ → (th → ψ)). Hyp: φ → ψ.
+    2a1d: φ → (χ → (θ → ψ)). Hyp: φ → ψ.
 
     Deduction introducing two antecedents.  Two applications of ~ a1d .
            Deduction associated with ~ 2a1 and ~ 2a1i .  (Contributed by BJ,
@@ -572,7 +572,7 @@ def prove_2a1(sys: System) -> Proof:
 
 def prove_a2d(sys: System) -> Proof:
     """
-    a2d: φ → ((ψ → χ) -> (ψ → th)). Hyp: φ → (ψ → (χ → th)).
+    a2d: φ → ((ψ → χ) -> (ψ → θ)). Hyp: φ → (ψ → (χ → θ)).
 
     Deduction distributing an embedded antecedent.  Deduction form of
            ~ ax-2 .  (Contributed by NM, 23-Jun-1994.)
@@ -607,7 +607,7 @@ def prove_a2d(sys: System) -> Proof:
 
 def prove_syl5com(sys: System) -> Proof:
     """
-    syl5com: φ → (χ → th). Hyp1: φ → ψ, Hyp2: χ → (ψ → th).
+    syl5com: φ → (χ → θ). Hyp1: φ → ψ, Hyp2: χ → (ψ → θ).
 
     Syllogism inference with commuted antecedents.  (Contributed by NM,
            24-May-2005.)
@@ -637,7 +637,7 @@ def prove_syl5com(sys: System) -> Proof:
 
 def prove_syl11(sys: System) -> Proof:
     """
-    syl11: ψ → (th → χ). Hyp1: φ → (ψ → χ), Hyp2: th → φ.
+    syl11: ψ → (θ → χ). Hyp1: φ → (ψ → χ), Hyp2: θ → φ.
 
     A syllogism inference.  Commuted form of an instance of ~ syl .
            (Contributed by BJ, 25-Oct-2021.)
@@ -652,7 +652,7 @@ def prove_syl11(sys: System) -> Proof:
 
 def prove_syl56(sys: System) -> Proof:
     """
-    syl56: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → (ψ → th), Hyp3: θ → ta.
+    syl56: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → (ψ → θ), Hyp3: θ → ta.
 
     Combine ~ syl5 and ~ syl6 .  (Contributed by NM, 14-Nov-2013.)
 
@@ -667,7 +667,7 @@ def prove_syl56(sys: System) -> Proof:
 
 def prove_syl6com(sys: System) -> Proof:
     """
-    syl6com: ψ → (φ → th). Hyp1: φ → (ψ → χ), Hyp2: χ → th.
+    syl6com: ψ → (φ → θ). Hyp1: φ → (ψ → χ), Hyp2: χ → θ.
 
     Syllogism inference with commuted antecedents.  (Contributed by NM,
            25-May-2005.)
@@ -697,7 +697,7 @@ def prove_mpcom(sys: System) -> Proof:
 
 def prove_syli(sys: System) -> Proof:
     """
-    syli: ψ → (φ → th). Hyp1: ψ → (φ → χ), Hyp2: χ → (φ → th).
+    syli: ψ → (φ → θ). Hyp1: ψ → (φ → χ), Hyp2: χ → (φ → θ).
 
     Syllogism inference with common nested antecedent.  (Contributed by NM,
            4-Nov-2004.)
@@ -712,7 +712,7 @@ def prove_syli(sys: System) -> Proof:
 
 def prove_syl2im(sys: System) -> Proof:
     """
-    syl2im: φ → (χ → ta). Hyp1: φ → ψ, Hyp2: χ → th, Hyp3: ψ → (th → ta).
+    syl2im: φ → (χ → τ). Hyp1: φ → ψ, Hyp2: χ → θ, Hyp3: ψ → (θ → τ).
 
     Replace two antecedents.  Implication-only version of ~ syl2an .
            (Contributed by Wolf Lammen, 14-May-2013.)
@@ -728,7 +728,7 @@ def prove_syl2im(sys: System) -> Proof:
 
 def prove_syl2imc(sys: System) -> Proof:
     """
-    syl2imc: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → th, Hyp3: ψ → (th → ta).
+    syl2imc: χ → (φ → ta). Hyp1: φ → ψ, Hyp2: χ → θ, Hyp3: ψ → (θ → τ).
 
     A commuted version of ~ syl2im .  Implication-only version of
            ~ syl2anr .  (Contributed by BJ, 20-Oct-2021.)
@@ -758,7 +758,7 @@ def prove_pm2_27(sys: System) -> Proof:
 
 def prove_mpdd(sys: System) -> Proof:
     """
-    mpdd: φ → (ψ → th). Hyp1: φ → (ψ → χ), Hyp2: φ → (ψ → (χ → th)).
+    mpdd: φ → (ψ → θ). Hyp1: φ → (ψ → χ), Hyp2: φ → (ψ → (χ → θ)).
 
     A nested modus ponens deduction.  Double deduction associated with
            ~ ax-mp .  Deduction associated with ~ mpd .  (Contributed by NM,
@@ -774,7 +774,7 @@ def prove_mpdd(sys: System) -> Proof:
 
 def prove_mpid(sys: System) -> Proof:
     """
-    mpid: φ → (ψ → th). Hyp1: φ → χ, Hyp2: φ → (ψ → (χ → th)).
+    mpid: φ → (ψ → θ). Hyp1: φ → χ, Hyp2: φ → (ψ → (χ → θ)).
 
     A nested modus ponens deduction.  Deduction associated with ~ mpi .
            (Contributed by NM, 14-Dec-2004.)
@@ -1035,7 +1035,7 @@ def prove_pm2_43(sys: System) -> Proof:
 
 def prove_pm2_18(sys: System) -> Proof:
     """
-    pm2.18: ( ¬ φ → φ ) -> φ.
+    pm2.18: ( ¬ φ → φ ) → φ.
 
     Clavius law, or "consequentia mirabilis" ("admirable consequence").  If a
          formula is implied by its negation, then it is true.  Can be used in

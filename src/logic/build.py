@@ -9,6 +9,10 @@ from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.lemmas import (
     Proof,
     prove_id,
+    prove_pm2_53,
+    prove_pm2_54,
+    prove_pm2_45,
+    prove_pm2_46,
 )
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
@@ -49,6 +53,10 @@ def build(ctx: BuildContextV2) -> None:
 
     base_lemmas = [
         prove_id(system),
+        prove_pm2_53(system),
+        prove_pm2_54(system),
+        prove_pm2_45(system),
+        prove_pm2_46(system),
     ]
 
     compiled_axioms = system.compile_axioms()
@@ -108,6 +116,8 @@ def build(ctx: BuildContextV2) -> None:
             prelude["ph"]: prelude["wph"],
             prelude["ps"]: prelude["wps"],
             prelude["ch"]: prelude["wch"],
+            prelude["th"]: prelude["wth"],
+            prelude["ta"]: prelude["wta"],
         },
     )
 

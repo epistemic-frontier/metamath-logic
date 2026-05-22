@@ -151,3 +151,8 @@ __all__ = [
     "SETMM_TO_HILBERT_RULES",
     "SETMM_TO_HILBERT",
 ]
+
+# Knowledge module re-exports
+from .implication import *
+from .negation import *
+from .disjunction import *

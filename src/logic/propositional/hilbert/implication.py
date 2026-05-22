@@ -411,7 +411,7 @@ def prove_a1i13(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "a1i13")
-    lb.hyp("hyp", "ψ → θ")
+    lb.hyp("prove_a1i13.h", "ψ → θ")
     stmt = lb.raw("res", "φ → ( ψ → ( χ → θ ) )", note="Imported")
     return lb.build(stmt)
 
@@ -425,7 +425,7 @@ def prove_2a1d(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "2a1d")
-    lb.hyp("hyp", "φ → ψ")
+    lb.hyp("prove_2a1d.h", "φ → ψ")
     stmt = lb.raw("res", "φ → ( χ → ( θ → ψ ) )", note="Imported")
     return lb.build(stmt)
 
@@ -451,7 +451,7 @@ def prove_a2d(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "a2d")
-    h1 = lb.hyp("hyp", "φ → ( ψ → ( χ → θ ) )")
+    h1 = lb.hyp("prove_a2d.h", "φ → ( ψ → ( χ → θ ) )")
 
     s1 = lb.ref(
         "s1",

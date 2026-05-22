@@ -343,7 +343,7 @@ def prove_con1i(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con1i")
-    hyp = lb.hyp("hyp", "¬ φ → ψ")
+    hyp = lb.hyp("prove_con1i.h", "¬ φ → ψ")
     s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", ref="con1", note="con1")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
@@ -358,7 +358,7 @@ def prove_con2i(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con2i")
-    hyp = lb.hyp("hyp", "φ → ¬ ψ")
+    hyp = lb.hyp("prove_con2i.h", "φ → ¬ ψ")
     s1 = lb.ref("s1", "( φ → ¬ ψ ) -> ( ψ → ¬ φ )", ref="con2", note="con2")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
@@ -373,7 +373,7 @@ def prove_con3i(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con3i")
-    hyp = lb.hyp("hyp", "φ → ψ")
+    hyp = lb.hyp("prove_con3i.h", "φ → ψ")
     s1 = lb.ref("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
@@ -390,7 +390,7 @@ def prove_con4i(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con4i")
-    hyp = lb.hyp("hyp", "¬ φ → ¬ ψ")
+    hyp = lb.hyp("prove_con4i.h", "¬ φ → ¬ ψ")
     s1 = lb.ref("s1", "( ¬ φ → ¬ ψ ) -> ( ψ → φ )", ref="con4", note="con4")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)

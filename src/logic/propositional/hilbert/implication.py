@@ -5,8 +5,7 @@ Operators: → and ¬ (∨ derived: φ∨ψ = ¬φ→ψ).
 """
 
 from __future__ import annotations
-from typing import Any
-from skfd.proof import Proof, ProofBuilder, Step
+from skfd.proof import Proof, ProofBuilder
 from . import System
 
 

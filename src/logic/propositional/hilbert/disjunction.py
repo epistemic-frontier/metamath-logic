@@ -5,8 +5,7 @@ Includes Peirce's law, jarli/ja, basic properties.
 """
 
 from __future__ import annotations
-from typing import Any
-from skfd.proof import Proof, ProofBuilder, Step
+from skfd.proof import Proof, ProofBuilder
 from . import System
 
 

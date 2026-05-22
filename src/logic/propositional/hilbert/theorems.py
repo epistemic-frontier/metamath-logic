@@ -142,9 +142,6 @@ SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "pm1.4": prove_pm1_4,
     "pm2.36": prove_pm2_36,
     "pm2.38": prove_pm2_38,
-    "pm1.4": prove_pm1_4,
-    "pm2.36": prove_pm2_36,
-    "pm2.38": prove_pm2_38,
 }
 
 

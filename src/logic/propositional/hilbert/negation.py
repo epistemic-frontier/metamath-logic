@@ -5,8 +5,7 @@ contradiction and reduction.
 """
 
 from __future__ import annotations
-from typing import Any
-from skfd.proof import Proof, ProofBuilder, Step
+from skfd.proof import Proof, ProofBuilder
 from . import System
 
 
@@ -413,16 +412,6 @@ def prove_mt4d(sys: System) -> Proof:
 # -----------------------------------------------------------------------------
 # Optional: debug printer
 # -----------------------------------------------------------------------------
-
-
-def debug_dump(proof: Proof, *, sys: System) -> str:
-    """Render a lemma proof using the symbol table for debugging."""
-    symtab = sys.interner.symbol_table()
-    lines = [f"== {proof.name} =="]
-    lines.append("statement: " + render(proof.statement.tokens, symtab=symtab))
-    for st in proof.steps:
-        lines.append(f"{st.label}: {render(st.wff.tokens, symtab=symtab)}    # {st.note}")
-    return "\n".join(lines)
 
 
 # =============================================================================

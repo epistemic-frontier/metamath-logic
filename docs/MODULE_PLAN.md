@@ -70,16 +70,36 @@ theorems.py                ← label → function 映射表
 | disjunction (bulk) | 12415–14552 | P1 |
 | alt_axioms | scattered | P2 |
 
-### Phase 4: FOL / Predicate Calculus
+### Phase 4: FOL / Predicate Calculus (set.mm 14553–24571)
 
-| Module | set.mm | Priority |
-|---|---|---|
-| syntax | 14553– | P1 |
-| quantifiers | — | P1 |
-| not_free | — | P2 |
-| equality | — | P1 |
-| membership | — | P2 |
-| core_schemes | — | P1 |
+Tarski's system S2: propositional axioms + ax-gen, ax-4 through ax-9.
+Metalogical completeness added via ax-10 through ax-13.
+
+| Module | set.mm | Content | Priority |
+|---|---|---|---|
+| fol/syntax | 14553–14680 | setvar pool (x,y,z,w,v,u,t), $d statements, wal syntax, weq/wel formation | P1 |
+| fol/quantifiers | 14680– | ax-gen, ax-4/5/6, df-ex, 19.* theorems, universal/existential manipulation | P1 |
+| fol/equality | — | ax-7/8/9, equality substitution, equequivalence rules | P1 |
+| fol/not_free | — | df-nf, nf-* theorems, free-variable reasoning | P2 |
+| fol/membership | — | ∈ as predicate, wel formation, elementary membership logic | P2 |
+| fol/core_schemes | — | ax-10/11/12/13, scheme completeness theorems | P1 |
+| fol/distinctors | — | $d manipulation, distinct variable conditions | P2 |
+
+#### FOL Axiom Index
+
+| Axiom | Name | set.mm | Module |
+|---|---|---|---|
+| ax-gen | Generalization | L14824 | quantifiers |
+| ax-4 | Universal quantifier distribution | — | quantifiers |
+| ax-5 | Quantified implication | — | quantifiers |
+| ax-6 | Quantified negation | — | quantifiers |
+| ax-7 | Equality reflexivity | — | equality |
+| ax-8 | Equality substitution (left) | — | equality |
+| ax-9 | Equality substitution (right) | — | equality |
+| ax-10 | Quantifier swap | — | core_schemes |
+| ax-11 | Quantifier commutation | — | core_schemes |
+| ax-12 | Substitution | — | core_schemes |
+| ax-13 | Quantified equality | — | core_schemes |
 
 ## Current Task: propcalc-migration
 

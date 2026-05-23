@@ -235,104 +235,7 @@ def prove_pm2_521(sys: System) -> Proof:
     res = lb.ref("res", "¬ ( φ → ψ ) -> ( ψ → φ )", ref="pm2.521g", note="pm2.521g")
     return lb.build(res)
 
-def prove_mt2(sys: System) -> Proof:
-    """
-    mt2: ¬ φ. Hyp1: ψ, Hyp2: φ → ¬ ψ.
-
-    A rule similar to modus tollens.  Inference associated with ~ con2i .
-           (Contributed by NM, 19-Aug-1993.)  (Proof shortened by Wolf Lammen,
-           10-Sep-2013.)
-
-    """
-    lb = ProofBuilder(sys, "mt2")
-    lb.hyp("hyp1", "ψ")
-    lb.hyp("hyp2", "φ → ¬ ψ")
-    stmt = lb.raw("res", "¬ φ", note="Imported")
-    return lb.build(stmt)
-
-def prove_mt3(sys: System) -> Proof:
-    """
-    mt3: φ. Hyp1: ¬ ψ, Hyp2: ¬ φ → ψ.
-
-    A rule similar to modus tollens.  Inference associated with ~ con1i .
-           (Contributed by NM, 18-May-1994.)  (Proof shortened by Wolf Lammen,
-           11-Sep-2013.)
-
-    """
-    lb = ProofBuilder(sys, "mt3")
-    lb.hyp("hyp1", "¬ ψ")
-    lb.hyp("hyp2", "¬ φ → ψ")
-    stmt = lb.raw("res", "φ", note="Imported")
-    return lb.build(stmt)
-
-def prove_nsyl(sys: System) -> Proof:
-    """
-    nsyl: φ → ¬ χ. Hyp1: φ → ¬ ψ, Hyp2: χ → ψ.
-
-    A negated syllogism inference.  (Contributed by NM, 31-Dec-1993.)
-           (Proof shortened by Wolf Lammen, 2-Mar-2013.)
-
-    """
-    lb = ProofBuilder(sys, "nsyl")
-    lb.hyp("hyp1", "φ → ¬ ψ")
-    lb.hyp("hyp2", "χ → ψ")
-    stmt = lb.raw("res", "φ → ¬ χ", note="Imported")
-    return lb.build(stmt)
-
-def prove_nsyl2(sys: System) -> Proof:
-    """
-    nsyl2: φ → χ. Hyp1: φ → ¬ ψ, Hyp2: ¬ χ → ψ.
-
-    A negated syllogism inference.  (Contributed by NM, 26-Jun-1994.)
-           (Proof shortened by Wolf Lammen, 14-Nov-2023.)
-
-    """
-    lb = ProofBuilder(sys, "nsyl2")
-    lb.hyp("hyp1", "φ → ¬ ψ")
-    lb.hyp("hyp2", "¬ χ → ψ")
-    stmt = lb.raw("res", "φ → χ", note="Imported")
-    return lb.build(stmt)
-
-def prove_nsyl3(sys: System) -> Proof:
-    """
-    nsyl3: χ → ¬ φ. Hyp1: φ → ¬ ψ, Hyp2: χ → ψ.
-
-    A negated syllogism inference.  (Contributed by NM, 1-Dec-1995.)
-
-    """
-    lb = ProofBuilder(sys, "nsyl3")
-    lb.hyp("hyp1", "φ → ¬ ψ")
-    lb.hyp("hyp2", "χ → ψ")
-    stmt = lb.raw("res", "χ → ¬ φ", note="Imported")
-    return lb.build(stmt)
-
-def prove_pm2_61(sys: System) -> Proof:
-    """
-    pm2.61: ( φ → ψ ) -> ( ( ¬ φ → ψ ) -> ψ ).
-
-    Theorem *2.61 of [WhiteheadRussell] p. 107.  Useful for eliminating an
-         antecedent.  (Contributed by NM, 4-Jan-1993.)  (Proof shortened by Wolf
-         Lammen, 22-Sep-2013.)
-
-    """
-    lb = ProofBuilder(sys, "pm2.61")
-    stmt = lb.raw("res", "( φ → ψ ) -> ( ( ¬ φ → ψ ) -> ψ )", note="Imported")
-    return lb.build(stmt)
-
-def prove_pm2_65(sys: System) -> Proof:
-    """
-    pm2.65: ( φ → ψ ) -> ( ( φ → ¬ ψ ) -> ¬ φ ).
-
-    Theorem *2.65 of [WhiteheadRussell] p. 107.  Proof by contradiction.
-         (Contributed by NM, 21-Jun-1993.)  (Proof shortened by Wolf Lammen,
-         8-Mar-2013.)
-
-    """
-    lb = ProofBuilder(sys, "pm2.65")
-    stmt = lb.raw("res", "( φ → ψ ) -> ( ( φ → ¬ ψ ) -> ¬ φ )", note="Imported")
-    return lb.build(stmt)
-
-def prove_con1i(sys: System) -> Proof:
+def rove_con1i(sys: System) -> Proof:
     """
     con1i: ¬ ψ → φ. Hyp: ¬ φ → ψ.
 
@@ -417,4 +320,282 @@ def prove_mt4d(sys: System) -> Proof:
 # =============================================================================
 # gen0_pod0: pm1.4, pm2.38, pm2.36
 # =============================================================================
+
+
+
+def prove_pm2_45(sys: System) -> Proof:
+    """pm2.45: ¬(φ ∨ ψ) → ¬φ.
+
+    Theorem *2.45 of [WhiteheadRussell] p. 106.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: pm2.24(ph,ps) = ph→(¬ph→ps) = orc.
+    con3i applied to pm2.24 gives ¬(¬ph→ps)→¬ph.
+    """
+    lb = ProofBuilder(sys, "pm2.45")
+    s1 = lb.ref("s1", "( ph -> ( -. ph -> ps ) )",
+                ref="pm2.24", note="pm2.24 (orc)")
+    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ph )",
+                 s1, ref="con3i", note="con3i(pm2.24)")
+    return lb.build(res)
+
+
+
+
+def prove_pm2_46(sys: System) -> Proof:
+    """pm2.46: ¬(φ ∨ ψ) → ¬ψ.
+
+    Theorem *2.46 of [WhiteheadRussell] p. 106.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: pm2.24(ps,ph) = ps→(¬ps→ph) = olc.
+    con3i applied gives ¬(¬ph→ps)→¬ps.
+    """
+    lb = ProofBuilder(sys, "pm2.46")
+    s1 = lb.ref("s1", "( ps -> ( -. ps -> ph ) )",
+                ref="pm2.24", note="pm2.24 (olc)")
+    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ps )",
+                 s1, ref="con3i", note="con3i(pm2.24)")
+    return lb.build(res)
+
+# ============================================================
+# pm2.47, pm2.48, pm2.49 (negated disjunction with one branch)
+# ============================================================
+
+
+
+def prove_pm2_47(sys: System) -> Proof:
+    """pm2.47: ¬(φ ∨ ψ) → (¬φ ∨ ψ).
+
+    Theorem *2.47 of [WhiteheadRussell] p. 106.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: ¬(¬ph→ps)→(¬¬ph→ps).
+    pm2.45 gives ¬(¬ph→ps)→¬ph.
+    A1(¬ph,ps): ¬ph→(¬¬ph→ps).
+    syl: ¬(¬ph→ps)→(¬¬ph→ps).
+    """
+    lb = ProofBuilder(sys, "pm2.47")
+    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ph )",
+                ref="pm2.45", note="pm2.45")
+    s2 = lb.ref("s2", "( -. ph -> ( -. -. ph -> ps ) )",
+                ref="A1", note="A1 (-.ph,ps)")
+    res = lb.ref("res",
+        "( -. ( -. ph -> ps ) -> ( -. -. ph -> ps ) )",
+        s1, s2, ref="syl", note="syl(pm2.45, A1)")
+    return lb.build(res)
+
+
+
+
+def prove_pm2_48(sys: System) -> Proof:
+    """pm2.48: ¬(φ ∨ ψ) → (φ ∨ ¬ψ).
+
+    Theorem *2.48 of [WhiteheadRussell] p. 106.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: ¬(¬ph→ps)→(¬ph→¬ps).
+    pm2.46 gives ¬(¬ph→ps)→¬ps.
+    A1(¬ps,¬ph): ¬ps→(¬ph→¬ps).
+    syl: ¬(¬ph→ps)→(¬ph→¬ps).
+    """
+    lb = ProofBuilder(sys, "pm2.48")
+    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ps )",
+                ref="pm2.46", note="pm2.46")
+    s2 = lb.ref("s2", "( -. ps -> ( -. ph -> -. ps ) )",
+                ref="A1", note="A1 (-.ps,-.ph)")
+    res = lb.ref("res",
+        "( -. ( -. ph -> ps ) -> ( -. ph -> -. ps ) )",
+        s1, s2, ref="syl", note="syl(pm2.46, A1)")
+    return lb.build(res)
+
+
+
+
+def prove_pm2_49(sys: System) -> Proof:
+    """pm2.49: ¬(φ ∨ ψ) → (¬φ ∨ ¬ψ).
+
+    Theorem *2.49 of [WhiteheadRussell] p. 106.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: ¬(¬ph→ps)→(¬¬ph→¬ps).
+    Same as pm2.48 with A1(¬ps,¬¬ph).
+    """
+    lb = ProofBuilder(sys, "pm2.49")
+    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ps )",
+                ref="pm2.46", note="pm2.46")
+    s2 = lb.ref("s2", "( -. ps -> ( -. -. ph -> -. ps ) )",
+                ref="A1", note="A1 (-.ps,-.-.ph)")
+    res = lb.ref("res",
+        "( -. ( -. ph -> ps ) -> ( -. -. ph -> -. ps ) )",
+        s1, s2, ref="syl", note="syl(pm2.46, A1)")
+    return lb.build(res)
+
+# ============================================================
+# pm2.51, pm2.52 (negation of implication)
+# ============================================================
+
+
+
+def prove_pm2_51(sys: System) -> Proof:
+    """pm2.51: ¬(φ → ψ) → (φ → ¬ψ).
+
+    Theorem *2.51 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    conax1(ph,ps): ¬(ph→ps)→¬ps.
+    A1(¬ps,ph): ¬ps→(ph→¬ps).
+    syl: ¬(ph→ps)→(ph→¬ps).
+    """
+    lb = ProofBuilder(sys, "pm2.51")
+    s1 = lb.ref("s1", "( -. ( ph -> ps ) -> -. ps )",
+                ref="conax1", note="conax1")
+    s2 = lb.ref("s2", "( -. ps -> ( ph -> -. ps ) )",
+                ref="A1", note="A1")
+    res = lb.ref("res", "( -. ( ph -> ps ) -> ( ph -> -. ps ) )",
+                 s1, s2, ref="syl", note="syl(conax1, A1)")
+    return lb.build(res)
+
+
+
+
+def prove_pm2_52(sys: System) -> Proof:
+    """pm2.52: ¬(φ → ψ) → (¬φ → ¬ψ).
+
+    Theorem *2.52 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    (Proof shortened by Wolf Lammen, 8-Oct-2012.)
+    conax1(ph,ps): ¬(ph→ps)→¬ps.
+    A1(¬ps,¬ph): ¬ps→(¬ph→¬ps).
+    syl: ¬(ph→ps)→(¬ph→¬ps).
+    """
+    lb = ProofBuilder(sys, "pm2.52")
+    s1 = lb.ref("s1", "( -. ( ph -> ps ) -> -. ps )",
+                ref="conax1", note="conax1")
+    s2 = lb.ref("s2", "( -. ps -> ( -. ph -> -. ps ) )",
+                ref="A1", note="A1")
+    res = lb.ref("res", "( -. ( ph -> ps ) -> ( -. ph -> -. ps ) )",
+                 s1, s2, ref="syl", note="syl(conax1, A1)")
+    return lb.build(res)
+
+# ============================================================
+# pm2.37 (implication through disjunction)
+# ============================================================
+
+
+
+def prove_pm2_53(sys: System) -> Proof:
+    """pm2.53: (φ ∨ ψ) → (¬φ → ψ).
+
+    Theorem *2.53 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: trivially id.
+    """
+    lb = ProofBuilder(sys, "pm2.53")
+    res = lb.ref("res", "( -. ph -> ps ) -> ( -. ph -> ps )",
+                 ref="id", note="id (trivial under df-or)")
+    return lb.build(res)
+
+
+
+
+def prove_pm2_54(sys: System) -> Proof:
+    """pm2.54: (¬φ → ψ) → (φ ∨ ψ).
+
+    Theorem *2.54 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    Under df-or: trivially id.
+    """
+    lb = ProofBuilder(sys, "pm2.54")
+    res = lb.ref("res", "( -. ph -> ps ) -> ( -. ph -> ps )",
+                 ref="id", note="id (trivial under df-or)")
+    return lb.build(res)
+
+# ============================================================
+# pm2.45, pm2.46 (negated disjunction elimination)
+# ============================================================
+
+
+
+def prove_pm2_62(sys: System) -> Proof:
+    """pm2.62: (φ ∨ ψ) → ((φ → ψ) → ψ).
+
+    Theorem *2.62 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    pm2.61: (ph→ps)→((¬ph→ps)→ps).
+    com12 swaps antecedents.
+    """
+    lb = ProofBuilder(sys, "pm2.62")
+    s1 = lb.ref("s1", "( ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps ) )",
+                ref="pm2.61", note="pm2.61")
+    res = lb.ref("res", "( ( -. ph -> ps ) -> ( ( ph -> ps ) -> ps ) )",
+                 s1, ref="com12", note="com12(pm2.61)")
+    return lb.build(res)
+
+
+# ============================================================
+# pm2.64 (disjunction with negated disjunct)
+# ============================================================
+
+
+
+def prove_pm2_63(sys: System) -> Proof:
+    """Theorem *2.63 of [WhiteheadRussell] p. 107.
+    ( ph \\/ ps ) -> ( ( -. ph \\/ ps ) -> ps ).
+    (Contributed by NM, 3-Jan-2005.)
+    set.mm proof: pm2.53 idd jaod.
+    Under df-or: ( -. ph -> ps ) -> ( ( -. -. ph -> ps ) -> ps ).
+    Derived: com12(syl(mp(notnot, imim1), pm2.61))."""
+    lb = ProofBuilder(sys, "pm2.63")
+    s_notnot = lb.ref("s_notnot", "ph -> -. -. ph",
+                      ref="notnot", note="notnot")
+    s_imim1 = lb.ref("s_imim1",
+        "( ph -> -. -. ph ) -> ( ( -. -. ph -> ps ) -> ( ph -> ps ) )",
+        ref="imim1", note="imim1(notnot)")
+    s_inner = lb.mp("s_inner", s_notnot, s_imim1,
+                    note="MP: (-.-.ph->ps)->(ph->ps)")
+    s_pm61 = lb.ref("s_pm61",
+        "( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )",
+        ref="pm2.61", note="pm2.61")
+    s_syl = lb.ref("s_syl",
+        "( -. -. ph -> ps ) -> ( ( -. ph -> ps ) -> ps )",
+        s_inner, s_pm61, ref="syl", note="syl(mp(notnot,imim1), pm2.61)")
+    res = lb.ref("res",
+        "( -. ph -> ps ) -> ( ( -. -. ph -> ps ) -> ps )",
+        s_syl, ref="com12", note="com12(syl(...))")
+    return lb.build(res)
+
+
+
+def prove_pm2_64(sys: System) -> Proof:
+    """pm2.64: (φ ∨ ψ) → ((φ ∨ ¬ψ) → φ).
+
+    Theorem *2.64 of [WhiteheadRussell] p. 107.
+    (Contributed by NM, 3-Jan-2005.)
+    pm2.65: (¬ph→ps)→((¬ph→¬ps)→¬¬ph).
+    notnotr: ¬¬ph→ph.
+    syl6: chains them.
+    """
+    lb = ProofBuilder(sys, "pm2.64")
+    s_pm65 = lb.ref("s_pm65",
+        "( ( -. ph -> ps ) -> ( ( -. ph -> -. ps ) -> -. -. ph ) )",
+        ref="pm2.65", note="pm2.65")
+    s_nn = lb.ref("s_nn", "( -. -. ph -> ph )",
+                  ref="notnotr", note="notnotr")
+    res = lb.ref("res",
+        "( ( -. ph -> ps ) -> ( ( -. ph -> -. ps ) -> ph ) )",
+        s_pm65, s_nn, ref="syl6", note="syl6(pm2.65, notnotr)")
+    return lb.build(res)
+
+
+
+def prove_con1i(sys: System) -> Proof:
+    """
+    con1i: ¬ ψ → φ. Hyp: ¬ φ → ψ.
+
+    A contraposition inference.  Inference associated with ~ con1 .  Its
+           associated inference is ~ mt3 .  (Contributed by NM, 3-Jan-1993.)
+           (Proof shortened by Mel L. O'Cat, 28-Nov-2008.)  (Proof shortened by
+           Wolf Lammen, 19-Jun-2013.)
+
+    """
+    lb = ProofBuilder(sys, "con1i")
+    hyp = lb.hyp("prove_con1i.h", "¬ φ → ψ")
+    s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", ref="con1", note="con1")
+    res = lb.mp("res", hyp, s1, "MP hyp, s1")
+    return lb.build(res)
 

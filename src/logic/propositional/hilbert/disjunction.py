@@ -22,6 +22,7 @@ def prove_jarli(sys: System) -> Proof:
     res = lb.ref("res", "¬ φ → χ", s1, h1, ref="syl", note="syl")
     return lb.build(res)
 
+
 def prove_ja(sys: System) -> Proof:
     """
     ja: ( ( φ → ψ ) -> χ ). Hyp1: ¬ φ → χ, Hyp2: ψ → χ.
@@ -60,6 +61,7 @@ def prove_ja(sys: System) -> Proof:
     res = lb.mp("res", s6, s8, "MP s6, s8")
     return lb.build(res)
 
+
 def prove_peirce(sys: System) -> Proof:
     """
     peirce: ( ( ( φ → ψ ) → φ ) → φ ).
@@ -79,12 +81,14 @@ def prove_peirce(sys: System) -> Proof:
     res = lb.mp("res", s1, s4, "MP s1, s4")
     return lb.build(res)
 
+
 def prove_pm1_4(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm1.4")
     s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ ψ → ¬ ¬ φ )", ref="con3", note="con3")
     s2 = lb.ref("s2", "¬ ¬ φ → φ", ref="notnotr", note="notnotr")
     res = lb.ref("res", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", s1, s2, ref="syl6", note="syl6")
     return lb.build(res)
+
 
 def prove_pm2_38(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm2.38")
@@ -93,13 +97,15 @@ def prove_pm2_38(sys: System) -> Proof:
     res = lb.ref("res", "( ψ → χ ) → ( ( ¬ ψ → φ ) → ( ¬ χ → φ ) )", s1, s2, ref="syl", note="syl")
     return lb.build(res)
 
+
 def prove_pm2_36(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm2.36")
     s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", ref="pm1.4", note="pm1.4")
     s2 = lb.ref("s2", "( ψ → χ ) → ( ( ¬ ψ → φ ) → ( ¬ χ → φ ) )", ref="pm2.38", note="pm2.38")
-    res = lb.ref("res", "( ψ → χ ) → ( ( ¬ φ → ψ ) → ( ¬ χ → φ ) )", s1, s2, ref="syl5", note="syl5")
+    res = lb.ref(
+        "res", "( ψ → χ ) → ( ( ¬ φ → ψ ) → ( ¬ χ → φ ) )", s1, s2, ref="syl5", note="syl5"
+    )
     return lb.build(res)
-
 
 
 def prove_jaod(sys: System) -> Proof:
@@ -120,7 +126,6 @@ def prove_jaod(sys: System) -> Proof:
 # ============================================================
 
 
-
 def prove_jaoi(sys: System) -> Proof:
     """jaoi: (ph \/ ch) -> psi.  Hyps: ph->psi, ch->psi.
     Under df-or: (~ph->ch)->psi.
@@ -131,22 +136,38 @@ def prove_jaoi(sys: System) -> Proof:
     h2 = lb.hyp("jaoi.2", "ch -> ps")
     s1 = lb.ref("s1", "-. ps -> -. ch", h2, ref="con3", note="con3(jaoi.2)")
     s2 = lb.ref("s2", "-. ps -> -. ph", h1, ref="con3", note="con3(jaoi.1)")
-    s3 = lb.ref("s3", "( -. ps -> -. ph ) -> ( ( -. ph -> ch ) -> ( -. ps -> ch ) )",
-                ref="imim1", note="imim1")
+    s3 = lb.ref(
+        "s3",
+        "( -. ps -> -. ph ) -> ( ( -. ph -> ch ) -> ( -. ps -> ch ) )",
+        ref="imim1",
+        note="imim1",
+    )
     s4 = lb.mp("s4", s2, s3, "s2,s3")
-    s5 = lb.ref("s5", "( -. ps -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )",
-                ref="pm2.65", note="pm2.65")
-    s6 = lb.ref("s6", "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )",
-                s4, s5, ref="syl6", note="syl6")
+    s5 = lb.ref(
+        "s5", "( -. ps -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )", ref="pm2.65", note="pm2.65"
+    )
+    s6 = lb.ref(
+        "s6",
+        "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )",
+        s4,
+        s5,
+        ref="syl6",
+        note="syl6",
+    )
     s7 = lb.ref("s7", "-. -. ps -> ps", ref="notnotr", note="notnotr")
-    s8 = lb.ref("s8", "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> ps )",
-                s6, s7, ref="syl6", note="syl6(s6,s7)")
-    s9 = lb.ref("s9", "( -. ps -> -. ch ) -> ( ( -. ph -> ch ) -> ps )",
-                s8, ref="com12", note="com12(s8)")
+    s8 = lb.ref(
+        "s8",
+        "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> ps )",
+        s6,
+        s7,
+        ref="syl6",
+        note="syl6(s6,s7)",
+    )
+    s9 = lb.ref(
+        "s9", "( -. ps -> -. ch ) -> ( ( -. ph -> ch ) -> ps )", s8, ref="com12", note="com12(s8)"
+    )
     res = lb.mp("res", s1, s9, "s1,s9")
     return lb.build(res)
-
-
 
 
 def prove_olc(sys: System) -> Proof:
@@ -163,7 +184,6 @@ def prove_olc(sys: System) -> Proof:
 # ============================================================
 
 
-
 def prove_pm2_621(sys: System) -> Proof:
     """Theorem *2.621 of [WhiteheadRussell] p. 107.
     ( ph -> ps ) -> ( ( ph \\/ ps ) -> ps ).
@@ -172,10 +192,8 @@ def prove_pm2_621(sys: System) -> Proof:
     Under df-or: ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps ).
     This is exactly pm2.61."""
     lb = ProofBuilder(sys, "pm2.621")
-    res = lb.ref("res", "( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )",
-                 ref="pm2.61", note="pm2.61")
+    res = lb.ref("res", "( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )", ref="pm2.61", note="pm2.61")
     return lb.build(res)
-
 
 
 def prove_pm2_67(sys: System) -> Proof:
@@ -191,8 +209,6 @@ def prove_pm2_67(sys: System) -> Proof:
     return lb.build(res)
 
 
-
-
 def prove_pm2_67_2(sys: System) -> Proof:
     """Theorem *2.67-2 of [WhiteheadRussell] p. 107.
     ( ( ph \\/ ch ) -> ps ) -> ( ph -> ps ).
@@ -201,14 +217,15 @@ def prove_pm2_67_2(sys: System) -> Proof:
     Under df-or: ( ( -. ph -> ch ) -> ps ) -> ( ph -> ps ).
     Proof: pm2.24 + imim1 via mp."""
     lb = ProofBuilder(sys, "pm2.67-2")
-    s1 = lb.ref("s1", "ph -> ( -. ph -> ch )",
-                ref="pm2.24", note="pm2.24")
-    s2 = lb.ref("s2",
+    s1 = lb.ref("s1", "ph -> ( -. ph -> ch )", ref="pm2.24", note="pm2.24")
+    s2 = lb.ref(
+        "s2",
         "( ph -> ( -. ph -> ch ) ) -> ( ( ( -. ph -> ch ) -> ps ) -> ( ph -> ps ) )",
-        ref="imim1", note="imim1")
+        ref="imim1",
+        note="imim1",
+    )
     res = lb.mp("res", s1, s2, note="MP pm2.24 imim1")
     return lb.build(res)
-
 
 
 def prove_pm2_68(sys: System) -> Proof:
@@ -222,8 +239,6 @@ def prove_pm2_68(sys: System) -> Proof:
     h1 = lb.hyp("pm2.68.1", "( φ → ψ ) → ψ")
     res = lb.ref("res", "¬ φ → ψ", h1, ref="jarli", note="jarli(h1)")
     return lb.build(res)
-
-
 
 
 def prove_pm2_73(sys: System) -> Proof:
@@ -247,13 +262,31 @@ def prove_pm2_73(sys: System) -> Proof:
     # con3: ((¬φ→ψ)→ψ) → (¬ψ→¬(¬φ→ψ))
     s4 = lb.ref("s4", "( ( ¬ φ → ψ ) → ψ ) → ( ¬ ψ → ¬ ( ¬ φ → ψ ) )", ref="con3", note="con3")
     # imim1: (¬ψ→¬(¬φ→ψ)) → ((¬(¬φ→ψ)→χ)→(¬ψ→χ))
-    s5 = lb.ref("s5", "( ¬ ψ → ¬ ( ¬ φ → ψ ) ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )", ref="imim1", note="imim1")
+    s5 = lb.ref(
+        "s5",
+        "( ¬ ψ → ¬ ( ¬ φ → ψ ) ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )",
+        ref="imim1",
+        note="imim1",
+    )
     # syl(s4, s5): ((¬φ→ψ)→ψ) → ((¬(¬φ→ψ)→χ)→(¬ψ→χ))
-    s6 = lb.ref("s6", "( ( ¬ φ → ψ ) → ψ ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )", s4, s5, ref="syl", note="syl(s4, s5)")
+    s6 = lb.ref(
+        "s6",
+        "( ( ¬ φ → ψ ) → ψ ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )",
+        s4,
+        s5,
+        ref="syl",
+        note="syl(s4, s5)",
+    )
     # syl(s3, s6): (φ→ψ) → ((¬(¬φ→ψ)→χ)→(¬ψ→χ))
-    res = lb.ref("res", "( φ → ψ ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )", s3, s6, ref="syl", note="syl(s3, s6)")
+    res = lb.ref(
+        "res",
+        "( φ → ψ ) → ( ( ¬ ( ¬ φ → ψ ) → χ ) → ( ¬ ψ → χ ) )",
+        s3,
+        s6,
+        ref="syl",
+        note="syl(s3, s6)",
+    )
     return lb.build(res)
-
 
 
 def prove_pm2_74(sys: System) -> Proof:
@@ -360,7 +393,6 @@ def prove_pm2_75(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_76(sys: System) -> Proof:
     """
     pm2.76: ( ¬ φ → ( ψ → χ ) ) → ( ( ¬ φ → ψ ) → ( ¬ φ → χ ) ).
@@ -383,7 +415,6 @@ def prove_pm2_76(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_81(sys: System) -> Proof:
     """pm2.81: (ψ → (χ → θ)) → ((φ ∨ ψ) → ((φ ∨ χ) → (φ ∨ θ))).
 
@@ -397,19 +428,28 @@ def prove_pm2_81(sys: System) -> Proof:
     syl6 chains them.
     """
     lb = ProofBuilder(sys, "pm2.81")
-    s_imim2 = lb.ref("s_imim2",
-        "( ( ps -> ( ch -> th ) ) -> "
-        "( ( -. ph -> ps ) -> ( -. ph -> ( ch -> th ) ) ) )",
-        ref="imim2", note="imim2")
-    s_A2 = lb.ref("s_A2",
+    s_imim2 = lb.ref(
+        "s_imim2",
+        "( ( ps -> ( ch -> th ) ) -> ( ( -. ph -> ps ) -> ( -. ph -> ( ch -> th ) ) ) )",
+        ref="imim2",
+        note="imim2",
+    )
+    s_A2 = lb.ref(
+        "s_A2",
         "( ( -. ph -> ( ch -> th ) ) -> ( ( -. ph -> ch ) -> ( -. ph -> th ) ) )",
-        ref="A2", note="A2")
-    res = lb.ref("res",
+        ref="A2",
+        note="A2",
+    )
+    res = lb.ref(
+        "res",
         "( ( ps -> ( ch -> th ) ) -> "
         "( ( -. ph -> ps ) -> ( ( -. ph -> ch ) -> ( -. ph -> th ) ) ) )",
-        s_imim2, s_A2, ref="syl6", note="syl6(imim2, A2)")
+        s_imim2,
+        s_A2,
+        ref="syl6",
+        note="syl6(imim2, A2)",
+    )
     return lb.build(res)
-
 
 
 def prove_pm2_83(sys: System) -> Proof:
@@ -420,10 +460,14 @@ def prove_pm2_83(sys: System) -> Proof:
     set.mm proof: imim1 imim3i.
     """
     lb = ProofBuilder(sys, "pm2.83")
-    s1 = lb.ref("s1",
-        "( ( ps -> ch ) -> ( ( ch -> th ) -> ( ps -> th ) ) )",
-        ref="imim1", note="imim1")
-    res = lb.ref("res",
+    s1 = lb.ref(
+        "s1", "( ( ps -> ch ) -> ( ( ch -> th ) -> ( ps -> th ) ) )", ref="imim1", note="imim1"
+    )
+    res = lb.ref(
+        "res",
         "( ( ph -> ( ps -> ch ) ) -> ( ( ph -> ( ch -> th ) ) -> ( ph -> ( ps -> th ) ) ) )",
-        s1, ref="imim3i", note="imim3i")
+        s1,
+        ref="imim3i",
+        note="imim3i",
+    )
     return lb.build(res)

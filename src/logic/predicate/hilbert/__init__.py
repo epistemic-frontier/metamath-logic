@@ -21,8 +21,10 @@ SETMM_TO_PREDICATE_AXIOMS: Mapping[str, str] = {
     "ax-13": "AX13",
 }
 
+
 def make(*, interner: SymbolInterner, origin_ref: Any = None) -> PredicateSystem:
     return make_system(interner=interner, origin_ref=origin_ref)
+
 
 __all__ = [
     "PredicateSystem",

@@ -50,6 +50,7 @@ class PredicateSystem:
     ) -> tuple[CompileEnv, RequireRegistry]:
         if registry is None:
             from skfd.authoring.dsl import DEFAULT_REQUIRE as registry_default
+
             registry = registry_default
         env = CompileEnv(
             interner=self.interner,

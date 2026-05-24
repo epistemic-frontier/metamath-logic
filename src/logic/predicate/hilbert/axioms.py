@@ -33,7 +33,9 @@ AX12: Axiom = Imp(Eq(x, y), Imp(All(y, phi), All(x, Imp(Eq(x, y), phi))))
 # AX13 (ax-13): ( -. x = y -> ( y = z -> A. x y = z ) )
 AX13: Axiom = Imp(Not(Eq(x, y)), Imp(Eq(y, z), All(x, Eq(y, z))))
 
+
 def make_axioms() -> Mapping[str, Axiom]:
     return cast(Mapping[str, Axiom], export_axioms(globals()))
+
 
 __all__ = ["AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13", "make_axioms"]

@@ -2,6 +2,7 @@
 
 Static imports so mypy can verify.
 """
+
 from . import System
 from skfd.proof import Proof, ProofBuilder
 
@@ -251,6 +252,7 @@ __all__ = [
 
 # ── Functions defined directly in lemmas.py ──
 
+
 def prove_imim2i(sys: System) -> Proof:
     """imim2i: (ψ → χ) → ((φ → ψ) → (φ → χ)). Hyp: ψ → χ. (Contributed by NM, 28-Dec-1992.)"""
     lb = ProofBuilder(sys, "imim2i")
@@ -262,7 +264,6 @@ def prove_imim2i(sys: System) -> Proof:
     return lb.build(s4)
 
 
-
 def prove_imim3i(sys: System) -> Proof:
     """imim3i: (th -> ph) -> ((th -> ps) -> (th -> ch)).  Hyp: ph -> (ps -> ch).
 
@@ -272,12 +273,11 @@ def prove_imim3i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "imim3i")
     h1 = lb.hyp("imim3i.1", "( ph -> ( ps -> ch ) )")
-    s1 = lb.ref("s1", "( ( th -> ph ) -> ( th -> ( ps -> ch ) ) )",
-        h1, ref="imim2i", note="imim2i")
-    res = lb.ref("res", "( ( th -> ph ) -> ( ( th -> ps ) -> ( th -> ch ) ) )",
-        s1, ref="a2d", note="a2d")
+    s1 = lb.ref("s1", "( ( th -> ph ) -> ( th -> ( ps -> ch ) ) )", h1, ref="imim2i", note="imim2i")
+    res = lb.ref(
+        "res", "( ( th -> ph ) -> ( ( th -> ps ) -> ( th -> ch ) ) )", s1, ref="a2d", note="a2d"
+    )
     return lb.build(res)
-
 
 
 def prove_jad(sys: System) -> Proof:
@@ -292,7 +292,6 @@ def prove_jad(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_jarl(sys: System) -> Proof:
     """jarl: ((ph → ps) → ch) → (¬ph → ch).
 
@@ -305,12 +304,14 @@ def prove_jarl(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "jarl")
     s1 = lb.ref("s1", "( -. ph → ( ph → ps ) )", ref="pm2.21", note="pm2.21")
-    s2 = lb.ref("s2",
+    s2 = lb.ref(
+        "s2",
         "( ( -. ph → ( ph → ps ) ) → ( ( ( ph → ps ) → ch ) → ( -. ph → ch ) ) )",
-        ref="imim1", note="imim1")
+        ref="imim1",
+        note="imim1",
+    )
     res = lb.mp("res", s1, s2, note="MP pm2.21, imim1")
     return lb.build(res)
-
 
 
 def prove_jarr(sys: System) -> Proof:
@@ -325,12 +326,14 @@ def prove_jarr(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "jarr")
     s1 = lb.ref("s1", "( ps → ( ph → ps ) )", ref="A1", note="A1")
-    s2 = lb.ref("s2",
+    s2 = lb.ref(
+        "s2",
         "( ( ps → ( ph → ps ) ) → ( ( ( ph → ps ) → ch ) → ( ps → ch ) ) )",
-        ref="imim1", note="imim1")
+        ref="imim1",
+        note="imim1",
+    )
     res = lb.mp("res", s1, s2, note="MP A1, imim1")
     return lb.build(res)
-
 
 
 def prove_loolin(sys: System) -> Proof:
@@ -342,14 +345,13 @@ def prove_loolin(sys: System) -> Proof:
     set.mm proof: jarr pm2.43d.
     """
     lb = ProofBuilder(sys, "loolin")
-    s1 = lb.ref("s1",
-        "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ( ps → ph ) ) )",
-        ref="jarr", note="jarr")
-    res = lb.ref("res",
-        "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ph ) )",
-        s1, ref="pm2.43d", note="pm2.43d")
+    s1 = lb.ref(
+        "s1", "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ( ps → ph ) ) )", ref="jarr", note="jarr"
+    )
+    res = lb.ref(
+        "res", "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ph ) )", s1, ref="pm2.43d", note="pm2.43d"
+    )
     return lb.build(res)
-
 
 
 def prove_mpdi(sys: System) -> Proof:
@@ -363,12 +365,9 @@ def prove_mpdi(sys: System) -> Proof:
     lb = ProofBuilder(sys, "mpdi")
     h1 = lb.hyp("mpdi.1", "( ps → ch )")
     h2 = lb.hyp("mpdi.2", "( ph → ( ps → ( ch → th ) ) )")
-    s1 = lb.ref("s1", "( ph → ( ps → ch ) )",
-                h1, ref="a1i", note="a1i")
-    res = lb.ref("res", "( ph → ( ps → th ) )",
-                 s1, h2, ref="mpdd", note="mpdd")
+    s1 = lb.ref("s1", "( ph → ( ps → ch ) )", h1, ref="a1i", note="a1i")
+    res = lb.ref("res", "( ph → ( ps → th ) )", s1, h2, ref="mpdd", note="mpdd")
     return lb.build(res)
-
 
 
 def prove_mt2d(sys: System) -> Proof:
@@ -379,7 +378,6 @@ def prove_mt2d(sys: System) -> Proof:
     s1 = lb.ref("s1", "φ → ( χ → ¬ ψ )", h2, ref="con2d", note="con2d")
     res = lb.ref("res", "φ → ¬ ψ", h1, s1, ref="mpd", note="mpd")
     return lb.build(res)
-
 
 
 def prove_mt4(sys: System) -> Proof:
@@ -397,7 +395,6 @@ def prove_mt4(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_mto(sys: System) -> Proof:
     """mto: ¬φ. Hyp: ¬ψ, φ → ψ. (Contributed by NM, 2-Sep-1993.)"""
     lb = ProofBuilder(sys, "mto")
@@ -408,7 +405,6 @@ def prove_mto(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_notnotri(sys: System) -> Proof:
     """notnotri: φ. Hyp: ¬¬φ. (Contributed by NM, 15-Feb-1993.)"""
     lb = ProofBuilder(sys, "notnotri")
@@ -416,7 +412,6 @@ def prove_notnotri(sys: System) -> Proof:
     s1 = lb.ref("s1", "¬ ¬ φ → φ", ref="notnotr", note="notnotr")
     res = lb.mp("res", h, s1, note="MP notnotri.1, s1")
     return lb.build(res)
-
 
 
 def prove_nsyl4(sys: System) -> Proof:
@@ -431,7 +426,6 @@ def prove_nsyl4(sys: System) -> Proof:
     s1 = lb.ref("s1", "( -. ch -> ph )", h2, ref="con1i", note="con1i")
     res = lb.ref("res", "( -. ch -> ps )", s1, h1, ref="syl", note="syl")
     return lb.build(res)
-
 
 
 def prove_pm2_01d(sys: System) -> Proof:
@@ -450,7 +444,6 @@ def prove_pm2_01d(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_18i(sys: System) -> Proof:
     """pm2.18i: ph.  Hyp: -. ph -> ph.
 
@@ -463,7 +456,6 @@ def prove_pm2_18i(sys: System) -> Proof:
     s1 = lb.ref("s1", "( ( -. ph -> ph ) -> ph )", ref="pm2.18", note="pm2.18")
     res = lb.mp("res", h1, s1, "MP hyp, pm2.18")
     return lb.build(res)
-
 
 
 def prove_pm2_21dd(sys: System) -> Proof:
@@ -481,7 +473,6 @@ def prove_pm2_21dd(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_21i(sys: System) -> Proof:
     """pm2.21i: ph -> ps.  Hyp: -. ph.
 
@@ -494,7 +485,6 @@ def prove_pm2_21i(sys: System) -> Proof:
     s1 = lb.ref("s1", "( -. ps -> -. ph )", h1, ref="a1i", note="a1i")
     res = lb.ref("res", "( ph -> ps )", s1, ref="con4i", note="con4i")
     return lb.build(res)
-
 
 
 def prove_pm2_24d(sys: System) -> Proof:
@@ -511,7 +501,6 @@ def prove_pm2_24d(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_24i(sys: System) -> Proof:
     """pm2.24i: -. ph -> ps.  Hyp: ph.
 
@@ -524,7 +513,6 @@ def prove_pm2_24i(sys: System) -> Proof:
     s1 = lb.ref("s1", "( -. ps -> ph )", h1, ref="a1i", note="a1i")
     res = lb.ref("res", "( -. ph -> ps )", s1, ref="con1i", note="con1i")
     return lb.build(res)
-
 
 
 def prove_pm2_24ii(sys: System) -> Proof:
@@ -542,7 +530,6 @@ def prove_pm2_24ii(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_43d(sys: System) -> Proof:
     """pm2.43d: ph → (ps → ch). Hyp: ph → (ps → (ps → ch)).
 
@@ -553,10 +540,8 @@ def prove_pm2_43d(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm2.43d")
     h1 = lb.hyp("pm2.43d.1", "( ph → ( ps → ( ps → ch ) ) )")
     s_id = lb.ref("s_id", "( ps → ps )", ref="id", note="id")
-    res = lb.ref("res", "( ph → ( ps → ch ) )",
-                 s_id, h1, ref="mpdi", note="mpdi")
+    res = lb.ref("res", "( ph → ( ps → ch ) )", s_id, h1, ref="mpdi", note="mpdi")
     return lb.build(res)
-
 
 
 def prove_pm2_43i(sys: System) -> Proof:
@@ -573,7 +558,6 @@ def prove_pm2_43i(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_521g2(sys: System) -> Proof:
     """pm2.521g2: -. ( ph -> ps ) -> ( ch -> ph ).
 
@@ -583,16 +567,13 @@ def prove_pm2_521g2(sys: System) -> Proof:
     set.mm proof: simplim a1d.  Here we derive simplim as con1(pm2.21).
     """
     lb = ProofBuilder(sys, "pm2.521g2")
-    s1 = lb.ref("s1", "( -. ph -> ( ph -> ps ) )", ref="pm2.21",
-                note="pm2.21")
-    s2 = lb.ref("s2",
-        "( ( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> ph ) )",
-        ref="con1", note="con1")
+    s1 = lb.ref("s1", "( -. ph -> ( ph -> ps ) )", ref="pm2.21", note="pm2.21")
+    s2 = lb.ref(
+        "s2", "( ( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> ph ) )", ref="con1", note="con1"
+    )
     s3 = lb.mp("s3", s1, s2, note="MP s1,s2: simplim")
-    res = lb.ref("res", "( -. ( ph -> ps ) -> ( ch -> ph ) )",
-                 s3, ref="a1d", note="a1d")
+    res = lb.ref("res", "( -. ( ph -> ps ) -> ( ch -> ph ) )", s3, ref="a1d", note="a1d")
     return lb.build(res)
-
 
 
 def prove_pm2_61d(sys: System) -> Proof:
@@ -607,7 +588,6 @@ def prove_pm2_61d(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_pm2_61d1(sys: System) -> Proof:
     """pm2.61d1: φ → χ. Hyp: φ → (ψ → χ), ¬ψ → χ. (Contributed by NM, 15-Jul-2005.)"""
     lb = ProofBuilder(sys, "pm2.61d1")
@@ -616,7 +596,6 @@ def prove_pm2_61d1(sys: System) -> Proof:
     s1 = lb.ref("s1", "φ → ( ¬ ψ → χ )", h2, ref="a1i", note="a1i")
     res = lb.ref("res", "φ → χ", h1, s1, ref="pm2.61d", note="pm2.61d")
     return lb.build(res)
-
 
 
 def prove_pm2_61i(sys: System) -> Proof:
@@ -632,7 +611,6 @@ def prove_pm2_61i(sys: System) -> Proof:
     s1 = lb.ref("s1", "( -. ps -> ps )", h1, h2, ref="nsyl4", note="nsyl4")
     res = lb.ref("res", "ps", s1, ref="pm2.18i", note="pm2.18i")
     return lb.build(res)
-
 
 
 def prove_pm2_65i(sys: System) -> Proof:
@@ -651,7 +629,6 @@ def prove_pm2_65i(sys: System) -> Proof:
     return lb.build(res)
 
 
-
 def prove_syld(sys: System) -> Proof:
     """syld: φ → (ψ → θ). Hyp: φ → (ψ → χ), φ → (χ → θ). (Contributed by NM, 5-Aug-1993.)"""
     lb = ProofBuilder(sys, "syld")
@@ -659,16 +636,4 @@ def prove_syld(sys: System) -> Proof:
     h2 = lb.hyp("syld.2", "φ → ( χ → θ )")
     s1 = lb.ref("s1", "φ → ( ψ → ( χ → θ ) )", h2, ref="a1d", note="a1d")
     res = lb.ref("res", "φ → ( ψ → θ )", h1, s1, ref="mpdd", note="mpdd")
-    return lb.build(res)
-
-
-
-
-def prove_mpcom(sys: System) -> Proof:
-    """mpcom: ψ → χ. Hyp: ψ → φ, φ → (ψ → χ). (Contributed by NM, 17-Mar-1996.)"""
-    lb = ProofBuilder(sys, "mpcom")
-    h1 = lb.hyp("mpcom.1", "ψ → φ")
-    h2 = lb.hyp("mpcom.2", "φ → ( ψ → χ )")
-    s1 = lb.ref("s1", "ψ → ( φ → χ )", h2, ref="com12", note="com12")
-    res = lb.ref("res", "ψ → χ", h1, s1, ref="mpd", note="mpd")
     return lb.build(res)

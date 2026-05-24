@@ -12,10 +12,7 @@ construction time by logic.propositional.hilbert.System.
 
 from __future__ import annotations
 
-from prelude.structures import (
-    Imp, Not, And, Or, Iff,
-    phi, psi, chi, th, ta
-)
+from prelude.structures import Imp, Not, And, Or, Iff, phi, psi, chi, th, ta
 
 # Re-export for compatibility
 __all__ = [

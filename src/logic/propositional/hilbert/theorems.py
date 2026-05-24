@@ -66,7 +66,7 @@ from .lemmas import (
     prove_mt2d,
     prove_mto,
     prove_notnotri,
-    prove_pm2_65i
+    prove_pm2_65i,
 )
 
 

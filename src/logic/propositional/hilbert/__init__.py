@@ -36,6 +36,7 @@ RuleFn: TypeAlias = Callable[..., Wff]
 # System
 # -----------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class System:
     """Hilbert propositional logic bundle.
@@ -43,6 +44,7 @@ class System:
     Authoring bridge:
       - author_env(): returns CompileEnv bound to this system
     """
+
     interner: SymbolInterner
     names: NameResolver
     builtins: Builtins
@@ -94,6 +96,7 @@ class System:
         """
         if registry is None:
             from skfd.authoring.dsl import DEFAULT_REQUIRE as registry_default
+
             registry = registry_default
 
         env = CompileEnv(
@@ -151,4 +154,3 @@ __all__ = [
     "SETMM_TO_HILBERT_RULES",
     "SETMM_TO_HILBERT",
 ]
-

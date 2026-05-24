@@ -1,11 +1,8 @@
 """Propositional logic — syllogism variants."""
 
 from __future__ import annotations
-from typing import Any
-from skfd.proof import Proof, ProofBuilder, Step
+from skfd.proof import Proof, ProofBuilder
 from . import System
-
-
 
 
 def prove_syl11(sys: System) -> Proof:
@@ -96,8 +93,7 @@ def prove_pm2_07(sys: System) -> Proof:
     set.mm proof: olc.  Here expanded via pm2.24 (df-or form).
     """
     lb = ProofBuilder(sys, "pm2.07")
-    res = lb.ref("res", "( ph -> ( ph \\/ ph ) )",
-                 ref="pm2.24", note="pm2.24 (df-or)")
+    res = lb.ref("res", "( ph -> ( ph \\/ ph ) )", ref="pm2.24", note="pm2.24 (df-or)")
     return lb.build(res)
 
 
@@ -123,6 +119,40 @@ def prove_pm2_6(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm2.6")
     s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ φ → ψ )", ref="id", note="id")
     s2 = lb.ref("s2", "( ¬ φ → ψ ) → ( ψ → ψ )", ref="idd", note="idd")
-    res = lb.ref("res", "( ¬ φ → ψ ) → ( ( φ → ψ ) → ψ )",
-                 s1, s2, ref="jad", note="jad")
+    res = lb.ref("res", "( ¬ φ → ψ ) → ( ( φ → ψ ) → ψ )", s1, s2, ref="jad", note="jad")
+    return lb.build(res)
+
+
+def prove_pm2_37(sys: System) -> Proof:
+    """pm2.37: (ψ → χ) → ((ψ ∨ φ) → (φ ∨ χ)). Theorem *2.37. set.mm: pm2.38 pm1.4 syl6."""
+    lb = ProofBuilder(sys, "pm2.37")
+    s1 = lb.ref(
+        "s1",
+        "( ( ψ → χ ) → ( ( ¬ ψ → φ ) → ( ¬ χ → φ ) ) )",
+        ref="pm2.38",
+        note="pm2.38: (ψ→χ)→((ψ∨φ)→(χ∨φ))",
+    )
+    s2 = lb.ref("s2", "( ( ¬ χ → φ ) → ( ¬ φ → χ ) )", ref="pm1.4", note="pm1.4: (χ∨φ)→(φ∨χ)")
+    res = lb.ref(
+        "res",
+        "( ( ψ → χ ) → ( ( ¬ ψ → φ ) → ( ¬ φ → χ ) ) )",
+        s1,
+        s2,
+        ref="syl6",
+        note="syl6(pm2.38, pm1.4)",
+    )
+    return lb.build(res)
+
+
+def prove_pm2_41(sys: System) -> Proof:
+    """pm2.41: (ψ ∨ (φ ∨ ψ)) → (φ ∨ ψ). Theorem *2.41.
+
+    Under df-or: (¬ψ → (¬φ → ψ)) → (¬φ → ψ).
+    Proof: com12 on hyp to get (¬φ → (¬ψ → ψ)), then syl with pm2.18.
+    """
+    lb = ProofBuilder(sys, "pm2.41")
+    h = lb.hyp("pm2.41.1", "¬ ψ → ( ¬ φ → ψ )")
+    s_swap = lb.ref("s_swap", "¬ φ → ( ¬ ψ → ψ )", h, ref="com12", note="com12(h)")
+    s_pm18 = lb.ref("s_pm18", "( ¬ ψ → ψ ) → ψ", ref="pm2.18", note="pm2.18")
+    res = lb.ref("res", "¬ φ → ψ", s_swap, s_pm18, ref="syl", note="syl(com12(h), pm2.18)")
     return lb.build(res)

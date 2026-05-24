@@ -13,9 +13,7 @@ from logic.propositional.hilbert.lemmas import (
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 
-def _emit_rule_skeleton(
-    mm: MMBuilderV2, system: System, *, provable: SymbolId
-) -> None:
+def _emit_rule_skeleton(mm: MMBuilderV2, system: System, *, provable: SymbolId) -> None:
     phi_wff = system.compile(phi, ctx="rule[mp.phi]")
     psi_wff = system.compile(psi, ctx="rule[mp.psi]")
     imp_wff = system.compile(Imp(phi, psi), ctx="rule[mp.imp]")

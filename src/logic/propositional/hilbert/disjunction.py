@@ -410,3 +410,20 @@ def prove_pm2_81(sys: System) -> Proof:
         s_imim2, s_A2, ref="syl6", note="syl6(imim2, A2)")
     return lb.build(res)
 
+
+
+def prove_pm2_83(sys: System) -> Proof:
+    """pm2.83: (ph -> (ps -> ch)) -> ((ph -> (ch -> th)) -> (ph -> (ps -> th))).
+
+    Closed form of syld.  Theorem *2.83 of [WhiteheadRussell] p. 108.
+    (Contributed by NM, 3-Jan-2005.)
+    set.mm proof: imim1 imim3i.
+    """
+    lb = ProofBuilder(sys, "pm2.83")
+    s1 = lb.ref("s1",
+        "( ( ps -> ch ) -> ( ( ch -> th ) -> ( ps -> th ) ) )",
+        ref="imim1", note="imim1")
+    res = lb.ref("res",
+        "( ( ph -> ( ps -> ch ) ) -> ( ( ph -> ( ch -> th ) ) -> ( ph -> ( ps -> th ) ) ) )",
+        s1, ref="imim3i", note="imim3i")
+    return lb.build(res)

@@ -387,7 +387,9 @@ def prove_a1d(sys: System) -> Proof:
 
 # -----------------------------------------------------------------------------
 # Expanded lemmas
-# -----------------------------------------------------------------------------f prove_a2d(sys: System) -> Proof:
+# -----------------------------------------------------------------------------
+
+def prove_a2d(sys: System) -> Proof:
     """
     a2d: φ → ((ψ → χ) -> (ψ → θ)). Hyp: φ → (ψ → (χ → θ)).
 
@@ -439,7 +441,13 @@ def prove_syl5com(sys: System) -> Proof:
         ref="A1",
         note="A1",
     )
-    s2 = lb.mp("s2", h2, s1, "MP hyp2, s1")
+    s2 = lb.ref(
+        "s2",
+        "χ → ( φ → ( ψ → θ ) )",
+        h2, s1,
+        ref="syl5",
+        note="syl5(hyp2, A1)",
+    )
     s3 = lb.ref(
         "s3",
         "( φ → ( ψ → θ ) ) -> ( ( φ → ψ ) -> ( φ → θ ) )",
@@ -728,3 +736,73 @@ def prove_a2d(sys: System) -> Proof:
     res = lb.mp("res", h1, s5, "MP hyp, s5")
     return lb.build(res)
 
+
+def prove_2a1(sys: System) -> Proof:
+    """2a1: φ → (ψ → (χ → φ)). Double form of ax-1. (Contributed by BJ, 10-Aug-2020.)"""
+    lb = ProofBuilder(sys, "2a1")
+    s1 = lb.ref("s1", "φ → φ", ref="id", note="id")
+    res = lb.ref("res", "φ → ( ψ → ( χ → φ ) )", s1, ref="2a1d", note="2a1d")
+    return lb.build(res)
+
+
+def prove_2a1d(sys: System) -> Proof:
+    """2a1d: ph → (ch → (th → ps)). Hyp: ph → ps."""
+    lb = ProofBuilder(sys, "2a1d")
+    hyp = lb.hyp("2a1d.1", "ph → ps")
+    s1 = lb.ref("s1", "ph → ( th → ps )", hyp, ref="a1d", note="a1d")
+    res = lb.ref("res", "ph → ( ch → ( th → ps ) )", s1, ref="a1d", note="a1d")
+    return lb.build(res)
+
+
+def prove_a1i13(sys: System) -> Proof:
+    """a1i13: ph → (ps → (ch → th)). Hyp: ps → th."""
+    lb = ProofBuilder(sys, "a1i13")
+    hyp = lb.hyp("a1i13.1", "ps → th")
+    s1 = lb.ref("s1", "ps → ( ch → th )", hyp, ref="a1d", note="a1d")
+    res = lb.ref("res", "ph → ( ps → ( ch → th ) )", s1, ref="a1i", note="a1i")
+    return lb.build(res)
+
+
+def prove_idd(sys: System) -> Proof:
+    """idd: φ → (ψ → ψ). No hypotheses."""
+    lb = ProofBuilder(sys, "idd")
+    s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1")
+    res = lb.ref("res", "φ → ( ψ → ψ )", s1, ref="com12", note="com12")
+    return lb.build(res)
+
+
+def prove_mpcom(sys: System) -> Proof:
+    """mpcom: ψ → χ. Hyp: ψ → φ, φ → (ψ → χ). (Contributed by NM, 17-Mar-1996.)"""
+    lb = ProofBuilder(sys, "mpcom")
+    h1 = lb.hyp("mpcom.1", "ψ → φ")
+    h2 = lb.hyp("mpcom.2", "φ → ( ψ → χ )")
+    s1 = lb.ref("s1", "ψ → ( φ → χ )", h2, ref="com12", note="com12")
+    res = lb.ref("res", "ψ → χ", h1, s1, ref="mpd", note="mpd")
+    return lb.build(res)
+
+
+def prove_mpdd(sys: System) -> Proof:
+    """mpdd: ph → (ps → th). Hyp1: ph → (ps → ch), Hyp2: ph → (ps → (ch → th)).
+
+    Nested modus ponens deduction.
+    (Contributed by NM, 26-Mar-1995.)
+    set.mm proof: a2d mpd.
+    """
+    lb = ProofBuilder(sys, "mpdd")
+    h1 = lb.hyp("mpdd.1", "( ph → ( ps → ch ) )")
+    h2 = lb.hyp("mpdd.2", "( ph → ( ps → ( ch → th ) ) )")
+    s1 = lb.ref("s1", "( ph → ( ( ps → ch ) → ( ps → th ) ) )",
+                h2, ref="a2d", note="a2d")
+    res = lb.ref("res", "( ph → ( ps → th ) )",
+                 h1, s1, ref="mpd", note="mpd")
+    return lb.build(res)
+
+
+def prove_mpid(sys: System) -> Proof:
+    """mpid: φ → (ψ → θ). Hyp: φ → χ, φ → (ψ → (χ → θ)). (Contributed by NM, 14-Dec-2004.)"""
+    lb = ProofBuilder(sys, "mpid")
+    h1 = lb.hyp("mpid.1", "φ → χ")
+    h2 = lb.hyp("mpid.2", "φ → ( ψ → ( χ → θ ) )")
+    s1 = lb.ref("s1", "φ → ( ψ → χ )", h1, ref="a1d", note="a1d")
+    res = lb.ref("res", "φ → ( ψ → θ )", s1, h2, ref="mpdd", note="mpdd")
+    return lb.build(res)

@@ -31,6 +31,10 @@ def build(ctx: BuildContextV2) -> None:
     prelude = ctx.deps["metamath-prelude"]
 
     system = System.make(interner=mm.interner, names=ctx.names)
+    coverage = getattr(ctx, "coverage", None)
+    if coverage is not None:
+        coverage.declare_registry("hilbert", SETMM_TO_HILBERT_LEMMAS)
+
     wff = prelude["wff"]
     provable = prelude["|-"]
 

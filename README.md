@@ -44,3 +44,14 @@ uv run --frozen skfd verify --level 1 metamath-logic
 ```
 
 `skfd verify` builds the package into a verification monolith (under `target/`) and checks it with the configured verifiers.
+
+When using a ProofScaffold version that supports proof coverage declarations,
+the package declares its Hilbert theorem registry during `build(ctx)`. To require
+that every declared theorem is emitted into the verification monolith, run:
+
+```bash
+uv run --frozen skfd verify --coverage declared --level 1 metamath-logic
+```
+
+This is stricter than artifact verification and is expected to fail until the
+declared registry and emitted proof closure are aligned.

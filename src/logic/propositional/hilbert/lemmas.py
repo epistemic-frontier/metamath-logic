@@ -39,6 +39,8 @@ from logic.propositional.hilbert.implication import (
     prove_syl5com,
     prove_syl6,
     prove_sylcom,
+    prove_pm2_86d,
+    prove_pm2_86i,
 )
 from logic.propositional.hilbert.negation import (
     prove_con1,
@@ -80,6 +82,8 @@ from logic.propositional.hilbert.negation import (
     prove_pm2_63,
     prove_pm2_64,
     prove_pm2_65,
+    prove_pm2_65da,
+    prove_pm2_65ni
 )
 from logic.propositional.hilbert.disjunction import (
     prove_ja,
@@ -101,6 +105,8 @@ from logic.propositional.hilbert.disjunction import (
     prove_pm2_76,
     prove_pm2_81,
     prove_pm2_83,
+    prove_pm2_85,
+    prove_pm2_86
 )
 from logic.propositional.hilbert.syllogism import (
     prove_pm2_01,
@@ -114,6 +120,9 @@ from logic.propositional.hilbert.syllogism import (
     prove_syl2imc,
     prove_syl56,
     prove_syl6com,
+    prove_pm2_13,
+    prove_pm2_26,
+    prove_syl9,
     prove_syli,
 )
 
@@ -827,7 +836,7 @@ def prove_pm2_65d(sys: System) -> Proof:
     lb = ProofBuilder(sys, "pm2.65d")
     h1 = lb.hyp("pm2.65d.1", "ph -> ( ps -> ch )")
     h2 = lb.hyp("pm2.65d.2", "ph -> ( ps -> -. ch )")
-    s1 = lb.ref("s1", "ph -> ( -. ch -> -. ps )", ref="con3d", note="con3d h1")
+    s1 = lb.ref("s1", "ph -> ( -. ch -> -. ps )", h1, ref="con3d", note="con3d h1")
     s2 = lb.ref("s2", "ph -> ( ps -> -. ps )", h2, s1, ref="syld", note="syld h2 s1")
     res = lb.ref("res", "ph -> -. ps", s2, ref="pm2.01d", note="pm2.01d")
     return lb.build(res)

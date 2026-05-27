@@ -920,26 +920,3 @@ def prove_pm2_86i(sys: Any) -> Any:
 
 def prove_pm2_21fal(sys: Any) -> Any:
     """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
-    from skfd.proof import ProofBuilder
-
-    lb = ProofBuilder(sys, "pm2.21fal")
-    h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
-    h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
-    res = lb.ref("res", "ph -> F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
-    return lb.build(res)
-
-
-def prove_pm2_85(sys: Any) -> Any:
-    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
-    Under df-or, this is pm2.86 with -.ph for ph.
-    """
-    from skfd.proof import ProofBuilder
-
-    lb = ProofBuilder(sys, "pm2.85")
-    res = lb.ref(
-        "res",
-        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
-        ref="pm2.86",
-        note="pm2.86 (df-or)",
-    )
-    return lb.build(res)

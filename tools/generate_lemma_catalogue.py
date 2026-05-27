@@ -12,12 +12,14 @@ if setmm_path.exists():
     with setmm_path.open("r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
 
+
 def find_label_line(label: str) -> int | None:
     pat = re.compile(rf"^\s*{re.escape(label)}\s+\$(?:a|p|f|e)\b")
     for i, ln in enumerate(lines, start=1):
         if pat.search(ln):
             return i
     return None
+
 
 rows: list[tuple[str, str, str, str, str]] = []
 

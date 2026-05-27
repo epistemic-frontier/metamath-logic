@@ -25,9 +25,7 @@ def test_hilbert_registry_reports_known_unresolved_surface() -> None:
     )
 
     unknown = sorted(
-        (issue.lemma, issue.ref)
-        for issue in result.issues
-        if issue.kind == "unknown_ref"
+        (issue.lemma, issue.ref) for issue in result.issues if issue.kind == "unknown_ref"
     )
     assert ("ja", "pm2.61") in unknown
     assert result.ok is False

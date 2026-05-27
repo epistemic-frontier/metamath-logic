@@ -711,3 +711,122 @@ def prove_pm2_65(sys: System) -> Proof:
         "res", "( ( ph → ps ) → ( ( ph → -. ps ) → -. ph ) )", s1, s2, ref="jad", note="jad"
     )
     return lb.build(res)
+
+
+def prove_pm2_65da(sys: Any) -> Any:
+    """pm2.65da: ( ph -> -. ps ).
+
+    Hypotheses: ( ( ph /\ ps ) -> ch ), ( ( ph /\ ps ) -> -. ch ).
+    Deduction for proof by contradiction (conjunction form).
+    (Contributed by NM, 12-Jun-2014.)
+
+    Using df-an expansion: (ph /\ ps) is -. ( ph -> -. ps ).
+    Proof: pm2.65i(h1, h2) -> -.-.(ph -> -.ps) ; notnotri -> (ph -> -.ps).
+    pm2.65i needs explicit args (ps not in conclusion).
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.65da")
+    h1 = lb.hyp("pm2.65da.1", "( -. ( ph -> -. ps ) -> ch )")
+    h2 = lb.hyp("pm2.65da.2", "( -. ( ph -> -. ps ) -> -. ch )")
+    s1 = lb.ref("s1", "-. -. ( ph -> -. ps )", h1, h2, ref="pm2.65i", note="pm2.65i h1 h2")
+    res = lb.ref("res", "ph -> -. ps", s1, ref="notnotri", note="notnotri")
+    return lb.build(res)
+
+
+def prove_pm2_65ni(sys: Any) -> Any:
+    """pm2.65ni: ph.
+
+    Hypotheses: ( -. ph -> ps ), ( -. ph -> -. ps ).
+    Inference rule for proof by contradiction.
+    (Contributed by Glauco Siliprandi, 5-Apr-2020.)
+
+    Proof: pm2.65i(h1, h2) -> -. -. ph ; notnotri -> ph.
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.65ni")
+    h1 = lb.hyp("pm2.65ni.1", "-. ph -> ps")
+    h2 = lb.hyp("pm2.65ni.2", "-. ph -> -. ps")
+    s1 = lb.ref("s1", "-. -. ph", h1, h2, ref="pm2.65i", note="pm2.65i")
+    res = lb.ref("res", "ph", s1, ref="notnotri", note="notnotri")
+    return lb.build(res)
+
+
+def prove_pm2_61ii(sys: Any) -> Any:
+    """pm2.61ii: ch.
+
+    Hypotheses: ( -. ph -> ( -. ps -> ch ) ), ( ph -> ch ), ( ps -> ch ).
+    Inference eliminating two antecedents.
+    (Contributed by NM, 4-Jan-1993.) (Proof shortened by Josh Purinton, 29-Dec-2000.)
+
+    Proof: a1i(h3) -> (-.ph -> (ps -> ch)) ; pm2.61d(that, h1) -> (-.ph -> ch) ; pm2.61i(h2, that) -> ch.
+    pm2.61d needs explicit args (ps not in conclusion).
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.61ii")
+    h1 = lb.hyp("pm2.61ii.1", "-. ph -> ( -. ps -> ch )")
+    h2 = lb.hyp("pm2.61ii.2", "ph -> ch")
+    h3 = lb.hyp("pm2.61ii.3", "ps -> ch")
+    s1 = lb.ref("s1", "-. ph -> ( ps -> ch )", h3, ref="a1i", note="a1i h3")
+    s2 = lb.ref("s2", "-. ph -> ch", s1, h1, ref="pm2.61d", note="pm2.61d s1 h1")
+    res = lb.ref("res", "ch", h2, s2, ref="pm2.61i", note="pm2.61i")
+    return lb.build(res)
+
+
+def prove_pm2_61iii(sys: Any) -> Any:
+    """pm2.61iii: th.
+
+    Hypotheses: ( -. ph -> ( -. ps -> ( -. ch -> th ) ) ), ( ph -> th ), ( ps -> th ), ( ch -> th ).
+    Inference eliminating three antecedents.
+    (Contributed by NM, 2-Jan-2002.) (Proof shortened by Wolf Lammen, 22-Sep-2013.)
+
+    Proof: a1d on hyp2/hyp3 gives (ph -> (-.ch -> th)) and (ps -> (-.ch -> th)).
+    Then pm2.61ii logic (inlined) gives (-.ch -> th).
+    Finally pm2.61i with hyp4 gives th.
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.61iii")
+    h1 = lb.hyp("pm2.61iii.1", "-. ph -> ( -. ps -> ( -. ch -> th ) )")
+    h2 = lb.hyp("pm2.61iii.2", "ph -> th")
+    h3 = lb.hyp("pm2.61iii.3", "ps -> th")
+    h4 = lb.hyp("pm2.61iii.4", "ch -> th")
+    # a1d on h2 and h3 to add -.ch antecedent
+    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", ref="a1d", note="a1d h2")
+    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", ref="a1d", note="a1d h3")
+    # inlined pm2.61ii logic with X=ph, Y=ps, Z=(-.ch -> th)
+    s_ii_a1i = lb.ref(
+        "s_ii_a1i", "-. ph -> ( ps -> ( -. ch -> th ) )", s_a1d3, ref="a1i", note="a1i"
+    )
+    s_ii_pm2d = lb.ref(
+        "s_ii_pm2d", "-. ph -> ( -. ch -> th )", s_ii_a1i, h1, ref="pm2.61d", note="pm2.61d"
+    )
+    s_notch_th = lb.ref(
+        "s_notch_th", "-. ch -> th", s_a1d2, s_ii_pm2d, ref="pm2.61i", note="pm2.61i"
+    )
+    # final pm2.61i
+    res = lb.ref("res", "th", h4, s_notch_th, ref="pm2.61i", note="pm2.61i")
+    return lb.build(res)
+
+
+def prove_pm2_61nii(sys: Any) -> Any:
+    """pm2.61nii: ch.
+
+    Hypotheses: ( ph -> ( ps -> ch ) ), ( -. ph -> ch ), ( -. ps -> ch ).
+    Inference eliminating two antecedents.
+    (Contributed by NM, 13-Jul-2005.) (Proof shortened by Andrew Salmon, 25-May-2011.)
+
+    Proof: pm2.61d1(h1, h3) -> (ph -> ch) ; pm2.61i(that, h2) -> ch.
+    pm2.61d1 needs explicit args (ps not in conclusion).
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.61nii")
+    h1 = lb.hyp("pm2.61nii.1", "ph -> ( ps -> ch )")
+    h2 = lb.hyp("pm2.61nii.2", "-. ph -> ch")
+    h3 = lb.hyp("pm2.61nii.3", "-. ps -> ch")
+    s1 = lb.ref("s1", "ph -> ch", h1, h3, ref="pm2.61d1", note="pm2.61d1 h1 h3")
+    res = lb.ref("res", "ch", s1, h2, ref="pm2.61i", note="pm2.61i")
+    return lb.build(res)

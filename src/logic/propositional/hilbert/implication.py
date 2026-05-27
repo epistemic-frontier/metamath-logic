@@ -830,3 +830,116 @@ def prove_mpid(sys: System) -> Proof:
     s1 = lb.ref("s1", "φ → ( ψ → χ )", h1, ref="a1d", note="a1d")
     res = lb.ref("res", "φ → ( ψ → θ )", s1, h2, ref="mpdd", note="mpdd")
     return lb.build(res)
+
+
+def prove_pm2_86d(sys: Any) -> Any:
+    """pm2.86d: ph -> ( ps -> ( ch -> th ) ).  Hyp: ph -> ((ps -> ch) -> (ps -> th))."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.86d")
+    h1 = lb.hyp("pm2.86d.1", "ph -> ( ( ps -> ch ) -> ( ps -> th ) )")
+    s_a1 = lb.ref("s_a1", "ch -> ( ps -> ch )", ref="A1", note="A1")
+    s_c12a = lb.ref(
+        "s_c12a", "( ps -> ch ) -> ( ph -> ( ps -> th ) )", h1, ref="com12", note="com12"
+    )
+    s_syl = lb.ref("s_syl", "ch -> ( ph -> ( ps -> th ) )", s_a1, s_c12a, ref="syl", note="syl")
+    s_c12b = lb.ref("s_c12b", "ph -> ( ch -> ( ps -> th ) )", s_syl, ref="com12", note="com12")
+    res = lb.ref("res", "ph -> ( ps -> ( ch -> th ) )", s_c12b, ref="com23", note="com23")
+    return lb.build(res)
+
+
+def prove_pm2_86(sys: Any) -> Any:
+    """pm2.86: ((ph -> ps) -> (ph -> ch)) -> (ph -> (ps -> ch))."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.86")
+    s1 = lb.ref(
+        "s1",
+        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ph -> ( ps -> ch ) )",
+        s1,
+        ref="pm2.86d",
+        note="pm2.86d",
+    )
+    return lb.build(res)
+
+
+def prove_pm2_86i(sys: Any) -> Any:
+    """pm2.86i: ph -> (ps -> ch).  Hyp: ((ph -> ps) -> (ph -> ch))."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.86i")
+    h1 = lb.hyp("pm2.86i.1", "( ph -> ps ) -> ( ph -> ch )")
+    s1 = lb.ref("s1", "ps -> ( ph -> ch )", h1, ref="jarri", note="jarri")
+    res = lb.ref("res", "ph -> ( ps -> ch )", s1, ref="com12", note="com12")
+    return lb.build(res)
+
+
+def prove_pm2_21fal(sys: Any) -> Any:
+    """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.21fal")
+    h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
+    h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
+    res = lb.ref("res", "ph -> F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
+    return lb.build(res)
+
+
+def prove_pm2_85(sys: Any) -> Any:
+    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
+    Under df-or, this is pm2.86 with -.ph for ph.
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.85")
+    res = lb.ref(
+        "res",
+        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
+        ref="pm2.86",
+        note="pm2.86 (df-or)",
+    )
+    return lb.build(res)
+
+
+def prove_pm2_86i(sys: Any) -> Any:
+    """pm2.86i: ph -> (ps -> ch).  Hyp: ((ph -> ps) -> (ph -> ch))."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.86i")
+    h1 = lb.hyp("pm2.86i.1", "( ph -> ps ) -> ( ph -> ch )")
+    s1 = lb.ref("s1", "ps -> ( ph -> ch )", h1, ref="jarri", note="jarri")
+    res = lb.ref("res", "ph -> ( ps -> ch )", s1, ref="com12", note="com12")
+    return lb.build(res)
+
+
+def prove_pm2_21fal(sys: Any) -> Any:
+    """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.21fal")
+    h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
+    h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
+    res = lb.ref("res", "ph -> F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
+    return lb.build(res)
+
+
+def prove_pm2_85(sys: Any) -> Any:
+    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
+    Under df-or, this is pm2.86 with -.ph for ph.
+    """
+    from skfd.proof import ProofBuilder
+
+    lb = ProofBuilder(sys, "pm2.85")
+    res = lb.ref(
+        "res",
+        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
+        ref="pm2.86",
+        note="pm2.86 (df-or)",
+    )
+    return lb.build(res)

@@ -471,3 +471,36 @@ def prove_pm2_83(sys: System) -> Proof:
         note="imim3i",
     )
     return lb.build(res)
+
+
+def prove_pm2_85(sys: System) -> Proof:
+    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
+    Under df-or, this is pm2.86 with -.ph for ph.
+    """
+    lb = ProofBuilder(sys, "pm2.85")
+    res = lb.ref(
+        "res",
+        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
+        ref="pm2.86",
+        note="pm2.86 (df-or)",
+    )
+    return lb.build(res)
+
+
+def prove_pm2_86(sys: System) -> Proof:
+    """pm2.86: ((ph -> ps) -> (ph -> ch)) -> (ph -> (ps -> ch))."""
+    lb = ProofBuilder(sys, "pm2.86")
+    s1 = lb.ref(
+        "s1",
+        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ph -> ( ps -> ch ) )",
+        s1,
+        ref="pm2.86d",
+        note="pm2.86d",
+    )
+    return lb.build(res)

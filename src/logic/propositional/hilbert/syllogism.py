@@ -318,3 +318,10 @@ def prove_pm2_85(sys: Any) -> Any:
         note="pm2.86 (df-or)",
     )
     return lb.build(res)
+
+
+def prove_pm2_25(sys: System) -> Proof:
+    """pm2.25: φ ∨ ( ( φ ∨ ψ ) → ψ )."""
+    lb = ProofBuilder(sys, "pm2.25")
+    s1 = lb.ref("s1", "¬ φ → ( ( ¬ φ → ψ ) → ψ )", ref="pm2.27", note="pm2.27")
+    return lb.build(s1)

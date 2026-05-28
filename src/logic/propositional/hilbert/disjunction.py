@@ -504,3 +504,81 @@ def prove_pm2_86(sys: System) -> Proof:
         note="pm2.86d",
     )
     return lb.build(res)
+
+
+def prove_pm2_82(sys: System) -> Proof:
+    """pm2.82: (((ph \/ ps) \/ ch) -> (((ph \/ -. ch) \/ th) -> ((ph \/ ps) \/ th))).
+    
+    Theorem *2.82 of [WhiteheadRussell] p. 108.
+    Under df-or: A = (-. ph -> ps), B = (-. ph -> -. ch).
+    Goal: (-. A -> ch) -> ((-. B -> th) -> (-. A -> th)).
+    
+    set.mm proof: pm2.24 orim2d jao1i orim1d.
+    Direct transliteration using df-or expansion.
+    """
+    lb = ProofBuilder(sys, "pm2.82")
+    
+    # Under df-or: (ph \/ ps) = (-. ph -> ps)
+    # Let A = (-. ph -> ps), B = (-. ph -> -. ch)
+    # Goal in df-or: 
+    # (-. (-. ph -> ps) -> ch) -> ((-. (-. ph -> -. ch) -> th) -> (-. (-. ph -> ps) -> th))
+    
+    # Step 1: pm2.24: ch -> (-. ch -> ps)
+    s1 = lb.ref("s1", "ch -> ( -. ch -> ps )", ref="pm2.24", note="pm2.24")
+    
+    # Step 2: imim2: (-. ch -> ps) -> ((-. ph -> -. ch) -> (-. ph -> ps))
+    s2 = lb.ref("s2",
+        "( -. ch -> ps ) -> ( ( -. ph -> -. ch ) -> ( -. ph -> ps ) )",
+        ref="imim2", note="imim2")
+    
+    # Step 3: syl(s1, s2): ch -> ((-. ph -> -. ch) -> (-. ph -> ps))
+    s3 = lb.ref("s3",
+        "ch -> ( ( -. ph -> -. ch ) -> ( -. ph -> ps ) )",
+        s1, s2, ref="syl", note="syl")
+    
+    # Step 4: con3: ((-. ph -> -. ch) -> (-. ph -> ps)) -> (-. (-. ph -> ps) -> -. (-. ph -> -. ch))
+    s4 = lb.ref("s4",
+        "( ( -. ph -> -. ch ) -> ( -. ph -> ps ) ) -> ( -. ( -. ph -> ps ) -> -. ( -. ph -> -. ch ) )",
+        ref="con3", note="con3")
+    
+    # Step 5: syl(s3, s4): ch -> (-. (-. ph -> ps) -> -. (-. ph -> -. ch))
+    s5 = lb.ref("s5",
+        "ch -> ( -. ( -. ph -> ps ) -> -. ( -. ph -> -. ch ) )",
+        s3, s4, ref="syl", note="syl")
+    
+    # Step 6: com12(s5): -. (-. ph -> ps) -> (ch -> -. (-. ph -> -. ch))
+    s6 = lb.ref("s6",
+        "-. ( -. ph -> ps ) -> ( ch -> -. ( -. ph -> -. ch ) )",
+        s5, ref="com12", note="com12")
+    
+    # Step 7: imim1: (ch -> -. (-. ph -> -. ch)) -> ((-. (-. ph -> -. ch) -> th) -> (ch -> th))
+    s7 = lb.ref("s7",
+        "( ch -> -. ( -. ph -> -. ch ) ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( ch -> th ) )",
+        ref="imim1", note="imim1")
+    
+    # Step 8: syl(s6, s7)
+    s8 = lb.ref("s8",
+        "-. ( -. ph -> ps ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( ch -> th ) )",
+        s6, s7, ref="syl", note="syl")
+    
+    # Step 9: com12(s8)
+    s9 = lb.ref("s9",
+        "( -. ( -. ph -> -. ch ) -> th ) -> ( -. ( -. ph -> ps ) -> ( ch -> th ) )",
+        s8, ref="com12", note="com12")
+    
+    # Step 10: A2
+    s10 = lb.ref("s10",
+        "( -. ( -. ph -> ps ) -> ( ch -> th ) ) -> ( ( -. ( -. ph -> ps ) -> ch ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        ref="A2", note="A2")
+    
+    # Step 11: syl(s9, s10)
+    s11 = lb.ref("s11",
+        "( -. ( -. ph -> -. ch ) -> th ) -> ( ( -. ( -. ph -> ps ) -> ch ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        s9, s10, ref="syl", note="syl")
+    
+    # Step 12: com12(s11) — final
+    res = lb.ref("res",
+        "( -. ( -. ph -> ps ) -> ch ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        s11, ref="com12", note="com12")
+    
+    return lb.build(res)

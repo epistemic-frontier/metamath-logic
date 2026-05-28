@@ -106,7 +106,8 @@ from logic.propositional.hilbert.disjunction import (
     prove_pm2_81,
     prove_pm2_83,
     prove_pm2_85,
-    prove_pm2_86
+    prove_pm2_86,
+    prove_pm2_82
 )
 from logic.propositional.hilbert.syllogism import (
     prove_pm2_01,
@@ -121,6 +122,7 @@ from logic.propositional.hilbert.syllogism import (
     prove_syl56,
     prove_syl6com,
     prove_pm2_13,
+    prove_pm2_25,
     prove_pm2_26,
     prove_syl9,
     prove_syli,

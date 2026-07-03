@@ -10,7 +10,7 @@ from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 
 
-def test_hilbert_registry_reports_known_unresolved_surface() -> None:
+def test_hilbert_registry_validates_cleanly() -> None:
     proof_mod = importlib.import_module("skfd.proof")
     validate = getattr(proof_mod, "validate_proof_registry", None)
     if validate is None:
@@ -24,10 +24,8 @@ def test_hilbert_registry_reports_known_unresolved_surface() -> None:
         reserved={"wi", "wn", "wa", "mp"},
     )
 
-    # The registry is not fully clean: syl5com has a known construction bug
-    # ("mp: antecedent mismatch"), reported as a constructor_error.
-    constructor_errors = sorted(
-        issue.lemma for issue in result.issues if issue.kind == "constructor_error"
-    )
-    assert "syl5com" in constructor_errors
-    assert result.ok is False
+    # Every declared lemma now constructs and resolves its references
+    # (syl5com was the last construction failure; see implication.py).
+    assert result.ok is True, [
+        (issue.kind, issue.lemma, issue.ref) for issue in result.issues
+    ]

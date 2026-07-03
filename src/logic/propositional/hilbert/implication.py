@@ -448,28 +448,10 @@ def prove_syl5com(sys: System) -> Proof:
     h1 = lb.hyp("hyp1", "φ → ψ")
     h2 = lb.hyp("hyp2", "χ → ( ψ → θ )")
 
-    s1 = lb.ref(
-        "s1",
-        "( ψ → θ ) -> ( φ → ( ψ → θ ) )",
-        ref="A1",
-        note="A1",
-    )
-    s2 = lb.ref(
-        "s2",
-        "χ → ( φ → ( ψ → θ ) )",
-        h2,
-        s1,
-        ref="syl5",
-        note="syl5(hyp2, A1)",
-    )
-    s3 = lb.ref(
-        "s3",
-        "( φ → ( ψ → θ ) ) -> ( ( φ → ψ ) -> ( φ → θ ) )",
-        ref="A2",
-        note="A2",
-    )
-    s4 = lb.mp("s4", s2, s3, "MP s2, s3")
-    res = lb.mp("res", h1, s4, "MP hyp1, s4")
+    # Commute the antecedents of hyp2: χ → ( ψ → θ )  ⇒  ψ → ( χ → θ ).
+    s1 = lb.ref("s1", "ψ → ( χ → θ )", h2, ref="com12", note="com12(hyp2)")
+    # Syllogism with hyp1: φ → ψ , ψ → ( χ → θ )  ⇒  φ → ( χ → θ ).
+    res = lb.ref("res", "φ → ( χ → θ )", h1, s1, ref="syl", note="syl(hyp1, s1)")
     return lb.build(res)
 
 

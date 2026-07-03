@@ -41,8 +41,7 @@ def prove_simplim(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "simplim")
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
-    s2 = lb.ref("s2", "( ¬ φ → ( φ → ψ ) ) -> ( ¬ ( φ → ψ ) -> φ )", ref="con1i", note="con1i")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    res = lb.ref("res", "¬ ( φ → ψ ) -> φ", s1, ref="con1i", note="con1i")
     return lb.build(res)
 
 

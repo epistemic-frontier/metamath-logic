@@ -796,12 +796,12 @@ def prove_pm2_61iii(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm2.61iii")
     h1 = lb.hyp("pm2.61iii.1", "-. ph -> ( -. ps -> ( -. ch -> th ) )")
-    lb.hyp("pm2.61iii.2", "ph -> th")
-    lb.hyp("pm2.61iii.3", "ps -> th")
+    h2 = lb.hyp("pm2.61iii.2", "ph -> th")
+    h3 = lb.hyp("pm2.61iii.3", "ps -> th")
     h4 = lb.hyp("pm2.61iii.4", "ch -> th")
     # a1d on h2 and h3 to add -.ch antecedent
-    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", ref="a1d", note="a1d h2")
-    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", ref="a1d", note="a1d h3")
+    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", h2, ref="a1d", note="a1d h2")
+    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", h3, ref="a1d", note="a1d h3")
     # inlined pm2.61ii logic with X=ph, Y=ps, Z=(-.ch -> th)
     s_ii_a1i = lb.ref(
         "s_ii_a1i", "-. ph -> ( ps -> ( -. ch -> th ) )", s_a1d3, ref="a1i", note="a1i"

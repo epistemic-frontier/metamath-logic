@@ -210,8 +210,7 @@ def prove_pm2_24(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm2.24")
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
-    s2 = lb.ref("s2", "( ¬ φ → ( φ → ψ ) ) -> ( φ → ( ¬ φ → ψ ) )", ref="com12", note="com12")
-    res = lb.mp("res", s1, s2, "MP s1, s2")
+    res = lb.ref("res", "φ → ( ¬ φ → ψ )", s1, ref="com12", note="com12")
     return lb.build(res)
 
 
@@ -360,12 +359,12 @@ def prove_pm2_46(sys: System) -> Proof:
 
     Theorem *2.46 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: pm2.24(ps,ph) = ps→(¬ps→ph) = olc.
+    Under df-or: olc = ps→(¬ph→ps), an ax-1 instance.
     con3i applied gives ¬(¬ph→ps)→¬ps.
     """
     lb = ProofBuilder(sys, "pm2.46")
-    s1 = lb.ref("s1", "( ps -> ( -. ps -> ph ) )", ref="pm2.24", note="pm2.24 (olc)")
-    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ps )", s1, ref="con3i", note="con3i(pm2.24)")
+    s1 = lb.ref("s1", "( ps -> ( -. ph -> ps ) )", ref="A1", note="A1 (olc df-or)")
+    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ps )", s1, ref="con3i", note="con3i(olc)")
     return lb.build(res)
 
 
@@ -782,12 +781,12 @@ def prove_pm2_61iii(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm2.61iii")
     h1 = lb.hyp("pm2.61iii.1", "-. ph -> ( -. ps -> ( -. ch -> th ) )")
-    lb.hyp("pm2.61iii.2", "ph -> th")
-    lb.hyp("pm2.61iii.3", "ps -> th")
+    h2 = lb.hyp("pm2.61iii.2", "ph -> th")
+    h3 = lb.hyp("pm2.61iii.3", "ps -> th")
     h4 = lb.hyp("pm2.61iii.4", "ch -> th")
     # a1d on h2 and h3 to add -.ch antecedent
-    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", ref="a1d", note="a1d h2")
-    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", ref="a1d", note="a1d h3")
+    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", h2, ref="a1d", note="a1d h2")
+    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", h3, ref="a1d", note="a1d h3")
     # inlined pm2.61ii logic with X=ph, Y=ps, Z=(-.ch -> th)
     s_ii_a1i = lb.ref(
         "s_ii_a1i", "-. ph -> ( ps -> ( -. ch -> th ) )", s_a1d3, ref="a1i", note="a1i"

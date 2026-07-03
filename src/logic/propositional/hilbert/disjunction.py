@@ -28,37 +28,14 @@ def prove_ja(sys: System) -> Proof:
     ja: ( ( φ → ψ ) -> χ ). Hyp1: ¬ φ → χ, Hyp2: ψ → χ.
 
     Inference joining antecedents.
+    set.mm proof: imim2i pm2.61d1.
     """
     lb = ProofBuilder(sys, "ja")
     h1 = lb.hyp("ja.1", "¬ φ → χ")
     h2 = lb.hyp("ja.2", "ψ → χ")
 
-    s1 = lb.ref("s1", "¬ ( φ → ψ ) -> φ", ref="simplim", note="simplim")
-    s2 = lb.ref(
-        "s2",
-        "( ¬ ( φ → ψ ) -> φ ) -> ( ( ¬ φ → χ ) -> ( ¬ ( φ → ψ ) -> χ ) )",
-        ref="syl",
-        note="syl",
-    )
-    s3 = lb.mp("s3", s1, s2, "MP s1, s2")
-    s4 = lb.mp("s4", h1, s3, "MP ja.1, s3")
-
-    s5 = lb.ref(
-        "s5",
-        "( ψ → χ ) -> ( ( φ → ψ ) -> ( φ → χ ) )",
-        ref="imim1",
-        note="imim1",
-    )
-    s6 = lb.mp("s6", h2, s5, "MP ja.2, s5")
-
-    s7 = lb.ref(
-        "s7",
-        "( ( ¬ ( φ → ψ ) -> χ ) -> ( ( ( φ → ψ ) -> ( φ → χ ) ) -> ( ( φ → ψ ) -> χ ) ) )",
-        ref="pm2.61",
-        note="pm2.61",
-    )
-    s8 = lb.mp("s8", s4, s7, "MP s4, s7")
-    res = lb.mp("res", s6, s8, "MP s6, s8")
+    s1 = lb.ref("s1", "( φ → ψ ) -> ( φ → χ )", h2, ref="imim2i", note="imim2i")
+    res = lb.ref("res", "( φ → ψ ) -> χ", s1, h1, ref="pm2.61d1", note="pm2.61d1")
     return lb.build(res)
 
 
@@ -134,39 +111,12 @@ def prove_jaoi(sys: System) -> Proof:
     lb = ProofBuilder(sys, "jaoi")
     h1 = lb.hyp("jaoi.1", "ph -> ps")
     h2 = lb.hyp("jaoi.2", "ch -> ps")
-    s1 = lb.ref("s1", "-. ps -> -. ch", h2, ref="con3", note="con3(jaoi.2)")
-    s2 = lb.ref("s2", "-. ps -> -. ph", h1, ref="con3", note="con3(jaoi.1)")
-    s3 = lb.ref(
-        "s3",
-        "( -. ps -> -. ph ) -> ( ( -. ph -> ch ) -> ( -. ps -> ch ) )",
-        ref="imim1",
-        note="imim1",
-    )
-    s4 = lb.mp("s4", s2, s3, "s2,s3")
-    s5 = lb.ref(
-        "s5", "( -. ps -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )", ref="pm2.65", note="pm2.65"
-    )
-    s6 = lb.ref(
-        "s6",
-        "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> -. -. ps )",
-        s4,
-        s5,
-        ref="syl6",
-        note="syl6",
-    )
-    s7 = lb.ref("s7", "-. -. ps -> ps", ref="notnotr", note="notnotr")
-    s8 = lb.ref(
-        "s8",
-        "( -. ph -> ch ) -> ( ( -. ps -> -. ch ) -> ps )",
-        s6,
-        s7,
-        ref="syl6",
-        note="syl6(s6,s7)",
-    )
-    s9 = lb.ref(
-        "s9", "( -. ps -> -. ch ) -> ( ( -. ph -> ch ) -> ps )", s8, ref="com12", note="com12(s8)"
-    )
-    res = lb.mp("res", s1, s9, "s1,s9")
+    # Under df-or the goal is ( -. ph -> ch ) -> ps, i.e. ja with φ:=-.ph, ψ:=ch.
+    # ja's first hypothesis is ¬φ -> χ = -. -. ph -> ps, obtained by lifting h1
+    # through notnotr.
+    s1 = lb.ref("s1", "-. -. ph -> ph", ref="notnotr", note="notnotr")
+    s2 = lb.ref("s2", "-. -. ph -> ps", s1, h1, ref="syl", note="syl(notnotr, jaoi.1)")
+    res = lb.ref("res", "( -. ph -> ch ) -> ps", s2, h2, ref="ja", note="ja(s2, jaoi.2)")
     return lb.build(res)
 
 

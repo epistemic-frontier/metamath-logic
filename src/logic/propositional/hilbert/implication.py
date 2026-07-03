@@ -832,10 +832,8 @@ def prove_mpid(sys: System) -> Proof:
     return lb.build(res)
 
 
-def prove_pm2_86d(sys: Any) -> Any:
+def prove_pm2_86d(sys: System) -> Proof:
     """pm2.86d: ph -> ( ps -> ( ch -> th ) ).  Hyp: ph -> ((ps -> ch) -> (ps -> th))."""
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.86d")
     h1 = lb.hyp("pm2.86d.1", "ph -> ( ( ps -> ch ) -> ( ps -> th ) )")
     s_a1 = lb.ref("s_a1", "ch -> ( ps -> ch )", ref="A1", note="A1")
@@ -848,10 +846,8 @@ def prove_pm2_86d(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_86(sys: Any) -> Any:
+def prove_pm2_86(sys: System) -> Proof:
     """pm2.86: ((ph -> ps) -> (ph -> ch)) -> (ph -> (ps -> ch))."""
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.86")
     s1 = lb.ref(
         "s1",
@@ -869,10 +865,8 @@ def prove_pm2_86(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_86i(sys: Any) -> Any:
+def prove_pm2_86i(sys: System) -> Proof:
     """pm2.86i: ph -> (ps -> ch).  Hyp: ((ph -> ps) -> (ph -> ch))."""
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.86i")
     h1 = lb.hyp("pm2.86i.1", "( ph -> ps ) -> ( ph -> ch )")
     s1 = lb.ref("s1", "ps -> ( ph -> ch )", h1, ref="jarri", note="jarri")
@@ -880,10 +874,8 @@ def prove_pm2_86i(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_21fal(sys: Any) -> Any:
+def prove_pm2_21fal(sys: System) -> Proof:
     """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.21fal")
     h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
     h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
@@ -891,12 +883,10 @@ def prove_pm2_21fal(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_85(sys: Any) -> Any:
+def prove_pm2_85(sys: System) -> Proof:
     """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
     Under df-or, this is pm2.86 with -.ph for ph.
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.85")
     res = lb.ref(
         "res",
@@ -905,18 +895,3 @@ def prove_pm2_85(sys: Any) -> Any:
         note="pm2.86 (df-or)",
     )
     return lb.build(res)
-
-
-def prove_pm2_86i(sys: Any) -> Any:
-    """pm2.86i: ph -> (ps -> ch).  Hyp: ((ph -> ps) -> (ph -> ch))."""
-    from skfd.proof import ProofBuilder
-
-    lb = ProofBuilder(sys, "pm2.86i")
-    h1 = lb.hyp("pm2.86i.1", "( ph -> ps ) -> ( ph -> ch )")
-    s1 = lb.ref("s1", "ps -> ( ph -> ch )", h1, ref="jarri", note="jarri")
-    res = lb.ref("res", "ph -> ( ps -> ch )", s1, ref="com12", note="com12")
-    return lb.build(res)
-
-
-def prove_pm2_21fal(sys: Any) -> Any:
-    """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""

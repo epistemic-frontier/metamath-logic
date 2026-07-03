@@ -713,7 +713,7 @@ def prove_pm2_65(sys: System) -> Proof:
     return lb.build(res)
 
 
-def prove_pm2_65da(sys: Any) -> Any:
+def prove_pm2_65da(sys: System) -> Proof:
     """pm2.65da: ( ph -> -. ps ).
 
     Hypotheses: ( ( ph /\ ps ) -> ch ), ( ( ph /\ ps ) -> -. ch ).
@@ -724,8 +724,6 @@ def prove_pm2_65da(sys: Any) -> Any:
     Proof: pm2.65i(h1, h2) -> -.-.(ph -> -.ps) ; notnotri -> (ph -> -.ps).
     pm2.65i needs explicit args (ps not in conclusion).
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.65da")
     h1 = lb.hyp("pm2.65da.1", "( -. ( ph -> -. ps ) -> ch )")
     h2 = lb.hyp("pm2.65da.2", "( -. ( ph -> -. ps ) -> -. ch )")
@@ -734,7 +732,7 @@ def prove_pm2_65da(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_65ni(sys: Any) -> Any:
+def prove_pm2_65ni(sys: System) -> Proof:
     """pm2.65ni: ph.
 
     Hypotheses: ( -. ph -> ps ), ( -. ph -> -. ps ).
@@ -743,8 +741,6 @@ def prove_pm2_65ni(sys: Any) -> Any:
 
     Proof: pm2.65i(h1, h2) -> -. -. ph ; notnotri -> ph.
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.65ni")
     h1 = lb.hyp("pm2.65ni.1", "-. ph -> ps")
     h2 = lb.hyp("pm2.65ni.2", "-. ph -> -. ps")
@@ -753,7 +749,7 @@ def prove_pm2_65ni(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_61ii(sys: Any) -> Any:
+def prove_pm2_61ii(sys: System) -> Proof:
     """pm2.61ii: ch.
 
     Hypotheses: ( -. ph -> ( -. ps -> ch ) ), ( ph -> ch ), ( ps -> ch ).
@@ -763,8 +759,6 @@ def prove_pm2_61ii(sys: Any) -> Any:
     Proof: a1i(h3) -> (-.ph -> (ps -> ch)) ; pm2.61d(that, h1) -> (-.ph -> ch) ; pm2.61i(h2, that) -> ch.
     pm2.61d needs explicit args (ps not in conclusion).
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.61ii")
     h1 = lb.hyp("pm2.61ii.1", "-. ph -> ( -. ps -> ch )")
     h2 = lb.hyp("pm2.61ii.2", "ph -> ch")
@@ -775,7 +769,7 @@ def prove_pm2_61ii(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_61iii(sys: Any) -> Any:
+def prove_pm2_61iii(sys: System) -> Proof:
     """pm2.61iii: th.
 
     Hypotheses: ( -. ph -> ( -. ps -> ( -. ch -> th ) ) ), ( ph -> th ), ( ps -> th ), ( ch -> th ).
@@ -786,12 +780,10 @@ def prove_pm2_61iii(sys: Any) -> Any:
     Then pm2.61ii logic (inlined) gives (-.ch -> th).
     Finally pm2.61i with hyp4 gives th.
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.61iii")
     h1 = lb.hyp("pm2.61iii.1", "-. ph -> ( -. ps -> ( -. ch -> th ) )")
-    h2 = lb.hyp("pm2.61iii.2", "ph -> th")
-    h3 = lb.hyp("pm2.61iii.3", "ps -> th")
+    lb.hyp("pm2.61iii.2", "ph -> th")
+    lb.hyp("pm2.61iii.3", "ps -> th")
     h4 = lb.hyp("pm2.61iii.4", "ch -> th")
     # a1d on h2 and h3 to add -.ch antecedent
     s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", ref="a1d", note="a1d h2")
@@ -811,7 +803,7 @@ def prove_pm2_61iii(sys: Any) -> Any:
     return lb.build(res)
 
 
-def prove_pm2_61nii(sys: Any) -> Any:
+def prove_pm2_61nii(sys: System) -> Proof:
     """pm2.61nii: ch.
 
     Hypotheses: ( ph -> ( ps -> ch ) ), ( -. ph -> ch ), ( -. ps -> ch ).
@@ -821,8 +813,6 @@ def prove_pm2_61nii(sys: Any) -> Any:
     Proof: pm2.61d1(h1, h3) -> (ph -> ch) ; pm2.61i(that, h2) -> ch.
     pm2.61d1 needs explicit args (ps not in conclusion).
     """
-    from skfd.proof import ProofBuilder
-
     lb = ProofBuilder(sys, "pm2.61nii")
     h1 = lb.hyp("pm2.61nii.1", "ph -> ( ps -> ch )")
     h2 = lb.hyp("pm2.61nii.2", "-. ph -> ch")

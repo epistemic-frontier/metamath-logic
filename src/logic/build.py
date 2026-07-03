@@ -51,10 +51,22 @@ def build(ctx: BuildContextV2) -> None:
     _emit_rule_skeleton(mm, system, provable=provable)
 
     compiled_axioms = system.compile_axioms()
-    reserved = {"wi", "wn"}
+    reserved = {"wi", "wn", "wtru", "wfal"}
     builtins = system.builtins
-    # The linked prelude only defines the ¬ and → connectives.
-    supported_tokens = {builtins.neg, builtins.imp, builtins.lp, builtins.rp}
+    # Tokens for which a proof has an emittable lowering path. The prelude also
+    # exposes ∨ (wo), but disjunction is *not* listed here: proving a ∨-stated
+    # theorem (e.g. pm2.07) requires df-or plus biconditional rewriting, which
+    # this pure ¬/→ Hilbert system does not provide, so such proofs cannot be
+    # lowered. The nullary top/bottom constants T. / F. are emittable because
+    # they only appear as opaque substitution targets during ref-unification.
+    supported_tokens = {
+        builtins.neg,
+        builtins.imp,
+        builtins.tru,
+        builtins.fal,
+        builtins.lp,
+        builtins.rp,
+    }
     # Propositional variables that have a floating hypothesis in the prelude.
     floating_by_var = {
         prelude["ph"]: prelude["wph"],
@@ -101,7 +113,7 @@ def build(ctx: BuildContextV2) -> None:
             excluded[name] = f"construction failed: {exc}"
             continue
         if not _emittable(p):
-            excluded[name] = "uses a connective absent from the prelude (only ¬/→)"
+            excluded[name] = "uses a connective absent from the prelude"
             continue
         constructed[name] = p
 
@@ -144,6 +156,8 @@ def build(ctx: BuildContextV2) -> None:
         label_ids={
             "wi": prelude["wi"],
             "wn": prelude["wn"],
+            "wtru": prelude["wtru"],
+            "wfal": prelude["wfal"],
             "mp": ax_mp,
             "A1": ax_1,
             "A2": ax_2,

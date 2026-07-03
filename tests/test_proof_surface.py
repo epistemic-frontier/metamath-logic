@@ -24,8 +24,10 @@ def test_hilbert_registry_reports_known_unresolved_surface() -> None:
         reserved={"wi", "wn", "wa", "mp"},
     )
 
-    unknown = sorted(
-        (issue.lemma, issue.ref) for issue in result.issues if issue.kind == "unknown_ref"
+    # The registry is not fully clean: syl5com has a known construction bug
+    # ("mp: antecedent mismatch"), reported as a constructor_error.
+    constructor_errors = sorted(
+        issue.lemma for issue in result.issues if issue.kind == "constructor_error"
     )
-    assert ("ja", "pm2.61") in unknown
+    assert "syl5com" in constructor_errors
     assert result.ok is False

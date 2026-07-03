@@ -35,8 +35,8 @@ maintainers = [
 ]
 
 dependencies = [
-    "proof-scaffold==0.0.5",
-    "metamath-prelude==0.0.2",
+    "proof-scaffold==0.0.7",
+    "metamath-prelude==0.0.3",
 ]
 
 [project.urls]

@@ -4,12 +4,12 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from prelude.formula import Builtins
 from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, RequireRegistry, compile_wff
 from skfd.authoring.typing import PreludeTypingError
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 
+from ._builtins import PredicateBuiltins
 from ._structures import All
 from .axioms import make_axioms
 
@@ -22,7 +22,7 @@ from .axioms import make_axioms
 class PredicateSystem:
     interner: SymbolInterner
     names: NameResolver
-    builtins: Builtins
+    builtins: PredicateBuiltins
     axioms: Mapping[str, Any]
 
     @classmethod
@@ -33,7 +33,7 @@ class PredicateSystem:
         names: NameResolver,
         origin_ref: Any = None,
     ) -> PredicateSystem:
-        b = Builtins.ensure(interner, origin_ref=origin_ref)
+        b = PredicateBuiltins.ensure(interner, origin_ref=origin_ref)
         return cls(
             interner=interner,
             names=names,

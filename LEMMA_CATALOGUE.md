@@ -1,60 +1,135 @@
 # Lemma Catalogue
 
-| set.mm 标签 | 本地名称/函数 | 类别 | set.mm 链接 | 状态 |
-|-------------|----------------|------|-------------|------|
-| ax-1 | A1 | Axiom | file:///Users/mingli/MetaMath/metamath/set.mm#L679 | ✔️ 实现 |
-| ax-2 | A2 | Axiom | file:///Users/mingli/MetaMath/metamath/set.mm#L688 | ✔️ 实现 |
-| ax-3 | A3 | Axiom | file:///Users/mingli/MetaMath/metamath/set.mm#L701 | ✔️ 实现 |
-| ax-mp | mp | Rule | file:///Users/mingli/MetaMath/metamath/set.mm#L668 | ✔️ 实现 |
-| idi | idi | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L440 | ✔️ 实现 |
-| a1ii | a1ii | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L489 | ✔️ 实现 |
-| 2a1 | prove_2a1 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L923 | ✔️ 实现 |
-| 2a1d | prove_2a1d | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L908 | ✔️ 实现 |
-| a1d | prove_a1d | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L899 | ✔️ 实现 |
-| a1i | prove_a1i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L743 | ✔️ 实现 |
-| a1i13 | prove_a1i13 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L916 | ✔️ 实现 |
-| a2d | prove_a2d | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L930 | ✔️ 实现 |
-| a2i | prove_a2i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L770 | ✔️ 实现 |
-| com12 | prove_com12 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L959 | ✔️ 实现 |
-| con1 | prove_con1 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1918 | ✔️ 实现 |
-| con1i | prove_con1i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1927 | ✔️ 实现 |
-| con2 | prove_con2 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1828 | ✔️ 实现 |
-| con2i | prove_con2i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1861 | ✔️ 实现 |
-| con3 | prove_con3 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1975 | ✔️ 实现 |
-| con3i | prove_con3i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1983 | ✔️ 实现 |
-| con4 | prove_con4 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1635 | ✔️ 实现 |
-| con4i | prove_con4i | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1645 | ✔️ 实现 |
-| id | prove_id | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L870 | ✔️ 实现 |
-| idd | prove_idd | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L891 | ✔️ 实现 |
-| imim1 | prove_imim1 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1431 | ✔️ 实现 |
-| imim2 | prove_imim2 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1187 | ✔️ 实现 |
-| mpcom | prove_mpcom | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1015 | ✔️ 实现 |
-| mpd | prove_mpd | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L781 | ✔️ 实现 |
-| mpdd | prove_mpdd | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1055 | ✔️ 实现 |
-| mpid | prove_mpid | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1064 | ✔️ 实现 |
-| mt2 | prove_mt2 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L2336 | ✔️ 实现 |
-| mt3 | prove_mt3 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L2346 | ✔️ 实现 |
-| notnot | prove_L6_double_neg_intro | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1888 | ✔️ 实现 |
-| notnotr | prove_L7_double_neg_elim | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1780 | ✔️ 实现 |
-| nsyl | prove_nsyl | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1870 | ✔️ 实现 |
-| nsyl2 | prove_nsyl2 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1879 | ✔️ 实现 |
-| nsyl3 | prove_nsyl3 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1852 | ✔️ 实现 |
-| peirce | prove_L9_peirce | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L2357 | ✔️ 实现 |
-| pm2.18 | prove_pm2_18 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1761 | ✔️ 实现 |
-| pm2.21 | prove_pm2_21 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1724 | ✔️ 实现 |
-| pm2.24 | prove_pm2_24 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1730 | ✔️ 实现 |
-| pm2.27 | prove_pm2_27 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1046 | ✔️ 实现 |
-| pm2.43 | prove_pm2_43 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1171 | ✔️ 实现 |
-| pm2.61 | prove_pm2_61 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L2260 | ✔️ 实现 |
-| pm2.65 | prove_pm2_65 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L2266 | ✔️ 实现 |
-| syl | prove_syl | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L814 | ✔️ 实现 |
-| syl11 | prove_syl11 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L968 | ✔️ 实现 |
-| syl2im | prove_syl2im | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1034 | ✔️ 实现 |
-| syl2imc | prove_syl2imc | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1039 | ✔️ 实现 |
-| syl5 | prove_syl5 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L978 | ✔️ 实现 |
-| syl56 | prove_syl56 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L997 | ✔️ 实现 |
-| syl5com | prove_syl5com | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L949 | ✔️ 实现 |
-| syl6 | prove_syl6 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L988 | ✔️ 实现 |
-| syl6com | prove_syl6com | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1006 | ✔️ 实现 |
-| sylcom | prove_sylcom | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L940 | ✔️ 实现 |
-| syli | prove_syli | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L1024 | ✔️ 实现 |
+Generated by `uv run python tools/generate_lemma_catalogue.py`.
+
+This catalogue is derived from the Hilbert axiom/rule mappings, `SETMM_TO_HILBERT_LEMMAS`, and the current `logic.build` lowering subset.
+
+- Registry lemmas: 114
+- Lowered/exported registry lemmas: 113
+- Registered-only lemmas: 1
+
+| set.mm label | Local name/function | Category | set.mm link | Build status |
+|--------------|---------------------|----------|-------------|--------------|
+| ax-1 | A1 | Axiom | file:///Users/mingli/MetaMath/set.mm/set.mm#L679 | exported |
+| ax-2 | A2 | Axiom | file:///Users/mingli/MetaMath/set.mm/set.mm#L688 | exported |
+| ax-3 | A3 | Axiom | file:///Users/mingli/MetaMath/set.mm/set.mm#L701 | exported |
+| ax-mp | mp | Rule | file:///Users/mingli/MetaMath/set.mm/set.mm#L668 | exported |
+| wo | wo | Syntax | file:///Users/mingli/MetaMath/set.mm/set.mm#L7313 | exported |
+| wtru | wtru | Syntax | file:///Users/mingli/MetaMath/set.mm/set.mm#L12131 | exported |
+| wfal | wfal | Syntax | file:///Users/mingli/MetaMath/set.mm/set.mm#L12224 | exported |
+| idi | idi | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L467 | exported |
+| a1ii | a1ii | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L516 | exported |
+| 2a1d | prove_2a1d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L908 | lowered/exported |
+| a1d | prove_a1d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L899 | lowered/exported |
+| a1i | prove_a1i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L743 | lowered/exported |
+| a2d | prove_a2d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L930 | lowered/exported |
+| a2i | prove_a2i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L770 | lowered/exported |
+| com12 | prove_com12 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L959 | lowered/exported |
+| com23 | prove_com23 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1455 | lowered/exported |
+| con1 | prove_con1 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1918 | lowered/exported |
+| con1d | prove_con1d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1911 | lowered/exported |
+| con1i | prove_con1i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1927 | lowered/exported |
+| con2 | prove_con2 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1828 | lowered/exported |
+| con2d | prove_con2d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1822 | lowered/exported |
+| con2i | prove_con2i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1861 | lowered/exported |
+| con3 | prove_con3 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1975 | lowered/exported |
+| con3d | prove_con3d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1967 | lowered/exported |
+| con3i | prove_con3i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1983 | lowered/exported |
+| con4 | prove_con4 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1635 | lowered/exported |
+| con4d | prove_con4d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1653 | lowered/exported |
+| con4i | prove_con4i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1645 | lowered/exported |
+| conax1 | prove_conax1 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2095 | lowered/exported |
+| id | prove_id | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L870 | lowered/exported |
+| idd | prove_idd | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L891 | lowered/exported |
+| imim1 | prove_imim1 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1431 | lowered/exported |
+| imim2 | prove_imim2 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1187 | lowered/exported |
+| imim2i | prove_imim2i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L790 | lowered/exported |
+| imim3i | prove_imim3i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1244 | lowered/exported |
+| ja | prove_ja | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2214 | lowered/exported |
+| jad | prove_jad | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2223 | lowered/exported |
+| jaoi | prove_jaoi | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7380 | lowered/exported |
+| jarl | prove_jarl | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1735 | lowered/exported |
+| jarli | prove_jarli | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1743 | lowered/exported |
+| jarr | prove_jarr | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1572 | lowered/exported |
+| jarri | prove_jarri | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1580 | lowered/exported |
+| loolin | prove_loolin | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1610 | lowered/exported |
+| mpd | prove_mpd | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L781 | lowered/exported |
+| mpdd | prove_mpdd | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1055 | lowered/exported |
+| mpdi | prove_mpdi | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1073 | lowered/exported |
+| mt2d | prove_mt2d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1835 | lowered/exported |
+| mt4 | prove_mt4 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1662 | lowered/exported |
+| mt4d | prove_mt4d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1671 | lowered/exported |
+| mto | prove_mto | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2308 | lowered/exported |
+| notnot | prove_notnot | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1888 | lowered/exported |
+| notnotr | prove_notnotr | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1780 | lowered/exported |
+| notnotri | prove_notnotri | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1789 | lowered/exported |
+| nsyl3 | prove_nsyl3 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1852 | lowered/exported |
+| nsyl4 | prove_nsyl4 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2015 | lowered/exported |
+| pm1.4 | prove_pm1_4 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7464 | lowered/exported |
+| pm2.01 | prove_pm2_01 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2233 | lowered/exported |
+| pm2.01d | prove_pm2_01d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2248 | lowered/exported |
+| pm2.04 | prove_pm2_04 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1478 | lowered/exported |
+| pm2.07 | prove_pm2_07 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7680 | registered only: uses a connective outside the current lowering subset |
+| pm2.13 | prove_pm2_13 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7654 | lowered/exported |
+| pm2.18 | prove_pm2_18 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1761 | lowered/exported |
+| pm2.18d | prove_pm2_18d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1752 | lowered/exported |
+| pm2.18i | prove_pm2_18i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1768 | lowered/exported |
+| pm2.21 | prove_pm2_21 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1724 | lowered/exported |
+| pm2.21d | prove_pm2_21d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1706 | lowered/exported |
+| pm2.21dd | prove_pm2_21dd | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2284 | lowered/exported |
+| pm2.21ddALT | prove_pm2_21ddALT | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1716 | lowered/exported |
+| pm2.21fal | prove_pm2_21fal | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L12289 | lowered/exported |
+| pm2.21i | prove_pm2_21i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1688 | lowered/exported |
+| pm2.24 | prove_pm2_24 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1730 | lowered/exported |
+| pm2.24d | prove_pm2_24d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1959 | lowered/exported |
+| pm2.24i | prove_pm2_24i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1952 | lowered/exported |
+| pm2.24ii | prove_pm2_24ii | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1697 | lowered/exported |
+| pm2.25 | prove_pm2_25 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7605 | lowered/exported |
+| pm2.26 | prove_pm2_26 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7929 | lowered/exported |
+| pm2.27 | prove_pm2_27 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1046 | lowered/exported |
+| pm2.36 | prove_pm2_36 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L8147 | lowered/exported |
+| pm2.37 | prove_pm2_37 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L8152 | lowered/exported |
+| pm2.38 | prove_pm2_38 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L8142 | lowered/exported |
+| pm2.41 | prove_pm2_41 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7706 | lowered/exported |
+| pm2.43 | prove_pm2_43 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1171 | lowered/exported |
+| pm2.43d | prove_pm2_43d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1147 | lowered/exported |
+| pm2.43i | prove_pm2_43i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1138 | lowered/exported |
+| pm2.45 | prove_pm2_45 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7563 | lowered/exported |
+| pm2.46 | prove_pm2_46 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7568 | lowered/exported |
+| pm2.521 | prove_pm2_521 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2126 | lowered/exported |
+| pm2.521g | prove_pm2_521g | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2115 | lowered/exported |
+| pm2.521g2 | prove_pm2_521g2 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2121 | lowered/exported |
+| pm2.5g | prove_pm2_5g | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2086 | lowered/exported |
+| pm2.6 | prove_pm2_6 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2254 | lowered/exported |
+| pm2.61 | prove_pm2_61 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2260 | lowered/exported |
+| pm2.61d | prove_pm2_61d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2145 | lowered/exported |
+| pm2.61d1 | prove_pm2_61d1 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2154 | lowered/exported |
+| pm2.61d2 | prove_pm2_61d2 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2163 | lowered/exported |
+| pm2.61i | prove_pm2_61i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2172 | lowered/exported |
+| pm2.61ii | prove_pm2_61ii | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2182 | lowered/exported |
+| pm2.61iii | prove_pm2_61iii | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2204 | lowered/exported |
+| pm2.61nii | prove_pm2_61nii | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2193 | lowered/exported |
+| pm2.65 | prove_pm2_65 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2266 | lowered/exported |
+| pm2.65d | prove_pm2_65d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2293 | lowered/exported |
+| pm2.65da | prove_pm2_65da | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7038 | lowered/exported |
+| pm2.65i | prove_pm2_65i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2274 | lowered/exported |
+| pm2.65ni | prove_pm2_65ni | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L751985 | lowered/exported |
+| pm2.82 | prove_pm2_82 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L8180 | lowered/exported |
+| pm2.85 | prove_pm2_85 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L7868 | lowered/exported |
+| pm2.86 | prove_pm2_86 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1595 | lowered/exported |
+| pm2.86d | prove_pm2_86d | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1588 | lowered/exported |
+| pm2.86i | prove_pm2_86i | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1603 | lowered/exported |
+| simplim | prove_simplim | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L2080 | lowered/exported |
+| syl | prove_syl | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L814 | lowered/exported |
+| syl11 | prove_syl11 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L968 | lowered/exported |
+| syl2im | prove_syl2im | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1034 | lowered/exported |
+| syl2imc | prove_syl2imc | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1039 | lowered/exported |
+| syl5 | prove_syl5 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L978 | lowered/exported |
+| syl56 | prove_syl56 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L997 | lowered/exported |
+| syl5com | prove_syl5com | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L949 | lowered/exported |
+| syl6 | prove_syl6 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L988 | lowered/exported |
+| syl6com | prove_syl6com | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1006 | lowered/exported |
+| syl9 | prove_syl9 | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1375 | lowered/exported |
+| sylcom | prove_sylcom | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L940 | lowered/exported |
+| syld | prove_syld | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1093 | lowered/exported |
+| syli | prove_syli | Lemma | file:///Users/mingli/MetaMath/set.mm/set.mm#L1024 | lowered/exported |

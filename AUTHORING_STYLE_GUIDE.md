@@ -99,7 +99,8 @@ Current code references:
 
 - For a set.mm theorem `pm2.24`, the preferred local constructor is `prove_pm2_24`.
 - Keep a single registry mapping in [theorems.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/theorems.py).
-- Keep the public catalogue in [LEMMA_CATALOGUE.md](file:///Users/mingli/MetaMath/metamath-logic/LEMMA_CATALOGUE.md) in sync.
+- Keep [LEMMA_CATALOGUE.md](file:///Users/mingli/MetaMath/metamath-logic/LEMMA_CATALOGUE.md) generated from the registry and current build lowering filter:
+  `uv run python tools/generate_lemma_catalogue.py`.
 
 ## 4. Authoring DSL Rules (Expr)
 
@@ -114,9 +115,10 @@ Rule:
 
 - If a formula is “core API surface” (axioms, key definitions), prefer constructor-based Expr.
 - If a formula is “proof script glue” and readability improves, parser strings are acceptable.
--
-- Unicode style requirement:
-  - Parser strings must be written in Unicode authoring style (e.g. `φ`, `ψ`, `→`, `¬`, `∧`), not legacy ASCII shorthands like `ph/ps/->/-.`.
+- Parser string style:
+  - Unicode authoring style (e.g. `φ`, `ψ`, `→`, `¬`, `∧`) is preferred for new examples and public-facing proof scripts.
+  - ASCII/set.mm shorthands such as `ph`, `ps`, `->`, and `-.` remain supported and are common in current migration code and tests.
+  - Emitted IR and `.mm` are always ASCII canonical after name resolution.
 
 ### 4.2 Keep the symbol set minimal and explicit
 
@@ -139,9 +141,10 @@ Target step kinds:
 This is aligned with the lowered emission support in:
 [emit_lowered_lemmas](file:///Users/mingli/MetaMath/proof-scaffold/src/skfd/authoring/emit.py#L93-L270)
 
-Hard requirement:
+Hard requirements:
 
-- Every entry listed in [LEMMA_CATALOGUE.md](file:///Users/mingli/MetaMath/metamath-logic/LEMMA_CATALOGUE.md) must be lowerable.
+- Every catalogue row with status `lowered/exported` must be lowerable and verifier-backed.
+- Catalogue rows with status `registered only` are allowed during migration but must not be exported by `build.py`.
 
 ### 5.2 Separate semantics from commentary
 

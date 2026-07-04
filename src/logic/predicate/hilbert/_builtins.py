@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from prelude.formula import Builtins as PropositionalBuiltins
+from logic.propositional.hilbert._builtins import PropositionalBuiltins
 from skfd.authoring.formula import Wff
 from skfd.core.symbols import SymbolId, SymbolInterner
 

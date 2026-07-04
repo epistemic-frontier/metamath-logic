@@ -16,8 +16,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
-from prelude.structures import Imp, Not, chi, phi, psi
 from skfd.authoring.dsl import Axiom, export_axioms
+
+from ._structures import Imp, Not, chi, phi, psi
 
 # A1: φ → (ψ → φ)
 A1: Axiom = Imp(phi, Imp(psi, phi))

@@ -5,7 +5,6 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, TypeAlias, cast
 
-from prelude.formula import Builtins
 from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
 from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
 from skfd.authoring.formula import Wff
@@ -15,10 +14,11 @@ from skfd.names import NameResolver
 from skfd.proof import TacticRegistry
 
 from skfd.authoring.rules import RuleBundle
-from prelude.hilbert_rules import make_rules
+from ._builtins import PropositionalBuiltins
 from ._internal import _apply as _apply_impl
 from ._internal import _compile as _compile_impl
 from ._internal import _compile_axioms as _compile_axioms_impl
+from ._syntactic import make_rules
 from .axioms import SETMM_TO_HILBERT_LABELS as SETMM_TO_HILBERT_AXIOMS
 
 RuleFn: TypeAlias = Callable[..., Wff]
@@ -47,7 +47,7 @@ class System:
 
     interner: SymbolInterner
     names: NameResolver
-    builtins: Builtins
+    builtins: PropositionalBuiltins
     rule_app: RuleApp
     rules: Mapping[str, RuleFn]
     axioms: Mapping[str, Expr]
@@ -60,7 +60,7 @@ class System:
         names: NameResolver,
         origin_ref: Any = None,
     ) -> System:
-        b = Builtins.ensure(interner, origin_ref=origin_ref)
+        b = PropositionalBuiltins.ensure(interner, origin_ref=origin_ref)
 
         bundle: RuleBundle = make_rules(b)
         rule_app = RuleApp(sigs=bundle.sigs)
@@ -150,6 +150,7 @@ SETMM_TO_HILBERT: Mapping[str, str] = {
 __all__ = [
     "System",
     "make",
+    "PropositionalBuiltins",
     "SETMM_TO_HILBERT_AXIOMS",
     "SETMM_TO_HILBERT_RULES",
     "SETMM_TO_HILBERT",

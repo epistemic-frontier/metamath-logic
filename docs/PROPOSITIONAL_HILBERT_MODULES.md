@@ -3,6 +3,9 @@
 This document records the planned module boundaries for migrating the late
 propositional material from `set.mm` into `logic.propositional.hilbert`.
 
+Engineering guardrails for applying this plan live in
+`docs/ENGINEERING_GUARDRAILS.md`.
+
 The current package is still Hilbert-based. The alternative axiomatization
 sections are therefore represented as derivability results inside the Hilbert
 environment, not as independent proof kernels.

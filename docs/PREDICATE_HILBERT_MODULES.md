@@ -4,6 +4,9 @@ This document records the planned module boundaries for migrating first-order
 predicate calculus with equality from `set.mm` into
 `logic.predicate.hilbert`.
 
+Engineering guardrails for applying this plan live in
+`docs/ENGINEERING_GUARDRAILS.md`.
+
 The main `set.mm` predicate calculus section starts at line 14553 and ends
 just before ZF set theory starts at line 24578. Three predicate/equality
 syntax declarations are introduced earlier for the `df-tru` construction:

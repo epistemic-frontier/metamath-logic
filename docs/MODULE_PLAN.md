@@ -2,6 +2,9 @@
 
 Based on `docs/LOGIC_MIGRATION_GUIDE.md` (set.mm lines 649–24571 → Python).
 
+Engineering guardrails for this migration live in
+`docs/ENGINEERING_GUARDRAILS.md`.
+
 ## Module Hierarchy
 
 ```

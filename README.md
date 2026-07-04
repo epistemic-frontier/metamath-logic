@@ -5,9 +5,9 @@ It provides reusable propositional and predicate logic artifacts that downstream
 
 ## Versioning
 
-- Package version: `0.0.2`
-- ProofScaffold dependency: `proof-scaffold==0.0.5`
-- Prelude dependency: `metamath-prelude==0.0.2`
+- Package version: `0.0.4`
+- ProofScaffold dependency: `proof-scaffold==0.0.7`
+- Prelude dependency: `metamath-prelude==0.0.3`
 
 ## Installation
 
@@ -23,6 +23,7 @@ uv add metamath-logic
 
 - A ProofScaffold `build.py` entrypoint that emits the logic layer as a linkable unit.
 - Authoring-facing propositional and predicate logic libraries (Hilbert-style systems).
+- Early propositional syntax/helpers beyond the foundation frame: `wo`, `wtru`, `wfal`, `idi`, `a1ii`.
 - A migration guide for the logic layer refactor.
 
 ## Migration guide

@@ -12,8 +12,10 @@ All line numbers below refer to this exact commit of `set.mm`. If you change the
 
 ### Prelude vs Logic boundary (within first 700 lines)
 
-- Prelude: `set.mm` **lines 1–648**
-- Logic: starts at `set.mm` **line 649** (the `ax-mp` block begins)
+- Foundation prelude: the ambient part of `set.mm` **lines 1–648**
+  (`wff`, `|-`, schema variables and `$f`, `wn`, `wi`)
+- Logic: ordinary proof/syntax content, including `idi`, `a1ii`, `wo`,
+  `wtru`, `wfal`, and the `ax-mp` / `ax-1..3` block.
 
 Reference:
 - `ax-mp` block begins: [set.mm:L649](file:///Users/mingli/MetaMath/set.mm/set.mm#L649)
@@ -25,10 +27,14 @@ In the upstream modularization scheme, `set.mm` marks “logic” as the virtual
 - End marker: [set.mm:L24571](file:///Users/mingli/MetaMath/set.mm/set.mm#L24571)
 
 Operationally, for this project:
-- `metamath-prelude` covers the portion of `set-pred.mm` that is pure syntax/bootstrap (currently 1–648).
+- `metamath-prelude` covers only the global foundation scope: base typecodes,
+  schema variables and floating hypotheses, `wn`, and `wi`.
 - `metamath-logic` is responsible for the remainder of `set-pred.mm`, i.e. **649–24571**, and must eventually include both:
   - propositional calculus library
   - first-order predicate calculus with equality (and the “setvar” language needed by set theory)
+- The helper labels `idi` and `a1ii` are historically before line 649, but are
+  owned by `metamath-logic` because they use local `$e` hypotheses and are not
+  foundation-scope mechanics.
 
 ## Migration strategy (why we split, and what each split guarantees)
 
@@ -191,4 +197,3 @@ For each chunk:
 - Use set.mm label spelling for exported assertions (`ax-mp`, `ax-1`, `df-ex`, …).
 - Keep all syntax/primitive tokens interned under a global stable module id (the prelude already does this for base tokens).
 - When lowering proofs, use dependency-provided label `SymbolId`s where applicable (to avoid accidental duplicate labels).
-

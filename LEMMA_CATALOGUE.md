@@ -6,6 +6,8 @@
 | ax-2 | A2 | Axiom | file:///Users/mingli/MetaMath/metamath/set.mm#L688 | ✔️ 实现 |
 | ax-3 | A3 | Axiom | file:///Users/mingli/MetaMath/metamath/set.mm#L701 | ✔️ 实现 |
 | ax-mp | mp | Rule | file:///Users/mingli/MetaMath/metamath/set.mm#L668 | ✔️ 实现 |
+| idi | idi | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L440 | ✔️ 实现 |
+| a1ii | a1ii | Helper theorem | file:///Users/mingli/MetaMath/set.mm/set.mm#L489 | ✔️ 实现 |
 | 2a1 | prove_2a1 | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L923 | ✔️ 实现 |
 | 2a1d | prove_2a1d | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L908 | ✔️ 实现 |
 | a1d | prove_a1d | Lemma | file:///Users/mingli/MetaMath/metamath/set.mm#L899 | ✔️ 实现 |

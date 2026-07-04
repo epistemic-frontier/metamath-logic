@@ -30,6 +30,7 @@ def build(ctx: BuildContextV2) -> None:
     prelude = ctx.deps["metamath-prelude"]
 
     system = System.make(interner=mm.interner, names=ctx.names)
+    builtins = system.builtins
     coverage = getattr(ctx, "coverage", None)
     if coverage is not None:
         coverage.declare_registry("hilbert", SETMM_TO_HILBERT_LEMMAS)
@@ -50,15 +51,38 @@ def build(ctx: BuildContextV2) -> None:
     )
     _emit_rule_skeleton(mm, system, provable=provable)
 
+    ph = prelude["ph"]
+    ps = prelude["ps"]
+    mm.auto.use_existing_floating(ph, label=prelude["wph"])
+    mm.auto.use_existing_floating(ps, label=prelude["wps"])
+
+    wo = mm.sym.label("wo")
+    wtru = mm.sym.label("wtru")
+    wfal = mm.sym.label("wfal")
+    idi = mm.sym.label("idi")
+    a1ii = mm.sym.label("a1ii")
+
+    mm.a(wo, tc=wff, expr=[builtins.lp, ph, builtins.or_, ps, builtins.rp])
+    mm.a(wtru, tc=wff, expr=[builtins.tru])
+    mm.a(wfal, tc=wff, expr=[builtins.fal])
+
+    with mm.block():
+        mm.e(mm.sym.label("idi.1"), tc=provable, expr=[ph])
+        mm.p(idi, tc=provable, expr=[ph], proof=[mm.sym.label("idi.1")])
+
+    with mm.block():
+        mm.e(mm.sym.label("a1ii.1"), tc=provable, expr=[ph])
+        mm.e(mm.sym.label("a1ii.2"), tc=provable, expr=[ps])
+        mm.p(a1ii, tc=provable, expr=[ph], proof=[mm.sym.label("a1ii.1")])
+
     compiled_axioms = system.compile_axioms()
     reserved = {"wi", "wn", "wtru", "wfal"}
-    builtins = system.builtins
-    # Tokens for which a proof has an emittable lowering path. The prelude also
-    # exposes ∨ (wo), but disjunction is *not* listed here: proving a ∨-stated
-    # theorem (e.g. pm2.07) requires df-or plus biconditional rewriting, which
-    # this pure ¬/→ Hilbert system does not provide, so such proofs cannot be
-    # lowered. The nullary top/bottom constants T. / F. are emittable because
-    # they only appear as opaque substitution targets during ref-unification.
+    # Tokens for which a proof has an emittable lowering path. Disjunction is
+    # declared above, but it is not listed here: proving a ∨-stated theorem
+    # (e.g. pm2.07) requires df-or plus biconditional rewriting, which this
+    # pure ¬/→ Hilbert lowering path does not provide. The nullary top/bottom
+    # constants T. / F. are emittable because they only appear as opaque
+    # substitution targets during ref-unification.
     supported_tokens = {
         builtins.neg,
         builtins.imp,
@@ -88,8 +112,8 @@ def build(ctx: BuildContextV2) -> None:
     def _emittable(p: Proof) -> bool:
         """A proof is emittable only if every token is a supported connective
         (¬, →, parens) or a propositional variable with a floating hypothesis.
-        Proofs stated with e.g. ∨ or ⊥ (``F.``) cannot be lowered because the
-        prelude has no such symbol."""
+        Proofs stated with e.g. ∨ cannot be lowered until the logic package has
+        a df-or based lowering path."""
         for st in getattr(p, "steps", ()):
             w = getattr(st, "wff", None)
             if w is None:
@@ -102,7 +126,7 @@ def build(ctx: BuildContextV2) -> None:
 
     # Emit the maximal subset of the declared registry. Drop:
     #   - construction failures (e.g. syl5com: "mp: antecedent mismatch"),
-    #   - proofs using a connective absent from the prelude (e.g. pm2.07 uses ∨),
+    #   - proofs using a connective outside this lowering subset (e.g. pm2.07 uses ∨),
     #   - anything that transitively depends on an excluded theorem.
     constructed: dict[str, Proof] = {}
     excluded: dict[str, str] = {}
@@ -113,7 +137,7 @@ def build(ctx: BuildContextV2) -> None:
             excluded[name] = f"construction failed: {exc}"
             continue
         if not _emittable(p):
-            excluded[name] = "uses a connective absent from the prelude"
+            excluded[name] = "uses a connective outside the lowering subset"
             continue
         constructed[name] = p
 
@@ -156,8 +180,8 @@ def build(ctx: BuildContextV2) -> None:
         label_ids={
             "wi": prelude["wi"],
             "wn": prelude["wn"],
-            "wtru": prelude["wtru"],
-            "wfal": prelude["wfal"],
+            "wtru": wtru,
+            "wfal": wfal,
             "mp": ax_mp,
             "A1": ax_1,
             "A2": ax_2,
@@ -167,6 +191,11 @@ def build(ctx: BuildContextV2) -> None:
     )
 
     export_labels = [
+        "wo",
+        "wtru",
+        "wfal",
+        "idi",
+        "a1ii",
         "ax-1",
         "ax-2",
         "ax-3",

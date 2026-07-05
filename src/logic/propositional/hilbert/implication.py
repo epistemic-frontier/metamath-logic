@@ -396,11 +396,6 @@ def prove_a1d(sys: System) -> Proof:
     return lb.build(s6)
 
 
-# -----------------------------------------------------------------------------
-# Expanded lemmas
-# -----------------------------------------------------------------------------
-
-
 def prove_a2d(sys: System) -> Proof:
     """
     a2d: φ → ((ψ → χ) -> (ψ → θ)). Hyp: φ → (ψ → (χ → θ)).
@@ -593,11 +588,6 @@ def prove_pm2_37(sys: System) -> Proof:
     return lb.build(res)
 
 
-# ============================================================
-# pm2.62 (disjunction to implication)
-# ============================================================
-
-
 def prove_pm2_4(sys: System) -> Proof:
     """
     pm2.4: ( ¬ φ → ( ¬ φ → ψ ) ) → ( ¬ φ → ψ ).
@@ -616,11 +606,6 @@ def prove_pm2_4(sys: System) -> Proof:
         note="pm2.43",
     )
     return lb.build(res)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# pm2.63: ( ¬ φ → ψ ) → ( ( ¬ ¬ φ → ψ ) → ψ )
-# ══════════════════════════════════════════════════════════════════════════════
 
 
 def prove_pm2_41(sys: System) -> Proof:
@@ -827,25 +812,6 @@ def prove_pm2_86d(sys: System) -> Proof:
     return lb.build(res)
 
 
-def prove_pm2_86(sys: System) -> Proof:
-    """pm2.86: ((ph -> ps) -> (ph -> ch)) -> (ph -> (ps -> ch))."""
-    lb = ProofBuilder(sys, "pm2.86")
-    s1 = lb.ref(
-        "s1",
-        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )",
-        ref="id",
-        note="id",
-    )
-    res = lb.ref(
-        "res",
-        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ph -> ( ps -> ch ) )",
-        s1,
-        ref="pm2.86d",
-        note="pm2.86d",
-    )
-    return lb.build(res)
-
-
 def prove_pm2_86i(sys: System) -> Proof:
     """pm2.86i: ph -> (ps -> ch).  Hyp: ((ph -> ps) -> (ph -> ch))."""
     lb = ProofBuilder(sys, "pm2.86i")
@@ -855,24 +821,131 @@ def prove_pm2_86i(sys: System) -> Proof:
     return lb.build(res)
 
 
-def prove_pm2_21fal(sys: System) -> Proof:
-    """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
-    lb = ProofBuilder(sys, "pm2.21fal")
-    h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
-    h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
-    res = lb.ref("res", "ph -> F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
+def prove_imim2i(sys: System) -> Proof:
+    """imim2i: (ψ → χ) → ((φ → ψ) → (φ → χ)). Hyp: ψ → χ. (Contributed by NM, 28-Dec-1992.)"""
+    lb = ProofBuilder(sys, "imim2i")
+    h = lb.hyp("imim2i.1", "ψ → χ")
+    s1 = lb.ref("s1", "( ψ → χ ) → ( φ → ( ψ → χ ) )", ref="A1", note="A1")
+    s2 = lb.mp("s2", h, s1, note="MP h, A1")
+    s3 = lb.ref("s3", "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )", ref="A2", note="A2")
+    s4 = lb.mp("s4", s2, s3, note="MP s2, A2")
+    return lb.build(s4)
+
+
+def prove_imim3i(sys: System) -> Proof:
+    """imim3i: (th -> ph) -> ((th -> ps) -> (th -> ch)).  Hyp: ph -> (ps -> ch).
+
+    Inference adding three nested antecedents.
+    (Contributed by NM, 19-Dec-2006.)
+    set.mm proof: imim2i a2d.
+    """
+    lb = ProofBuilder(sys, "imim3i")
+    h1 = lb.hyp("imim3i.1", "( ph -> ( ps -> ch ) )")
+    s1 = lb.ref("s1", "( ( th -> ph ) -> ( th -> ( ps -> ch ) ) )", h1, ref="imim2i", note="imim2i")
+    res = lb.ref(
+        "res", "( ( th -> ph ) -> ( ( th -> ps ) -> ( th -> ch ) ) )", s1, ref="a2d", note="a2d"
+    )
     return lb.build(res)
 
 
-def prove_pm2_85(sys: System) -> Proof:
-    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
-    Under df-or, this is pm2.86 with -.ph for ph.
+def prove_jarr(sys: System) -> Proof:
+    """jarr: ((ph → ps) → ch) → (ps → ch).
+
+    "Jar" — weakening of the consequent (backwards "ja").
+    (Contributed by NM, 21-Jun-1993.)
+    set.mm proof: ax-1 imim1i.
+
+    Derivation: ax-1 gives ps → (ph → ps). Then imim1 chains this
+    with the target to get ((ph → ps) → ch) → (ps → ch).
     """
-    lb = ProofBuilder(sys, "pm2.85")
-    res = lb.ref(
-        "res",
-        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
-        ref="pm2.86",
-        note="pm2.86 (df-or)",
+    lb = ProofBuilder(sys, "jarr")
+    s1 = lb.ref("s1", "( ps → ( ph → ps ) )", ref="A1", note="A1")
+    s2 = lb.ref(
+        "s2",
+        "( ( ps → ( ph → ps ) ) → ( ( ( ph → ps ) → ch ) → ( ps → ch ) ) )",
+        ref="imim1",
+        note="imim1",
     )
+    res = lb.mp("res", s1, s2, note="MP A1, imim1")
+    return lb.build(res)
+
+
+def prove_jarri(sys: System) -> Proof:
+    """jarri: ps -> ch.  Hyp: ((ph -> ps) -> ch)."""
+    lb = ProofBuilder(sys, "jarri")
+    h1 = lb.hyp("jarri.1", "( ph -> ps ) -> ch")
+    s1 = lb.ref("s1", "ps -> ( ph -> ps )", ref="A1", note="A1")
+    res = lb.ref("res", "ps -> ch", s1, h1, ref="syl", note="syl")
+    return lb.build(res)
+
+
+def prove_loolin(sys: System) -> Proof:
+    """loolin: ((ph → ps) → (ps → ph)) → (ps → ph).
+
+    An alternate for the Linearity Axiom of the infinite-valued sentential
+    logic (L-infinity) of Lukasiewicz.
+    (Contributed by Mel L. O'Cat, 12-Aug-2004.)
+    set.mm proof: jarr pm2.43d.
+    """
+    lb = ProofBuilder(sys, "loolin")
+    s1 = lb.ref(
+        "s1", "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ( ps → ph ) ) )", ref="jarr", note="jarr"
+    )
+    res = lb.ref(
+        "res", "( ( ( ph → ps ) → ( ps → ph ) ) → ( ps → ph ) )", s1, ref="pm2.43d", note="pm2.43d"
+    )
+    return lb.build(res)
+
+
+def prove_mpdi(sys: System) -> Proof:
+    """mpdi: ph → (ps → th). Hyp1: ps → ch, Hyp2: ph → (ps → (ch → th)).
+
+    A nested modus ponens deduction.
+    (Contributed by NM, 16-Apr-2005.)
+    (Proof shortened by Mel L. O'Cat, 15-Jan-2008.)
+    set.mm proof: a1i mpdd.
+    """
+    lb = ProofBuilder(sys, "mpdi")
+    h1 = lb.hyp("mpdi.1", "( ps → ch )")
+    h2 = lb.hyp("mpdi.2", "( ph → ( ps → ( ch → th ) ) )")
+    s1 = lb.ref("s1", "( ph → ( ps → ch ) )", h1, ref="a1i", note="a1i")
+    res = lb.ref("res", "( ph → ( ps → th ) )", s1, h2, ref="mpdd", note="mpdd")
+    return lb.build(res)
+
+
+def prove_pm2_43d(sys: System) -> Proof:
+    """pm2.43d: ph → (ps → ch). Hyp: ph → (ps → (ps → ch)).
+
+    Deduction absorbing redundant antecedent.
+    (Contributed by NM, 18-Aug-1993.)
+    set.mm proof: id mpdi.
+    """
+    lb = ProofBuilder(sys, "pm2.43d")
+    h1 = lb.hyp("pm2.43d.1", "( ph → ( ps → ( ps → ch ) ) )")
+    s_id = lb.ref("s_id", "( ps → ps )", ref="id", note="id")
+    res = lb.ref("res", "( ph → ( ps → ch ) )", s_id, h1, ref="mpdi", note="mpdi")
+    return lb.build(res)
+
+
+def prove_pm2_43i(sys: System) -> Proof:
+    """pm2.43i: ph -> ps.  Hyp: ph -> (ph -> ps).
+
+    Inference absorbing redundant antecedent.  Associated with pm2.43.
+    (Contributed by NM, 10-Jan-1993.)
+    set.mm proof: id mpd.
+    """
+    lb = ProofBuilder(sys, "pm2.43i")
+    h1 = lb.hyp("pm2.43i.1", "( ph -> ( ph -> ps ) )")
+    s1 = lb.ref("s1", "( ph -> ph )", ref="id", note="id")
+    res = lb.ref("res", "( ph -> ps )", s1, h1, ref="mpd", note="mpd")
+    return lb.build(res)
+
+
+def prove_syld(sys: System) -> Proof:
+    """syld: φ → (ψ → θ). Hyp: φ → (ψ → χ), φ → (χ → θ). (Contributed by NM, 5-Aug-1993.)"""
+    lb = ProofBuilder(sys, "syld")
+    h1 = lb.hyp("syld.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("syld.2", "φ → ( χ → θ )")
+    s1 = lb.ref("s1", "φ → ( ψ → ( χ → θ ) )", h2, ref="a1d", note="a1d")
+    res = lb.ref("res", "φ → ( ψ → θ )", h1, s1, ref="mpdd", note="mpdd")
     return lb.build(res)

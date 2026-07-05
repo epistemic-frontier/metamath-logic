@@ -65,16 +65,57 @@ logic/propositional/hilbert/
   _structures.py     # Language skeleton: Vars + constructors only
   axioms.py          # Axiom schemas (Expr only)
   _syntactic.py      # Token-level rule skeleton (mp/wi/wn/wa) if needed
-  lemmas/*.py        # Lemma proof scripts (author-facing)
-  theorems.py        # set.mm label → local lemma constructor registry
+  implication.py     # Proof scripts, by category (see placement rule below)
+  negation.py
+  disjunction.py
+  conjunction.py
+  equivalence.py
+  constants.py
+  syllogism.py       # frozen legacy subdivision of implication (see below)
+  lemmas.py          # pure re-export shim (NO proof defs)
+  theorems.py        # set.mm label → local lemma constructor registry (shim)
   __init__.py        # System facade (author_env/compile/apply)
 ```
+
+### Proof placement rule (where a `prove_*` lives)
+
+- **Every `prove_*` is defined in exactly one category file.** Never define the
+  same proof in two modules.
+- **Choose the category file from the set.mm *section* the label lives in**,
+  which set.mm keys off the *last-introduced connective in the statement* (not
+  the proof). Inference/deduction variants (`*i`, `*d`, `*dd`, `*ii`) live with
+  their closed form.
+
+  | set.mm section | file |
+  |---|---|
+  | Logical implication (pure `→`) | `implication.py` |
+  | Logical negation (`¬`) | `negation.py` |
+  | Logical equivalence (`↔`) | `equivalence.py` |
+  | Logical disjunction (`∨`) | `disjunction.py` |
+  | Logical conjunction (`∧`) | `conjunction.py` |
+  | True/false constants (`⊤`/`⊥`) | `constants.py` |
+  | Stoic / mixed connectives | `stoic.py` |
+
+- `syllogism.py` has **no** set.mm counterpart (`syl*`/`com*` are all in the
+  "Logical implication" section). Treat it as a frozen legacy bucket: leave its
+  existing contents, but **place new proofs by the rule above** — nothing new
+  goes into `syllogism.py`.
+- Category files must **not** import from one another; proof steps reference
+  lemmas by string (`ref="pm2.18"`), so placement never creates import edges.
+- Known legacy misplacements exist (e.g. `notnot`/`notnotr`/`pm2_18` in
+  `implication.py`, `pm2_01`/`pm2_43` in `syllogism.py`). Do not mass-relocate
+  them (pure churn); apply the rule to new and moved code.
+- `lemmas.py` and `theorems.py` are **pure re-export shims** — they must contain
+  no `def prove_*`. `lemmas.py` re-exports the full surface (imports from the
+  category files + `__all__`); `theorems.py` holds the
+  `SETMM_TO_HILBERT_LEMMAS` registry.
 
 Current code references:
 
 - Language skeleton: [hilbert/_structures.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/_structures.py)
 - Axioms: [hilbert/axioms.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/axioms.py)
-- Lemmas (current, to be split): [hilbert/lemmas.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/lemmas.py)
+- Proof scripts by category: [hilbert/implication.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/implication.py), [negation.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/negation.py), [disjunction.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/disjunction.py), [constants.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/constants.py)
+- Re-export shim: [hilbert/lemmas.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/lemmas.py)
 - Registry: [hilbert/theorems.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/theorems.py)
 
 ## 3. Naming Conventions

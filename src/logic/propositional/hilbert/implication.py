@@ -47,7 +47,7 @@ def prove_simplim(sys: System) -> Proof:
 
 def prove_a1i(sys: System) -> Proof:
     """
-    a1i: φ → (ψ → φ).
+    a1i: ψ → φ.
 
     Hyp: φ
     Concl: ψ → φ
@@ -358,42 +358,22 @@ def prove_syl6(sys: System) -> Proof:
 
 
 def prove_a1d(sys: System) -> Proof:
-    """
-    a1d: φ → (χ → ψ).
+    """a1d: φ → (χ → ψ).
 
-    Hyp: φ → ψ
-    Concl: φ → (χ → ψ)
+    Hyp: φ → ψ, Concl: φ → (χ → ψ).
 
     Deduction introducing an embedded antecedent.  Deduction form of ~ ax-1
-           and ~ a1i .  (Contributed by NM, 5-Jan-1993.)  (Proof shortened by
-           Stefan Allan, 20-Mar-2006.)
-
+    and ~ a1i .  (Contributed by NM, 5-Jan-1993.)  (Proof shortened by
+    Stefan Allan, 20-Mar-2006.)
     """
     lb = ProofBuilder(sys, "a1d")
 
     hyp_wff = lb.hyp("a1d.1", "φ → ψ")
 
-    s1 = lb.ref("s1", "ψ → ( χ → ψ )", ref="A1", note="A1")
+    s1 = lb.ref("s1", "ψ → (χ → ψ)", ref="A1", note="A1")
+    res = lb.ref("res", "φ → (χ → ψ)", hyp_wff, s1, ref="syl", note="syl")
 
-    s2 = lb.ref(
-        "s2",
-        "( ψ → ( χ → ψ ) ) -> ( φ → ( ψ → ( χ → ψ ) ) )",
-        ref="A1",
-        note="A1 (syl)",
-    )
-    s3 = lb.mp("s3", s1, s2, "MP s1, s2")
-
-    s4 = lb.ref(
-        "s4",
-        "( φ → ( ψ → ( χ → ψ ) ) ) -> ( ( φ → ψ ) -> ( φ → ( χ → ψ ) ) )",
-        ref="A2",
-        note="A2 (syl)",
-    )
-    s5 = lb.mp("s5", s3, s4, "MP s3, s4")
-
-    s6 = lb.mp("s6", hyp_wff, s5, "MP hyp, s5")
-
-    return lb.build(s6)
+    return lb.build(res)
 
 
 def prove_a2d(sys: System) -> Proof:
@@ -714,7 +694,26 @@ def prove_pm2_8(sys: System) -> Proof:
 
 
 def prove_id(sys: System) -> Proof:
+    """id: φ → φ.
+
+    Principle of identity.  Theorem *2.08 of [WhiteheadRussell] p. 101.
+    For a shorter proof using ~ ax-2 see ~ idALT .
+    (Contributed by NM, 30-Sep-1992.)
+    """
     lb = ProofBuilder(sys, "id")
+    s1 = lb.ref("s1", "φ → ( φ → φ )", ref="A1", note="ax-1")
+    s2 = lb.ref("s2", "φ → ( ( φ → φ ) → φ )", ref="A1", note="ax-1")
+    res = lb.ref("res", "φ → φ", s1, s2, ref="mpd", note="mpd")
+    return lb.build(res)
+
+
+def prove_idALT(sys: System) -> Proof:
+    """idALT: φ → φ. Alternate proof of id directly from the axioms.
+
+    (Contributed by NM, 30-Sep-1992.)  (Proof modification is discouraged.)
+    (New usage is discouraged.)
+    """
+    lb = ProofBuilder(sys, "idALT")
 
     s1 = lb.ref("s1", "φ → ( φ → φ )", ref="A1", note="A1")
     s2 = lb.ref(
@@ -745,6 +744,21 @@ def prove_2a1d(sys: System) -> Proof:
     res = lb.ref("res", "ph → ( ch → ( th → ps ) )", s1, ref="a1d", note="a1d")
     return lb.build(res)
 
+def prove_2a1i(sys: System) -> Proof:
+    """2a1i: ps → (ch → ph).
+
+    Hyp: ph
+    Concl: ps → (ch → ph)
+
+    Inference introducing two nested antecedents.  Inference associated
+    with ~ 2a1 .  (Contributed by NM, 5-Jan-1993.)
+
+    """
+    lb = ProofBuilder(sys, "2a1i")
+    hyp = lb.hyp("2a1i.1", "ph")
+    s1 = lb.ref("s1", "ch → ph", hyp, ref="a1i", note="a1i")
+    res = lb.ref("res", "ps → ( ch → ph )", s1, ref="a1i", note="a1i")
+    return lb.build(res)
 
 def prove_a1i13(sys: System) -> Proof:
     """a1i13: ph → (ps → (ch → th)). Hyp: ps → th."""
@@ -786,8 +800,6 @@ def prove_mpdd(sys: System) -> Proof:
     s1 = lb.ref("s1", "( ph → ( ( ps → ch ) → ( ps → th ) ) )", h2, ref="a2d", note="a2d")
     res = lb.ref("res", "( ph → ( ps → th ) )", h1, s1, ref="mpd", note="mpd")
     return lb.build(res)
-
-
 def prove_mpid(sys: System) -> Proof:
     """mpid: φ → (ψ → θ). Hyp: φ → χ, φ → (ψ → (χ → θ)). (Contributed by NM, 14-Dec-2004.)"""
     lb = ProofBuilder(sys, "mpid")
@@ -948,4 +960,133 @@ def prove_syld(sys: System) -> Proof:
     h2 = lb.hyp("syld.2", "φ → ( χ → θ )")
     s1 = lb.ref("s1", "φ → ( ψ → ( χ → θ ) )", h2, ref="a1d", note="a1d")
     res = lb.ref("res", "φ → ( ψ → θ )", h1, s1, ref="mpdd", note="mpdd")
+    return lb.build(res)
+
+
+def prove_mp2(sys: System) -> Proof:
+    """mp2: χ.
+
+    Hyp 1: φ
+    Hyp 2: ψ
+    Hyp 3: φ → (ψ → χ)
+    Concl: χ
+
+    A double modus ponens inference.
+    (Contributed by NM, 5-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "mp2")
+    h1 = lb.hyp("mp2.1", "φ")
+    h2 = lb.hyp("mp2.2", "ψ")
+    h3 = lb.hyp("mp2.3", "φ → ( ψ → χ )")
+    s1 = lb.mp("s1", h1, h3, "MP mp2.1, mp2.3")
+    res = lb.mp("res", h2, s1, "MP mp2.2, s1")
+    return lb.build(res)
+
+
+def prove_mp2b(sys: System) -> Proof:
+    """mp2b: χ.
+
+    Hyp 1: φ
+    Hyp 2: φ → ψ
+    Hyp 3: ψ → χ
+    Concl: χ
+
+    A chained modus ponens inference.
+    (Contributed by NM, 5-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "mp2b")
+    h1 = lb.hyp("mp2b.1", "φ")
+    h2 = lb.hyp("mp2b.2", "φ → ψ")
+    h3 = lb.hyp("mp2b.3", "ψ → χ")
+    s1 = lb.mp("s1", h1, h2, "MP mp2b.1, mp2b.2")
+    res = lb.mp("res", s1, h3, "MP s1, mp2b.3")
+    return lb.build(res)
+
+
+def prove_mp1i(sys: System) -> Proof:
+    """mp1i: χ → ψ.
+
+    Hyp 1: φ
+    Hyp 2: φ → ψ
+    Concl: χ → ψ
+
+    Inference adding an antecedent to a modus ponens.
+    (Contributed by NM, 5-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "mp1i")
+    h1 = lb.hyp("mp1i.1", "φ")
+    h2 = lb.hyp("mp1i.2", "φ → ψ")
+    s1 = lb.mp("s1", h1, h2, "MP mp1i.1, mp1i.2")
+    res = lb.ref("res", "χ → ψ", s1, ref="a1i", note="a1i")
+    return lb.build(res)
+
+
+def prove_tbw_ax2(sys: System) -> Proof:
+    """tbw-ax2: ( ph -> ( ps -> ph ) ).
+
+    Restatement of ax-1.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "tbw-ax2")
+    res = lb.ref("res", "ph → ( ps → ph )", ref="A1", note="A1")
+    return lb.build(res)
+
+
+def prove_3syl(sys: System) -> Proof:
+    """3syl: φ → θ.
+
+    Hyp 1: φ → ψ
+    Hyp 2: ψ → χ
+    Hyp 3: χ → θ
+    Concl: φ → θ
+
+    Nested syllogism inference.
+    (Contributed by NM, 31-Dec-1993.)
+    """
+    lb = ProofBuilder(sys, "3syl")
+    h1 = lb.hyp("3syl.1", "φ → ψ")
+    h2 = lb.hyp("3syl.2", "ψ → χ")
+    h3 = lb.hyp("3syl.3", "χ → θ")
+    s1 = lb.ref("s1", "ψ → θ", h2, h3, ref="syl", note="syl 3syl.2, 3syl.3")
+    res = lb.ref("res", "φ → θ", h1, s1, ref="syl", note="syl 3syl.1, s1")
+    return lb.build(res)
+
+
+def prove_4syl(sys: System) -> Proof:
+    """4syl: φ → τ.
+
+    Hyp 1: φ → ψ
+    Hyp 2: ψ → χ
+    Hyp 3: χ → θ
+    Hyp 4: θ → τ
+    Concl: φ → τ
+
+    Nested syllogism inference.
+    (Contributed by NM, 12-May-1993.)
+    """
+    lb = ProofBuilder(sys, "4syl")
+    h1 = lb.hyp("4syl.1", "φ → ψ")
+    h2 = lb.hyp("4syl.2", "ψ → χ")
+    h3 = lb.hyp("4syl.3", "χ → θ")
+    h4 = lb.hyp("4syl.4", "θ → τ")
+    s1 = lb.ref("s1", "φ → θ", h1, h2, h3, ref="3syl", note="3syl 4syl.1, 4syl.2, 4syl.3")
+    res = lb.ref("res", "φ → τ", s1, h4, ref="syl", note="syl s1, 4syl.4")
+    return lb.build(res)
+
+
+def prove_mpi(sys: System) -> Proof:
+    """mpi: φ → χ.
+
+    Hyp 1: ψ
+    Hyp 2: φ → (ψ → χ)
+    Concl: φ → χ
+
+    An inference form of modus ponens.
+    (Contributed by NM, 5-Jul-1994.)
+    set.mm proof: a1i mpd.
+    """
+    lb = ProofBuilder(sys, "mpi")
+    h1 = lb.hyp("mpi.1", "ψ")
+    h2 = lb.hyp("mpi.2", "φ → ( ψ → χ )")
+    s1 = lb.ref("s1", "φ → ψ", h1, ref="a1i", note="a1i mpi.1")
+    res = lb.ref("res", "φ → χ", s1, h2, ref="mpd", note="mpd s1, mpi.2")
     return lb.build(res)

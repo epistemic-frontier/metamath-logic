@@ -3,9 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from logic.propositional.hilbert._builtins import PropositionalBuiltins
 from skfd.authoring.formula import Wff
 from skfd.core.symbols import SymbolId, SymbolInterner
+
+from logic.propositional.hilbert._builtins import PropositionalBuiltins
 
 PREDICATE_BUILTINS_MODULE_ID = "logic.predicate"
 
@@ -19,10 +20,17 @@ class PredicateBuiltins:
     imp: SymbolId
     neg: SymbolId
     and_: SymbolId
-    forall: SymbolId  # "A."
-    exist: SymbolId  # "E."
+    forall: SymbolId  # "∀"
+    exist: SymbolId  # "∃"
+    eu: SymbolId  # "E!"
+    moeu: SymbolId  # "E*"
+    nf: SymbolId  # "F/"
     eq: SymbolId  # "="
     elem: SymbolId  # "e."
+    cv: SymbolId  # "cv"
+    sb_lb: SymbolId  # "["
+    sb_slash: SymbolId  # "/"
+    sb_rb: SymbolId  # "]"
 
     @staticmethod
     def ensure(
@@ -38,11 +46,32 @@ class PredicateBuiltins:
         exist = interner.intern(
             origin_module_id=origin_module_id, local_name="E.", kind="Const", origin_ref=origin_ref
         )
+        eu = interner.intern(
+            origin_module_id=origin_module_id, local_name="E!", kind="Const", origin_ref=origin_ref
+        )
+        moeu = interner.intern(
+            origin_module_id=origin_module_id, local_name="E*", kind="Const", origin_ref=origin_ref
+        )
         eq = interner.intern(
             origin_module_id=origin_module_id, local_name="=", kind="Const", origin_ref=origin_ref
         )
         elem = interner.intern(
             origin_module_id=origin_module_id, local_name="e.", kind="Const", origin_ref=origin_ref
+        )
+        cv = interner.intern(
+            origin_module_id=origin_module_id, local_name="cv", kind="Const", origin_ref=origin_ref
+        )
+        nf = interner.intern(
+            origin_module_id=origin_module_id, local_name="F/", kind="Const", origin_ref=origin_ref
+        )
+        sb_lb = interner.intern(
+            origin_module_id=origin_module_id, local_name="[", kind="Const", origin_ref=origin_ref
+        )
+        sb_slash = interner.intern(
+            origin_module_id=origin_module_id, local_name="/", kind="Const", origin_ref=origin_ref
+        )
+        sb_rb = interner.intern(
+            origin_module_id=origin_module_id, local_name="]", kind="Const", origin_ref=origin_ref
         )
         return PredicateBuiltins(
             lp=core.lp,
@@ -52,19 +81,36 @@ class PredicateBuiltins:
             and_=core.and_,
             forall=forall,
             exist=exist,
+            eu=eu,
+            moeu=moeu,
+            nf=nf,
             eq=eq,
             elem=elem,
+            cv=cv,
+            sb_lb=sb_lb,
+            sb_slash=sb_slash,
+            sb_rb=sb_rb,
         )
 
 
 def forall2(b: PredicateBuiltins, x: Wff, phi: Wff) -> Wff:
-    """Construct A. x phi."""
+    """Construct A. x φ."""
     return Wff("wff", (b.forall, *x.tokens, *phi.tokens))
 
 
 def exist(b: PredicateBuiltins, x: Wff, phi: Wff) -> Wff:
-    """Construct E. x phi."""
+    """Construct E. x φ."""
     return Wff("wff", (b.exist, *x.tokens, *phi.tokens))
+
+
+def eu(b: PredicateBuiltins, x: Wff, phi: Wff) -> Wff:
+    """Construct E! x φ."""
+    return Wff("wff", (b.eu, *x.tokens, *phi.tokens))
+
+
+def moeu(b: PredicateBuiltins, x: Wff, phi: Wff) -> Wff:
+    """Construct E* x φ."""
+    return Wff("wff", (b.moeu, *x.tokens, *phi.tokens))
 
 
 def eq(b: PredicateBuiltins, x: Wff, y: Wff) -> Wff:
@@ -75,11 +121,31 @@ def elem(b: PredicateBuiltins, x: Wff, z: Wff) -> Wff:
     return Wff("wff", (*x.tokens, b.elem, *z.tokens))
 
 
+def cv(b: PredicateBuiltins, x: Wff) -> Wff:
+    """Construct class expression from setvar x."""
+    return Wff("class", (b.cv, *x.tokens))
+
+
+def nf(b: PredicateBuiltins, x: Wff, phi: Wff) -> Wff:
+    """Construct F/ x φ."""
+    return Wff("wff", (b.nf, *x.tokens, *phi.tokens))
+
+
+def wsb(b: PredicateBuiltins, y: Wff, x: Wff, phi: Wff) -> Wff:
+    """Construct [ y / x ] φ."""
+    return Wff("wff", (b.sb_lb, *y.tokens, b.sb_slash, *x.tokens, b.sb_rb, *phi.tokens))
+
+
 __all__ = [
     "PREDICATE_BUILTINS_MODULE_ID",
     "PredicateBuiltins",
+    "cv",
     "elem",
     "eq",
+    "eu",
     "exist",
+    "moeu",
     "forall2",
+    "nf",
+    "wsb",
 ]

@@ -28,12 +28,13 @@ from skfd.proof import Proof, ProofBuilder
 
 from . import System
 
+
 def prove_pm2_21fal(sys: System) -> Proof:
-    """pm2.21fal: ph -> F. .  Hyps: ph -> ps, ph -> -. ps."""
+    """pm2.21fal: φ → F. .  Hyps: φ → ψ, φ → -. ψ."""
     lb = ProofBuilder(sys, "pm2.21fal")
-    h1 = lb.hyp("pm2.21fal.1", "ph -> ps")
-    h2 = lb.hyp("pm2.21fal.2", "ph -> -. ps")
-    res = lb.ref("res", "ph -> F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
+    h1 = lb.hyp("pm2.21fal.1", "φ → ψ")
+    h2 = lb.hyp("pm2.21fal.2", "φ → -. ψ")
+    res = lb.ref("res", "φ → F.", h1, h2, ref="pm2.21dd", note="pm2.21dd")
     return lb.build(res)
 
 

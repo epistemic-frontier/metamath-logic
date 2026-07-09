@@ -5,8 +5,9 @@ from typing import Any
 
 from skfd.core.symbols import SymbolInterner
 
-from .system import PredicateSystem, make as make_system
 from .axioms import make_axioms
+from .system import PredicateSystem
+from .system import make as make_system
 
 # Mapping from set.mm labels to local predicate system labels
 SETMM_TO_PREDICATE_AXIOMS: Mapping[str, str] = {

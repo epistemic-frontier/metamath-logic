@@ -3,11 +3,11 @@ from __future__ import annotations
 import importlib
 
 import pytest
+from skfd.core.symbols import SymbolInterner
+from skfd.names import NameResolver
 
 from logic.propositional.hilbert import System
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
-from skfd.core.symbols import SymbolInterner
-from skfd.names import NameResolver
 
 
 def test_hilbert_registry_validates_cleanly() -> None:
@@ -26,6 +26,4 @@ def test_hilbert_registry_validates_cleanly() -> None:
 
     # Every declared lemma now constructs and resolves its references
     # (syl5com was the last construction failure; see implication.py).
-    assert result.ok is True, [
-        (issue.kind, issue.lemma, issue.ref) for issue in result.issues
-    ]
+    assert result.ok is True, [(issue.kind, issue.lemma, issue.ref) for issue in result.issues]

@@ -45,15 +45,16 @@ def main() -> None:
     sys.path.insert(0, str(ROOT / "metamath-prelude" / "src"))
     sys.path.insert(0, str(ROOT / "proof-scaffold" / "src"))
 
+    from prelude.formula import GLOBAL_PRELUDE_MODULE_ID, Builtins
+    from skfd.core.symbols import SymbolId, SymbolInterner
+    from skfd.names import NameResolver
+
     from logic.propositional.hilbert import (
         SETMM_TO_HILBERT_AXIOMS,
         SETMM_TO_HILBERT_RULES,
+        System,
     )
-    from logic.propositional.hilbert import System
     from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
-    from prelude.formula import Builtins, GLOBAL_PRELUDE_MODULE_ID
-    from skfd.core.symbols import SymbolId, SymbolInterner
-    from skfd.names import NameResolver
 
     interner = SymbolInterner()
     names = NameResolver()
@@ -151,9 +152,7 @@ def main() -> None:
         rows.append((label, label, "Helper theorem", setmm_link(label), "exported"))
     for label, ctor in sorted(SETMM_TO_HILBERT_LEMMAS.items()):
         status = (
-            "lowered/exported"
-            if label in constructed
-            else f"registered only: {excluded[label]}"
+            "lowered/exported" if label in constructed else f"registered only: {excluded[label]}"
         )
         rows.append(
             (

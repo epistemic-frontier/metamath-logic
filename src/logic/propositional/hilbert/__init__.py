@@ -6,14 +6,14 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias, cast
 
 from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
-from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, Expr, RequireRegistry
+from skfd.authoring.dsl import DEFAULT_BUILDERS, CompileEnv, Expr, RequireRegistry
 from skfd.authoring.formula import Wff
+from skfd.authoring.rules import RuleBundle
 from skfd.authoring.typing import HypothesisAny, RuleApp
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 from skfd.proof import TacticRegistry
 
-from skfd.authoring.rules import RuleBundle
 from ._builtins import PropositionalBuiltins
 from ._internal import _apply as _apply_impl
 from ._internal import _compile as _compile_impl
@@ -25,7 +25,7 @@ RuleFn: TypeAlias = Callable[..., Wff]
 
 
 # -----------------------------------------------------------------------------
-# Builders for authoring -> token lowering
+# Builders for authoring → token lowering
 # -----------------------------------------------------------------------------
 
 # Deprecated: _hilbert_builders

@@ -5,7 +5,7 @@ set.mm range:
     conjunction is introduced at line 4044.
 
 Scope:
-    This module is reserved for theorems around ``<->`` and ``df-bi``:
+    This module is reserved for theorems around ``<→`` and ``df-bi``:
 
     - definitional and justification material for biconditional reasoning
     - ``bi*`` inference helpers

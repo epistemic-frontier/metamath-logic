@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from logic.predicate.hilbert import PredicateSystem
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
+
+from logic.predicate.hilbert import PredicateSystem
 
 
 def test_predicate_system_owns_predicate_tokens() -> None:
@@ -11,9 +12,7 @@ def test_predicate_system_owns_predicate_tokens() -> None:
     system = PredicateSystem.make(interner=interner, names=NameResolver())
     compiled = system.compile_axioms()
 
-    assert {"AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13"} <= set(
-        compiled
-    )
+    assert {"AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13"} <= set(compiled)
 
     token_owners: dict[str, set[str]] = {}
     for d in interner.symbol_table().values():

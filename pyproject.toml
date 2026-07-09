@@ -81,3 +81,13 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+# W605 added on top of AGENT.md's E/F/I/B/UP: proof formula strings historically
+# used ASCII operator tokens like "\/" / "/\" which Python parses as invalid escape
+# sequences (SyntaxWarning today, SyntaxError later). Keep it flagged to prevent
+# regression now that formulas use the Unicode aliases ∨ / ∧.
+select = ["E", "F", "I", "B", "UP", "W605"]
+# wff formula string literals are irreducibly long; the formatter handles code
+# width, and sibling packages (metamath-prelude) do not enforce E501 either.
+ignore = ["E501"]

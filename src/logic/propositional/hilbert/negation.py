@@ -5,7 +5,9 @@ contradiction and reduction.
 """
 
 from __future__ import annotations
+
 from skfd.proof import Proof, ProofBuilder
+
 from . import System
 
 
@@ -21,7 +23,7 @@ def prove_modus_tollens(sys: System) -> Proof:
     h1 = lb.hyp("h1", "φ → ψ")
     h2 = lb.hyp("h2", "¬ ψ")
 
-    s1 = lb.ref("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
+    s1 = lb.ref("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
 
     s2 = lb.mp("s2", h1, s1, "MP h1, s1")
 
@@ -37,7 +39,7 @@ def prove_modus_tollens(sys: System) -> Proof:
 
 def prove_con1(sys: System) -> Proof:
     """
-    con1: ( ¬ φ → ψ ) -> ( ¬ ψ → φ ).
+    con1: ( ¬ φ → ψ ) → ( ¬ ψ → φ ).
 
     Contraposition.  Theorem *2.15 of [WhiteheadRussell] p. 102.  Its
          associated inference is ~ con1i .  (Contributed by NM, 29-Dec-1992.)
@@ -45,8 +47,8 @@ def prove_con1(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con1")
-    s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ φ → ψ )", ref="id", note="id")
-    res = lb.ref("res", "( ( ¬ φ → ψ ) -> ( ¬ ψ → φ ) )", s1, ref="con1d", note="con1d")
+    s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ φ → ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( ¬ φ → ψ ) → ( ¬ ψ → φ ) )", s1, ref="con1d", note="con1d")
     return lb.build(res)
 
 
@@ -67,15 +69,15 @@ def prove_con1d(sys: System) -> Proof:
 
 def prove_con2(sys: System) -> Proof:
     """
-    con2: ( φ → ¬ ψ ) -> ( ψ → ¬ φ ).
+    con2: ( φ → ¬ ψ ) → ( ψ → ¬ φ ).
 
     Contraposition.  Theorem *2.03 of [WhiteheadRussell] p. 100.  (Contributed
          by NM, 29-Dec-1992.)  (Proof shortened by Wolf Lammen, 12-Feb-2013.)
 
     """
     lb = ProofBuilder(sys, "con2")
-    s1 = lb.ref("s1", "( φ → ¬ ψ ) -> ( φ → ¬ ψ )", ref="id", note="id")
-    res = lb.ref("res", "( ( φ → ¬ ψ ) -> ( ψ → ¬ φ ) )", s1, ref="con2d", note="con2d")
+    s1 = lb.ref("s1", "( φ → ¬ ψ ) → ( φ → ¬ ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( φ → ¬ ψ ) → ( ψ → ¬ φ ) )", s1, ref="con2d", note="con2d")
     return lb.build(res)
 
 
@@ -109,7 +111,7 @@ def prove_con3d(sys: System) -> Proof:
 
 def prove_con3(sys: System) -> Proof:
     """
-    con3: ( φ → ψ ) -> ( ¬ ψ → ¬ φ ).
+    con3: ( φ → ψ ) → ( ¬ ψ → ¬ φ ).
 
     Contraposition.  Theorem *2.16 of [WhiteheadRussell] p. 103.  This was the
          fourth axiom of Frege, specifically Proposition 28 of [Frege1879] p. 43.
@@ -118,14 +120,14 @@ def prove_con3(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con3")
-    s1 = lb.ref("s1", "( φ → ψ ) -> ( φ → ψ )", ref="id", note="id")
-    res = lb.ref("res", "( ( φ → ψ ) -> ( ¬ ψ → ¬ φ ) )", s1, ref="con3d", note="con3d")
+    s1 = lb.ref("s1", "( φ → ψ ) → ( φ → ψ )", ref="id", note="id")
+    res = lb.ref("res", "( ( φ → ψ ) → ( ¬ ψ → ¬ φ ) )", s1, ref="con3d", note="con3d")
     return lb.build(res)
 
 
 def prove_con4(sys: System) -> Proof:
     """
-    con4: ( ¬ φ → ¬ ψ ) -> ( ψ → φ ).
+    con4: ( ¬ φ → ¬ ψ ) → ( ψ → φ ).
 
     Alias for ~ ax-3 to be used instead of it for labeling consistency.  Its
          associated inference is ~ con4i and its associated deduction is ~ con4d .
@@ -133,7 +135,7 @@ def prove_con4(sys: System) -> Proof:
 
     """
     lb = ProofBuilder(sys, "con4")
-    stmt = lb.ref("res", "( ¬ φ → ¬ ψ ) -> ( ψ → φ )", ref="A3", note="A3")
+    stmt = lb.ref("res", "( ¬ φ → ¬ ψ ) → ( ψ → φ )", ref="A3", note="A3")
     return lb.build(stmt)
 
 
@@ -148,20 +150,20 @@ def prove_con4d(sys: System) -> Proof:
 
     s1 = lb.ref(
         "s1",
-        "( ¬ ψ → ¬ χ ) -> ( χ → ψ )",
+        "( ¬ ψ → ¬ χ ) → ( χ → ψ )",
         ref="con4",
         note="con4",
     )
     s2 = lb.ref(
         "s2",
-        "( ( ¬ ψ → ¬ χ ) -> ( χ → ψ ) ) -> ( φ -> ( ( ¬ ψ → ¬ χ ) -> ( χ → ψ ) ) )",
+        "( ( ¬ ψ → ¬ χ ) → ( χ → ψ ) ) → ( φ → ( ( ¬ ψ → ¬ χ ) → ( χ → ψ ) ) )",
         ref="A1",
         note="A1",
     )
     s3 = lb.mp("s3", s1, s2, "MP s1, s2")
     s4 = lb.ref(
         "s4",
-        "( φ -> ( ( ¬ ψ → ¬ χ ) -> ( χ → ψ ) ) ) -> ( ( φ -> ( ¬ ψ → ¬ χ ) ) -> ( φ -> ( χ → ψ ) ) )",
+        "( φ → ( ( ¬ ψ → ¬ χ ) → ( χ → ψ ) ) ) → ( ( φ → ( ¬ ψ → ¬ χ ) ) → ( φ → ( χ → ψ ) ) )",
         ref="A2",
         note="A2",
     )
@@ -222,7 +224,7 @@ def prove_conax1(sys: System) -> Proof:
     s1 = lb.ref("s1", "ψ → ( φ → ψ )", ref="A1", note="A1")
     s2 = lb.ref(
         "s2",
-        "( ψ → ( φ → ψ ) ) -> ( ¬ ( φ → ψ ) -> ¬ ψ )",
+        "( ψ → ( φ → ψ ) ) → ( ¬ ( φ → ψ ) → ¬ ψ )",
         ref="con3",
         note="con3",
     )
@@ -232,20 +234,20 @@ def prove_conax1(sys: System) -> Proof:
 
 def prove_pm2_521g(sys: System) -> Proof:
     """
-    pm2.521g: ¬ ( φ → ψ ) -> ( ψ → χ ).
+    pm2.521g: ¬ ( φ → ψ ) → ( ψ → χ ).
     """
     lb = ProofBuilder(sys, "pm2.521g")
-    h1 = lb.ref("h1", "¬ ( φ → ψ ) -> ¬ ψ", ref="conax1", note="conax1")
-    res = lb.ref("res", "¬ ( φ → ψ ) -> ( ψ → χ )", h1, ref="pm2.21d", note="pm2.21d")
+    h1 = lb.ref("h1", "¬ ( φ → ψ ) → ¬ ψ", ref="conax1", note="conax1")
+    res = lb.ref("res", "¬ ( φ → ψ ) → ( ψ → χ )", h1, ref="pm2.21d", note="pm2.21d")
     return lb.build(res)
 
 
 def prove_pm2_521(sys: System) -> Proof:
     """
-    pm2.521: ¬ ( φ → ψ ) -> ( ψ → φ ).
+    pm2.521: ¬ ( φ → ψ ) → ( ψ → φ ).
     """
     lb = ProofBuilder(sys, "pm2.521")
-    res = lb.ref("res", "¬ ( φ → ψ ) -> ( ψ → φ )", ref="pm2.521g", note="pm2.521g")
+    res = lb.ref("res", "¬ ( φ → ψ ) → ( ψ → φ )", ref="pm2.521g", note="pm2.521g")
     return lb.build(res)
 
 
@@ -261,7 +263,7 @@ def rove_con1i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "con1i")
     hyp = lb.hyp("prove_con1i.h", "¬ φ → ψ")
-    s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", ref="con1", note="con1")
+    s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", ref="con1", note="con1")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
 
@@ -277,7 +279,7 @@ def prove_con2i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "con2i")
     hyp = lb.hyp("prove_con2i.h", "φ → ¬ ψ")
-    s1 = lb.ref("s1", "( φ → ¬ ψ ) -> ( ψ → ¬ φ )", ref="con2", note="con2")
+    s1 = lb.ref("s1", "( φ → ¬ ψ ) → ( ψ → ¬ φ )", ref="con2", note="con2")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
 
@@ -293,7 +295,7 @@ def prove_con3i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "con3i")
     hyp = lb.hyp("prove_con3i.h", "φ → ψ")
-    s1 = lb.ref("s1", "( φ → ψ ) -> ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
+    s1 = lb.ref("s1", "( φ → ψ ) → ( ¬ ψ → ¬ φ )", ref="con3", note="con3")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
 
@@ -311,7 +313,7 @@ def prove_con4i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "con4i")
     hyp = lb.hyp("prove_con4i.h", "¬ φ → ¬ ψ")
-    s1 = lb.ref("s1", "( ¬ φ → ¬ ψ ) -> ( ψ → φ )", ref="con4", note="con4")
+    s1 = lb.ref("s1", "( ¬ φ → ¬ ψ ) → ( ψ → φ )", ref="con4", note="con4")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
 
@@ -345,12 +347,12 @@ def prove_pm2_45(sys: System) -> Proof:
 
     Theorem *2.45 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: pm2.24(ph,ps) = ph→(¬ph→ps) = orc.
-    con3i applied to pm2.24 gives ¬(¬ph→ps)→¬ph.
+    Under df-or: pm2.24(φ,ψ) = φ→(¬φ→ψ) = orc.
+    con3i applied to pm2.24 gives ¬(¬φ→ψ)→¬φ.
     """
     lb = ProofBuilder(sys, "pm2.45")
-    s1 = lb.ref("s1", "( ph -> ( -. ph -> ps ) )", ref="pm2.24", note="pm2.24 (orc)")
-    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ph )", s1, ref="con3i", note="con3i(pm2.24)")
+    s1 = lb.ref("s1", "( φ → ( -. φ → ψ ) )", ref="pm2.24", note="pm2.24 (orc)")
+    res = lb.ref("res", "( -. ( -. φ → ψ ) → -. φ )", s1, ref="con3i", note="con3i(pm2.24)")
     return lb.build(res)
 
 
@@ -359,12 +361,12 @@ def prove_pm2_46(sys: System) -> Proof:
 
     Theorem *2.46 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: olc = ps→(¬ph→ps), an ax-1 instance.
-    con3i applied gives ¬(¬ph→ps)→¬ps.
+    Under df-or: olc = ψ→(¬φ→ψ), an ax-1 instance.
+    con3i applied gives ¬(¬φ→ψ)→¬ψ.
     """
     lb = ProofBuilder(sys, "pm2.46")
-    s1 = lb.ref("s1", "( ps -> ( -. ph -> ps ) )", ref="A1", note="A1 (olc df-or)")
-    res = lb.ref("res", "( -. ( -. ph -> ps ) -> -. ps )", s1, ref="con3i", note="con3i(olc)")
+    s1 = lb.ref("s1", "( ψ → ( -. φ → ψ ) )", ref="A1", note="A1 (olc df-or)")
+    res = lb.ref("res", "( -. ( -. φ → ψ ) → -. ψ )", s1, ref="con3i", note="con3i(olc)")
     return lb.build(res)
 
 
@@ -378,17 +380,17 @@ def prove_pm2_47(sys: System) -> Proof:
 
     Theorem *2.47 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: ¬(¬ph→ps)→(¬¬ph→ps).
-    pm2.45 gives ¬(¬ph→ps)→¬ph.
-    A1(¬ph,ps): ¬ph→(¬¬ph→ps).
-    syl: ¬(¬ph→ps)→(¬¬ph→ps).
+    Under df-or: ¬(¬φ→ψ)→(¬¬φ→ψ).
+    pm2.45 gives ¬(¬φ→ψ)→¬φ.
+    A1(¬φ,ψ): ¬φ→(¬¬φ→ψ).
+    syl: ¬(¬φ→ψ)→(¬¬φ→ψ).
     """
     lb = ProofBuilder(sys, "pm2.47")
-    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ph )", ref="pm2.45", note="pm2.45")
-    s2 = lb.ref("s2", "( -. ph -> ( -. -. ph -> ps ) )", ref="A1", note="A1 (-.ph,ps)")
+    s1 = lb.ref("s1", "( -. ( -. φ → ψ ) → -. φ )", ref="pm2.45", note="pm2.45")
+    s2 = lb.ref("s2", "( -. φ → ( -. -. φ → ψ ) )", ref="A1", note="A1 (-.φ,ψ)")
     res = lb.ref(
         "res",
-        "( -. ( -. ph -> ps ) -> ( -. -. ph -> ps ) )",
+        "( -. ( -. φ → ψ ) → ( -. -. φ → ψ ) )",
         s1,
         s2,
         ref="syl",
@@ -402,17 +404,17 @@ def prove_pm2_48(sys: System) -> Proof:
 
     Theorem *2.48 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: ¬(¬ph→ps)→(¬ph→¬ps).
-    pm2.46 gives ¬(¬ph→ps)→¬ps.
-    A1(¬ps,¬ph): ¬ps→(¬ph→¬ps).
-    syl: ¬(¬ph→ps)→(¬ph→¬ps).
+    Under df-or: ¬(¬φ→ψ)→(¬φ→¬ψ).
+    pm2.46 gives ¬(¬φ→ψ)→¬ψ.
+    A1(¬ψ,¬φ): ¬ψ→(¬φ→¬ψ).
+    syl: ¬(¬φ→ψ)→(¬φ→¬ψ).
     """
     lb = ProofBuilder(sys, "pm2.48")
-    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ps )", ref="pm2.46", note="pm2.46")
-    s2 = lb.ref("s2", "( -. ps -> ( -. ph -> -. ps ) )", ref="A1", note="A1 (-.ps,-.ph)")
+    s1 = lb.ref("s1", "( -. ( -. φ → ψ ) → -. ψ )", ref="pm2.46", note="pm2.46")
+    s2 = lb.ref("s2", "( -. ψ → ( -. φ → -. ψ ) )", ref="A1", note="A1 (-.ψ,-.φ)")
     res = lb.ref(
         "res",
-        "( -. ( -. ph -> ps ) -> ( -. ph -> -. ps ) )",
+        "( -. ( -. φ → ψ ) → ( -. φ → -. ψ ) )",
         s1,
         s2,
         ref="syl",
@@ -426,15 +428,15 @@ def prove_pm2_49(sys: System) -> Proof:
 
     Theorem *2.49 of [WhiteheadRussell] p. 106.
     (Contributed by NM, 3-Jan-2005.)
-    Under df-or: ¬(¬ph→ps)→(¬¬ph→¬ps).
-    Same as pm2.48 with A1(¬ps,¬¬ph).
+    Under df-or: ¬(¬φ→ψ)→(¬¬φ→¬ψ).
+    Same as pm2.48 with A1(¬ψ,¬¬φ).
     """
     lb = ProofBuilder(sys, "pm2.49")
-    s1 = lb.ref("s1", "( -. ( -. ph -> ps ) -> -. ps )", ref="pm2.46", note="pm2.46")
-    s2 = lb.ref("s2", "( -. ps -> ( -. -. ph -> -. ps ) )", ref="A1", note="A1 (-.ps,-.-.ph)")
+    s1 = lb.ref("s1", "( -. ( -. φ → ψ ) → -. ψ )", ref="pm2.46", note="pm2.46")
+    s2 = lb.ref("s2", "( -. ψ → ( -. -. φ → -. ψ ) )", ref="A1", note="A1 (-.ψ,-.-.φ)")
     res = lb.ref(
         "res",
-        "( -. ( -. ph -> ps ) -> ( -. -. ph -> -. ps ) )",
+        "( -. ( -. φ → ψ ) → ( -. -. φ → -. ψ ) )",
         s1,
         s2,
         ref="syl",
@@ -453,15 +455,15 @@ def prove_pm2_51(sys: System) -> Proof:
 
     Theorem *2.51 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
-    conax1(ph,ps): ¬(ph→ps)→¬ps.
-    A1(¬ps,ph): ¬ps→(ph→¬ps).
-    syl: ¬(ph→ps)→(ph→¬ps).
+    conax1(φ,ψ): ¬(φ→ψ)→¬ψ.
+    A1(¬ψ,φ): ¬ψ→(φ→¬ψ).
+    syl: ¬(φ→ψ)→(φ→¬ψ).
     """
     lb = ProofBuilder(sys, "pm2.51")
-    s1 = lb.ref("s1", "( -. ( ph -> ps ) -> -. ps )", ref="conax1", note="conax1")
-    s2 = lb.ref("s2", "( -. ps -> ( ph -> -. ps ) )", ref="A1", note="A1")
+    s1 = lb.ref("s1", "( -. ( φ → ψ ) → -. ψ )", ref="conax1", note="conax1")
+    s2 = lb.ref("s2", "( -. ψ → ( φ → -. ψ ) )", ref="A1", note="A1")
     res = lb.ref(
-        "res", "( -. ( ph -> ps ) -> ( ph -> -. ps ) )", s1, s2, ref="syl", note="syl(conax1, A1)"
+        "res", "( -. ( φ → ψ ) → ( φ → -. ψ ) )", s1, s2, ref="syl", note="syl(conax1, A1)"
     )
     return lb.build(res)
 
@@ -472,16 +474,16 @@ def prove_pm2_52(sys: System) -> Proof:
     Theorem *2.52 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
     (Proof shortened by Wolf Lammen, 8-Oct-2012.)
-    conax1(ph,ps): ¬(ph→ps)→¬ps.
-    A1(¬ps,¬ph): ¬ps→(¬ph→¬ps).
-    syl: ¬(ph→ps)→(¬ph→¬ps).
+    conax1(φ,ψ): ¬(φ→ψ)→¬ψ.
+    A1(¬ψ,¬φ): ¬ψ→(¬φ→¬ψ).
+    syl: ¬(φ→ψ)→(¬φ→¬ψ).
     """
     lb = ProofBuilder(sys, "pm2.52")
-    s1 = lb.ref("s1", "( -. ( ph -> ps ) -> -. ps )", ref="conax1", note="conax1")
-    s2 = lb.ref("s2", "( -. ps -> ( -. ph -> -. ps ) )", ref="A1", note="A1")
+    s1 = lb.ref("s1", "( -. ( φ → ψ ) → -. ψ )", ref="conax1", note="conax1")
+    s2 = lb.ref("s2", "( -. ψ → ( -. φ → -. ψ ) )", ref="A1", note="A1")
     res = lb.ref(
         "res",
-        "( -. ( ph -> ps ) -> ( -. ph -> -. ps ) )",
+        "( -. ( φ → ψ ) → ( -. φ → -. ψ ) )",
         s1,
         s2,
         ref="syl",
@@ -503,9 +505,7 @@ def prove_pm2_53(sys: System) -> Proof:
     Under df-or: trivially id.
     """
     lb = ProofBuilder(sys, "pm2.53")
-    res = lb.ref(
-        "res", "( -. ph -> ps ) -> ( -. ph -> ps )", ref="id", note="id (trivial under df-or)"
-    )
+    res = lb.ref("res", "( -. φ → ψ ) → ( -. φ → ψ )", ref="id", note="id (trivial under df-or)")
     return lb.build(res)
 
 
@@ -517,9 +517,7 @@ def prove_pm2_54(sys: System) -> Proof:
     Under df-or: trivially id.
     """
     lb = ProofBuilder(sys, "pm2.54")
-    res = lb.ref(
-        "res", "( -. ph -> ps ) -> ( -. ph -> ps )", ref="id", note="id (trivial under df-or)"
-    )
+    res = lb.ref("res", "( -. φ → ψ ) → ( -. φ → ψ )", ref="id", note="id (trivial under df-or)")
     return lb.build(res)
 
 
@@ -533,14 +531,14 @@ def prove_pm2_62(sys: System) -> Proof:
 
     Theorem *2.62 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
-    pm2.61: (ph→ps)→((¬ph→ps)→ps).
+    pm2.61: (φ→ψ)→((¬φ→ψ)→ψ).
     com12 swaps antecedents.
     """
     lb = ProofBuilder(sys, "pm2.62")
-    s1 = lb.ref("s1", "( ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps ) )", ref="pm2.61", note="pm2.61")
+    s1 = lb.ref("s1", "( ( φ → ψ ) → ( ( -. φ → ψ ) → ψ ) )", ref="pm2.61", note="pm2.61")
     res = lb.ref(
         "res",
-        "( ( -. ph -> ps ) -> ( ( ph -> ps ) -> ps ) )",
+        "( ( -. φ → ψ ) → ( ( φ → ψ ) → ψ ) )",
         s1,
         ref="com12",
         note="com12(pm2.61)",
@@ -555,26 +553,24 @@ def prove_pm2_62(sys: System) -> Proof:
 
 def prove_pm2_63(sys: System) -> Proof:
     """Theorem *2.63 of [WhiteheadRussell] p. 107.
-    ( ph \\/ ps ) -> ( ( -. ph \\/ ps ) -> ps ).
+    ( φ ∨ ψ ) → ( ( -. φ ∨ ψ ) → ψ ).
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: pm2.53 idd jaod.
-    Under df-or: ( -. ph -> ps ) -> ( ( -. -. ph -> ps ) -> ps ).
+    Under df-or: ( -. φ → ψ ) → ( ( -. -. φ → ψ ) → ψ ).
     Derived: com12(syl(mp(notnot, imim1), pm2.61))."""
     lb = ProofBuilder(sys, "pm2.63")
-    s_notnot = lb.ref("s_notnot", "ph -> -. -. ph", ref="notnot", note="notnot")
+    s_notnot = lb.ref("s_notnot", "φ → -. -. φ", ref="notnot", note="notnot")
     s_imim1 = lb.ref(
         "s_imim1",
-        "( ph -> -. -. ph ) -> ( ( -. -. ph -> ps ) -> ( ph -> ps ) )",
+        "( φ → -. -. φ ) → ( ( -. -. φ → ψ ) → ( φ → ψ ) )",
         ref="imim1",
         note="imim1(notnot)",
     )
-    s_inner = lb.mp("s_inner", s_notnot, s_imim1, note="MP: (-.-.ph->ps)->(ph->ps)")
-    s_pm61 = lb.ref(
-        "s_pm61", "( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )", ref="pm2.61", note="pm2.61"
-    )
+    s_inner = lb.mp("s_inner", s_notnot, s_imim1, note="MP: (-.-.φ→ψ)→(φ→ψ)")
+    s_pm61 = lb.ref("s_pm61", "( φ → ψ ) → ( ( -. φ → ψ ) → ψ )", ref="pm2.61", note="pm2.61")
     s_syl = lb.ref(
         "s_syl",
-        "( -. -. ph -> ps ) -> ( ( -. ph -> ps ) -> ps )",
+        "( -. -. φ → ψ ) → ( ( -. φ → ψ ) → ψ )",
         s_inner,
         s_pm61,
         ref="syl",
@@ -582,7 +578,7 @@ def prove_pm2_63(sys: System) -> Proof:
     )
     res = lb.ref(
         "res",
-        "( -. ph -> ps ) -> ( ( -. -. ph -> ps ) -> ps )",
+        "( -. φ → ψ ) → ( ( -. -. φ → ψ ) → ψ )",
         s_syl,
         ref="com12",
         note="com12(syl(...))",
@@ -595,21 +591,21 @@ def prove_pm2_64(sys: System) -> Proof:
 
     Theorem *2.64 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
-    pm2.65: (¬ph→ps)→((¬ph→¬ps)→¬¬ph).
-    notnotr: ¬¬ph→ph.
+    pm2.65: (¬φ→ψ)→((¬φ→¬ψ)→¬¬φ).
+    notnotr: ¬¬φ→φ.
     syl6: chains them.
     """
     lb = ProofBuilder(sys, "pm2.64")
     s_pm65 = lb.ref(
         "s_pm65",
-        "( ( -. ph -> ps ) -> ( ( -. ph -> -. ps ) -> -. -. ph ) )",
+        "( ( -. φ → ψ ) → ( ( -. φ → -. ψ ) → -. -. φ ) )",
         ref="pm2.65",
         note="pm2.65",
     )
-    s_nn = lb.ref("s_nn", "( -. -. ph -> ph )", ref="notnotr", note="notnotr")
+    s_nn = lb.ref("s_nn", "( -. -. φ → φ )", ref="notnotr", note="notnotr")
     res = lb.ref(
         "res",
-        "( ( -. ph -> ps ) -> ( ( -. ph -> -. ps ) -> ph ) )",
+        "( ( -. φ → ψ ) → ( ( -. φ → -. ψ ) → φ ) )",
         s_pm65,
         s_nn,
         ref="syl6",
@@ -630,7 +626,7 @@ def prove_con1i(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "con1i")
     hyp = lb.hyp("prove_con1i.h", "¬ φ → ψ")
-    s1 = lb.ref("s1", "( ¬ φ → ψ ) -> ( ¬ ψ → φ )", ref="con1", note="con1")
+    s1 = lb.ref("s1", "( ¬ φ → ψ ) → ( ¬ ψ → φ )", ref="con1", note="con1")
     res = lb.mp("res", hyp, s1, "MP hyp, s1")
     return lb.build(res)
 
@@ -695,7 +691,7 @@ def prove_pm2_61(sys: System) -> Proof:
 
 
 def prove_pm2_65(sys: System) -> Proof:
-    """pm2.65: (ph → ps) → ((ph → ¬ps) → ¬ph).
+    """pm2.65: (φ → ψ) → ((φ → ¬ψ) → ¬φ).
 
     Theorem *2.65 of [WhiteheadRussell] p. 107.
     Proof by contradiction ("reductio ad absurdum").
@@ -704,120 +700,114 @@ def prove_pm2_65(sys: System) -> Proof:
     set.mm proof: idd con3 jad.
     """
     lb = ProofBuilder(sys, "pm2.65")
-    s1 = lb.ref("s1", "( ( ph → ps ) → ( -. ph → -. ph ) )", ref="idd", note="idd")
-    s2 = lb.ref("s2", "( ( ph → ps ) → ( -. ps → -. ph ) )", ref="con3", note="con3")
-    res = lb.ref(
-        "res", "( ( ph → ps ) → ( ( ph → -. ps ) → -. ph ) )", s1, s2, ref="jad", note="jad"
-    )
+    s1 = lb.ref("s1", "( ( φ → ψ ) → ( -. φ → -. φ ) )", ref="idd", note="idd")
+    s2 = lb.ref("s2", "( ( φ → ψ ) → ( -. ψ → -. φ ) )", ref="con3", note="con3")
+    res = lb.ref("res", "( ( φ → ψ ) → ( ( φ → -. ψ ) → -. φ ) )", s1, s2, ref="jad", note="jad")
     return lb.build(res)
 
 
 def prove_pm2_65da(sys: System) -> Proof:
-    """pm2.65da: ( ph -> -. ps ).
+    """pm2.65da: ( φ → -. ψ ).
 
-    Hypotheses: ( ( ph /\ ps ) -> ch ), ( ( ph /\ ps ) -> -. ch ).
+    Hypotheses: ( ( φ ∧ ψ ) → χ ), ( ( φ ∧ ψ ) → -. χ ).
     Deduction for proof by contradiction (conjunction form).
     (Contributed by NM, 12-Jun-2014.)
 
-    Using df-an expansion: (ph /\ ps) is -. ( ph -> -. ps ).
-    Proof: pm2.65i(h1, h2) -> -.-.(ph -> -.ps) ; notnotri -> (ph -> -.ps).
-    pm2.65i needs explicit args (ps not in conclusion).
+    Using df-an expansion: (φ ∧ ψ) is -. ( φ → -. ψ ).
+    Proof: pm2.65i(h1, h2) → -.-.(φ → -.ψ) ; notnotri → (φ → -.ψ).
+    pm2.65i needs explicit args (ψ not in conclusion).
     """
     lb = ProofBuilder(sys, "pm2.65da")
-    h1 = lb.hyp("pm2.65da.1", "( -. ( ph -> -. ps ) -> ch )")
-    h2 = lb.hyp("pm2.65da.2", "( -. ( ph -> -. ps ) -> -. ch )")
-    s1 = lb.ref("s1", "-. -. ( ph -> -. ps )", h1, h2, ref="pm2.65i", note="pm2.65i h1 h2")
-    res = lb.ref("res", "ph -> -. ps", s1, ref="notnotri", note="notnotri")
+    h1 = lb.hyp("pm2.65da.1", "( -. ( φ → -. ψ ) → χ )")
+    h2 = lb.hyp("pm2.65da.2", "( -. ( φ → -. ψ ) → -. χ )")
+    s1 = lb.ref("s1", "-. -. ( φ → -. ψ )", h1, h2, ref="pm2.65i", note="pm2.65i h1 h2")
+    res = lb.ref("res", "φ → -. ψ", s1, ref="notnotri", note="notnotri")
     return lb.build(res)
 
 
 def prove_pm2_65ni(sys: System) -> Proof:
-    """pm2.65ni: ph.
+    """pm2.65ni: φ.
 
-    Hypotheses: ( -. ph -> ps ), ( -. ph -> -. ps ).
+    Hypotheses: ( -. φ → ψ ), ( -. φ → -. ψ ).
     Inference rule for proof by contradiction.
     (Contributed by Glauco Siliprandi, 5-Apr-2020.)
 
-    Proof: pm2.65i(h1, h2) -> -. -. ph ; notnotri -> ph.
+    Proof: pm2.65i(h1, h2) → -. -. φ ; notnotri → φ.
     """
     lb = ProofBuilder(sys, "pm2.65ni")
-    h1 = lb.hyp("pm2.65ni.1", "-. ph -> ps")
-    h2 = lb.hyp("pm2.65ni.2", "-. ph -> -. ps")
-    s1 = lb.ref("s1", "-. -. ph", h1, h2, ref="pm2.65i", note="pm2.65i")
-    res = lb.ref("res", "ph", s1, ref="notnotri", note="notnotri")
+    h1 = lb.hyp("pm2.65ni.1", "-. φ → ψ")
+    h2 = lb.hyp("pm2.65ni.2", "-. φ → -. ψ")
+    s1 = lb.ref("s1", "-. -. φ", h1, h2, ref="pm2.65i", note="pm2.65i")
+    res = lb.ref("res", "φ", s1, ref="notnotri", note="notnotri")
     return lb.build(res)
 
 
 def prove_pm2_61ii(sys: System) -> Proof:
-    """pm2.61ii: ch.
+    """pm2.61ii: χ.
 
-    Hypotheses: ( -. ph -> ( -. ps -> ch ) ), ( ph -> ch ), ( ps -> ch ).
+    Hypotheses: ( -. φ → ( -. ψ → χ ) ), ( φ → χ ), ( ψ → χ ).
     Inference eliminating two antecedents.
     (Contributed by NM, 4-Jan-1993.) (Proof shortened by Josh Purinton, 29-Dec-2000.)
 
-    Proof: a1i(h3) -> (-.ph -> (ps -> ch)) ; pm2.61d(that, h1) -> (-.ph -> ch) ; pm2.61i(h2, that) -> ch.
-    pm2.61d needs explicit args (ps not in conclusion).
+    Proof: a1i(h3) → (-.φ → (ψ → χ)) ; pm2.61d(that, h1) → (-.φ → χ) ; pm2.61i(h2, that) → χ.
+    pm2.61d needs explicit args (ψ not in conclusion).
     """
     lb = ProofBuilder(sys, "pm2.61ii")
-    h1 = lb.hyp("pm2.61ii.1", "-. ph -> ( -. ps -> ch )")
-    h2 = lb.hyp("pm2.61ii.2", "ph -> ch")
-    h3 = lb.hyp("pm2.61ii.3", "ps -> ch")
-    s1 = lb.ref("s1", "-. ph -> ( ps -> ch )", h3, ref="a1i", note="a1i h3")
-    s2 = lb.ref("s2", "-. ph -> ch", s1, h1, ref="pm2.61d", note="pm2.61d s1 h1")
-    res = lb.ref("res", "ch", h2, s2, ref="pm2.61i", note="pm2.61i")
+    h1 = lb.hyp("pm2.61ii.1", "-. φ → ( -. ψ → χ )")
+    h2 = lb.hyp("pm2.61ii.2", "φ → χ")
+    h3 = lb.hyp("pm2.61ii.3", "ψ → χ")
+    s1 = lb.ref("s1", "-. φ → ( ψ → χ )", h3, ref="a1i", note="a1i h3")
+    s2 = lb.ref("s2", "-. φ → χ", s1, h1, ref="pm2.61d", note="pm2.61d s1 h1")
+    res = lb.ref("res", "χ", h2, s2, ref="pm2.61i", note="pm2.61i")
     return lb.build(res)
 
 
 def prove_pm2_61iii(sys: System) -> Proof:
-    """pm2.61iii: th.
+    """pm2.61iii: θ.
 
-    Hypotheses: ( -. ph -> ( -. ps -> ( -. ch -> th ) ) ), ( ph -> th ), ( ps -> th ), ( ch -> th ).
+    Hypotheses: ( -. φ → ( -. ψ → ( -. χ → θ ) ) ), ( φ → θ ), ( ψ → θ ), ( χ → θ ).
     Inference eliminating three antecedents.
     (Contributed by NM, 2-Jan-2002.) (Proof shortened by Wolf Lammen, 22-Sep-2013.)
 
-    Proof: a1d on hyp2/hyp3 gives (ph -> (-.ch -> th)) and (ps -> (-.ch -> th)).
-    Then pm2.61ii logic (inlined) gives (-.ch -> th).
-    Finally pm2.61i with hyp4 gives th.
+    Proof: a1d on hyp2/hyp3 gives (φ → (-.χ → θ)) and (ψ → (-.χ → θ)).
+    Then pm2.61ii logic (inlined) gives (-.χ → θ).
+    Finally pm2.61i with hyp4 gives θ.
     """
     lb = ProofBuilder(sys, "pm2.61iii")
-    h1 = lb.hyp("pm2.61iii.1", "-. ph -> ( -. ps -> ( -. ch -> th ) )")
-    h2 = lb.hyp("pm2.61iii.2", "ph -> th")
-    h3 = lb.hyp("pm2.61iii.3", "ps -> th")
-    h4 = lb.hyp("pm2.61iii.4", "ch -> th")
-    # a1d on h2 and h3 to add -.ch antecedent
-    s_a1d2 = lb.ref("s_a1d2", "ph -> ( -. ch -> th )", h2, ref="a1d", note="a1d h2")
-    s_a1d3 = lb.ref("s_a1d3", "ps -> ( -. ch -> th )", h3, ref="a1d", note="a1d h3")
-    # inlined pm2.61ii logic with X=ph, Y=ps, Z=(-.ch -> th)
-    s_ii_a1i = lb.ref(
-        "s_ii_a1i", "-. ph -> ( ps -> ( -. ch -> th ) )", s_a1d3, ref="a1i", note="a1i"
-    )
+    h1 = lb.hyp("pm2.61iii.1", "-. φ → ( -. ψ → ( -. χ → θ ) )")
+    h2 = lb.hyp("pm2.61iii.2", "φ → θ")
+    h3 = lb.hyp("pm2.61iii.3", "ψ → θ")
+    h4 = lb.hyp("pm2.61iii.4", "χ → θ")
+    # a1d on h2 and h3 to add ¬χ antecedent
+    s_a1d2 = lb.ref("s_a1d2", "φ → ( -. χ → θ )", h2, ref="a1d", note="a1d h2")
+    s_a1d3 = lb.ref("s_a1d3", "ψ → ( -. χ → θ )", h3, ref="a1d", note="a1d h3")
+    # inlined pm2.61ii logic with X=φ, Y=ψ, Z=(¬χ → θ)
+    s_ii_a1i = lb.ref("s_ii_a1i", "-. φ → ( ψ → ( -. χ → θ ) )", s_a1d3, ref="a1i", note="a1i")
     s_ii_pm2d = lb.ref(
-        "s_ii_pm2d", "-. ph -> ( -. ch -> th )", s_ii_a1i, h1, ref="pm2.61d", note="pm2.61d"
+        "s_ii_pm2d", "-. φ → ( -. χ → θ )", s_ii_a1i, h1, ref="pm2.61d", note="pm2.61d"
     )
-    s_notch_th = lb.ref(
-        "s_notch_th", "-. ch -> th", s_a1d2, s_ii_pm2d, ref="pm2.61i", note="pm2.61i"
-    )
+    s_notch_th = lb.ref("s_notch_th", "-. χ → θ", s_a1d2, s_ii_pm2d, ref="pm2.61i", note="pm2.61i")
     # final pm2.61i
-    res = lb.ref("res", "th", h4, s_notch_th, ref="pm2.61i", note="pm2.61i")
+    res = lb.ref("res", "θ", h4, s_notch_th, ref="pm2.61i", note="pm2.61i")
     return lb.build(res)
 
 
 def prove_pm2_61nii(sys: System) -> Proof:
-    """pm2.61nii: ch.
+    """pm2.61nii: χ.
 
-    Hypotheses: ( ph -> ( ps -> ch ) ), ( -. ph -> ch ), ( -. ps -> ch ).
+    Hypotheses: ( φ → ( ψ → χ ) ), ( -. φ → χ ), ( -. ψ → χ ).
     Inference eliminating two antecedents.
     (Contributed by NM, 13-Jul-2005.) (Proof shortened by Andrew Salmon, 25-May-2011.)
 
-    Proof: pm2.61d1(h1, h3) -> (ph -> ch) ; pm2.61i(that, h2) -> ch.
-    pm2.61d1 needs explicit args (ps not in conclusion).
+    Proof: pm2.61d1(h1, h3) → (φ → χ) ; pm2.61i(that, h2) → χ.
+    pm2.61d1 needs explicit args (ψ not in conclusion).
     """
     lb = ProofBuilder(sys, "pm2.61nii")
-    h1 = lb.hyp("pm2.61nii.1", "ph -> ( ps -> ch )")
-    h2 = lb.hyp("pm2.61nii.2", "-. ph -> ch")
-    h3 = lb.hyp("pm2.61nii.3", "-. ps -> ch")
-    s1 = lb.ref("s1", "ph -> ch", h1, h3, ref="pm2.61d1", note="pm2.61d1 h1 h3")
-    res = lb.ref("res", "ch", s1, h2, ref="pm2.61i", note="pm2.61i")
+    h1 = lb.hyp("pm2.61nii.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("pm2.61nii.2", "-. φ → χ")
+    h3 = lb.hyp("pm2.61nii.3", "-. ψ → χ")
+    s1 = lb.ref("s1", "φ → χ", h1, h3, ref="pm2.61d1", note="pm2.61d1 h1 h3")
+    res = lb.ref("res", "χ", s1, h2, ref="pm2.61i", note="pm2.61i")
     return lb.build(res)
 
 
@@ -834,20 +824,20 @@ def prove_jad(sys: System) -> Proof:
 
 
 def prove_jarl(sys: System) -> Proof:
-    """jarl: ((ph → ps) → ch) → (¬ph → ch).
+    """jarl: ((φ → ψ) → χ) → (¬φ → χ).
 
     "Jar" with left antecedent negated (forward "ja" partial converse).
     (Contributed by NM, 25-Jun-1993.)
     set.mm proof: pm2.21 imim1i.
 
-    Derivation: pm2.21 gives ¬ph → (ph → ps). Then imim1 chains
-    this to get ((ph → ps) → ch) → (¬ph → ch).
+    Derivation: pm2.21 gives ¬φ → (φ → ψ). Then imim1 chains
+    this to get ((φ → ψ) → χ) → (¬φ → χ).
     """
     lb = ProofBuilder(sys, "jarl")
-    s1 = lb.ref("s1", "( -. ph → ( ph → ps ) )", ref="pm2.21", note="pm2.21")
+    s1 = lb.ref("s1", "( -. φ → ( φ → ψ ) )", ref="pm2.21", note="pm2.21")
     s2 = lb.ref(
         "s2",
-        "( ( -. ph → ( ph → ps ) ) → ( ( ( ph → ps ) → ch ) → ( -. ph → ch ) ) )",
+        "( ( -. φ → ( φ → ψ ) ) → ( ( ( φ → ψ ) → χ ) → ( -. φ → χ ) ) )",
         ref="imim1",
         note="imim1",
     )
@@ -866,16 +856,16 @@ def prove_mt2d(sys: System) -> Proof:
 
 
 def prove_mt4(sys: System) -> Proof:
-    """mt4: ps.  Hyps: ph, -. ps -> -. ph.
+    """mt4: ψ.  Hyps: φ, -. ψ → -. φ.
 
     The rule of modus tollens.  Inference associated with con4i.
     (Contributed by Wolf Lammen, 12-May-2013.)
     set.mm proof: con4i ax-mp.
     """
     lb = ProofBuilder(sys, "mt4")
-    h1 = lb.hyp("mt4.1", "ph")
-    h2 = lb.hyp("mt4.2", "( -. ps -> -. ph )")
-    s1 = lb.ref("s1", "( ph -> ps )", h2, ref="con4i", note="con4i")
+    h1 = lb.hyp("mt4.1", "φ")
+    h2 = lb.hyp("mt4.2", "( -. ψ → -. φ )")
+    s1 = lb.ref("s1", "( φ → ψ )", h2, ref="con4i", note="con4i")
     res = lb.mp("res", h1, s1, "MP hyp1, s1")
     return lb.build(res)
 
@@ -900,144 +890,144 @@ def prove_notnotri(sys: System) -> Proof:
 
 
 def prove_nsyl4(sys: System) -> Proof:
-    """nsyl4: -. ch -> ps. Hyps: ph -> ps, -. ph -> ch.
+    """nsyl4: -. χ → ψ. Hyps: φ → ψ, -. φ → χ.
 
     (Contributed by Wolf Lammen, 20-May-2024.)
     set.mm proof: con1i syl.
     """
     lb = ProofBuilder(sys, "nsyl4")
-    h1 = lb.hyp("nsyl4.1", "( ph -> ps )")
-    h2 = lb.hyp("nsyl4.2", "( -. ph -> ch )")
-    s1 = lb.ref("s1", "( -. ch -> ph )", h2, ref="con1i", note="con1i")
-    res = lb.ref("res", "( -. ch -> ps )", s1, h1, ref="syl", note="syl")
+    h1 = lb.hyp("nsyl4.1", "( φ → ψ )")
+    h2 = lb.hyp("nsyl4.2", "( -. φ → χ )")
+    s1 = lb.ref("s1", "( -. χ → φ )", h2, ref="con1i", note="con1i")
+    res = lb.ref("res", "( -. χ → ψ )", s1, h1, ref="syl", note="syl")
     return lb.build(res)
 
 
 def prove_pm2_01d(sys: System) -> Proof:
-    """pm2.01d: ph -> -. ps.  Hyp: ph -> (ps -> -. ps).
+    """pm2.01d: φ → -. ψ.  Hyp: φ → (ψ → -. ψ).
 
     Deduction based on reductio ad absurdum.
     (Contributed by NM, 18-Aug-1993.)
     set.mm proof: id pm2.61d1.
     """
     lb = ProofBuilder(sys, "pm2.01d")
-    h1 = lb.hyp("pm2.01d.1", "( ph -> ( ps -> -. ps ) )")
-    # id : (-. ps -> -. ps)
-    s_id = lb.ref("s_id", "( -. ps -> -. ps )", ref="id", note="id")
-    # pm2.61d1(h1, s_id): ph -> -. ps
-    res = lb.ref("res", "( ph -> -. ps )", h1, s_id, ref="pm2.61d1", note="pm2.61d1")
+    h1 = lb.hyp("pm2.01d.1", "( φ → ( ψ → -. ψ ) )")
+    # id : (¬ ψ → ¬ ψ)
+    s_id = lb.ref("s_id", "( -. ψ → -. ψ )", ref="id", note="id")
+    # pm2.61d1(h1, s_id): φ → ¬ ψ
+    res = lb.ref("res", "( φ → -. ψ )", h1, s_id, ref="pm2.61d1", note="pm2.61d1")
     return lb.build(res)
 
 
 def prove_pm2_18i(sys: System) -> Proof:
-    """pm2.18i: ph.  Hyp: -. ph -> ph.
+    """pm2.18i: φ.  Hyp: -. φ → φ.
 
     Inference associated with the Clavius law pm2.18.
     (Contributed by BJ, 30-Mar-2020.)
     set.mm proof: pm2.18 ax-mp.
     """
     lb = ProofBuilder(sys, "pm2.18i")
-    h1 = lb.hyp("pm2.18i.1", "( -. ph -> ph )")
-    s1 = lb.ref("s1", "( ( -. ph -> ph ) -> ph )", ref="pm2.18", note="pm2.18")
+    h1 = lb.hyp("pm2.18i.1", "( -. φ → φ )")
+    s1 = lb.ref("s1", "( ( -. φ → φ ) → φ )", ref="pm2.18", note="pm2.18")
     res = lb.mp("res", h1, s1, "MP hyp, pm2.18")
     return lb.build(res)
 
 
 def prove_pm2_21dd(sys: System) -> Proof:
-    """pm2.21dd: ph -> ch.  Hyps: ph -> ps, ph -> -. ps.
+    """pm2.21dd: φ → χ.  Hyps: φ → ψ, φ → -. ψ.
 
     A contradiction implies anything.  Deduction from pm2.21.
     (Contributed by Mario Carneiro, 9-Feb-2017.)
     set.mm proof: pm2.65i pm2.21i.
     """
     lb = ProofBuilder(sys, "pm2.21dd")
-    h1 = lb.hyp("pm2.21dd.1", "( ph -> ps )")
-    h2 = lb.hyp("pm2.21dd.2", "( ph -> -. ps )")
-    s1 = lb.ref("s1", "( -. ph )", h1, h2, ref="pm2.65i", note="pm2.65i")
-    res = lb.ref("res", "( ph -> ch )", s1, ref="pm2.21i", note="pm2.21i")
+    h1 = lb.hyp("pm2.21dd.1", "( φ → ψ )")
+    h2 = lb.hyp("pm2.21dd.2", "( φ → -. ψ )")
+    s1 = lb.ref("s1", "( -. φ )", h1, h2, ref="pm2.65i", note="pm2.65i")
+    res = lb.ref("res", "( φ → χ )", s1, ref="pm2.21i", note="pm2.21i")
     return lb.build(res)
 
 
 def prove_pm2_21ddALT(sys: System) -> Proof:
-    """pm2.21ddALT: ph -> ch.  Alternate proof of pm2.21dd.
+    """pm2.21ddALT: φ → χ.  Alternate proof of pm2.21dd.
 
     set.mm label: pm2.21ddALT
-    Statement: ph -> ch  (given ph -> ps and ph -> -. ps)
+    Statement: φ → χ  (given φ → ψ and φ → -. ψ)
     Natural language: From a wff and its negation, anything follows (alternate proof).
     Contributed by Mario Carneiro, 9-Feb-2017.
-    Proof sketch: Apply pm2.21d to get ph -> (ps -> ch) from h2 (ph -> -.ps),
-    then mpd with h1 (ph -> ps) yields ph -> ch.
+    Proof sketch: Apply pm2.21d to get φ → (ψ → χ) from h2 (φ → -.ψ),
+    then mpd with h1 (φ → ψ) yields φ → χ.
 
     Deduction variant: This is an alternate of pm2.21dd (already in lemmas.py).
     Cross-pod dependency: pm2.21d from pod0 knowledge module (negation.py).
     """
     lb = ProofBuilder(sys, "pm2.21ddALT")
-    h1 = lb.hyp("pm2.21ddALT.1", "ph -> ps")
-    h2 = lb.hyp("pm2.21ddALT.2", "ph -> -. ps")
-    s1 = lb.ref("s1", "ph -> ( ps -> ch )", h2, ref="pm2.21d", note="pm2.21d")
-    res = lb.ref("res", "ph -> ch", h1, s1, ref="mpd", note="mpd")
+    h1 = lb.hyp("pm2.21ddALT.1", "φ → ψ")
+    h2 = lb.hyp("pm2.21ddALT.2", "φ → -. ψ")
+    s1 = lb.ref("s1", "φ → ( ψ → χ )", h2, ref="pm2.21d", note="pm2.21d")
+    res = lb.ref("res", "φ → χ", h1, s1, ref="mpd", note="mpd")
     return lb.build(res)
 
 
 def prove_pm2_21i(sys: System) -> Proof:
-    """pm2.21i: ph -> ps.  Hyp: -. ph.
+    """pm2.21i: φ → ψ.  Hyp: -. φ.
 
     A contradiction implies anything.  Associated with pm2.21.
     (Contributed by NM, 16-Sep-1993.)
     set.mm proof: a1i con4i.
     """
     lb = ProofBuilder(sys, "pm2.21i")
-    h1 = lb.hyp("pm2.21i.1", "( -. ph )")
-    s1 = lb.ref("s1", "( -. ps -> -. ph )", h1, ref="a1i", note="a1i")
-    res = lb.ref("res", "( ph -> ps )", s1, ref="con4i", note="con4i")
+    h1 = lb.hyp("pm2.21i.1", "( -. φ )")
+    s1 = lb.ref("s1", "( -. ψ → -. φ )", h1, ref="a1i", note="a1i")
+    res = lb.ref("res", "( φ → ψ )", s1, ref="con4i", note="con4i")
     return lb.build(res)
 
 
 def prove_pm2_24d(sys: System) -> Proof:
-    """pm2.24d: ph -> (-. ps -> ch).  Hyp: ph -> ps.
+    """pm2.24d: φ → (-. ψ → χ).  Hyp: φ → ψ.
 
     Deduction form of pm2.24.
     (Contributed by NM, 30-Jan-2006.)
     set.mm proof: a1d con1d.
     """
     lb = ProofBuilder(sys, "pm2.24d")
-    h1 = lb.hyp("pm2.24d.1", "( ph -> ps )")
-    s1 = lb.ref("s1", "( ph -> ( -. ch -> ps ) )", h1, ref="a1d", note="a1d")
-    res = lb.ref("res", "( ph -> ( -. ps -> ch ) )", s1, ref="con1d", note="con1d")
+    h1 = lb.hyp("pm2.24d.1", "( φ → ψ )")
+    s1 = lb.ref("s1", "( φ → ( -. χ → ψ ) )", h1, ref="a1d", note="a1d")
+    res = lb.ref("res", "( φ → ( -. ψ → χ ) )", s1, ref="con1d", note="con1d")
     return lb.build(res)
 
 
 def prove_pm2_24i(sys: System) -> Proof:
-    """pm2.24i: -. ph -> ps.  Hyp: ph.
+    """pm2.24i: -. φ → ψ.  Hyp: φ.
 
     Inference associated with pm2.24.
     (Contributed by NM, 20-Aug-2001.)
     set.mm proof: a1i con1i.
     """
     lb = ProofBuilder(sys, "pm2.24i")
-    h1 = lb.hyp("pm2.24i.1", "ph")
-    s1 = lb.ref("s1", "( -. ps -> ph )", h1, ref="a1i", note="a1i")
-    res = lb.ref("res", "( -. ph -> ps )", s1, ref="con1i", note="con1i")
+    h1 = lb.hyp("pm2.24i.1", "φ")
+    s1 = lb.ref("s1", "( -. ψ → φ )", h1, ref="a1i", note="a1i")
+    res = lb.ref("res", "( -. φ → ψ )", s1, ref="con1i", note="con1i")
     return lb.build(res)
 
 
 def prove_pm2_24ii(sys: System) -> Proof:
-    """pm2.24ii: ps.  Hyps: ph, -. ph.
+    """pm2.24ii: ψ.  Hyps: φ, -. φ.
 
     A contradiction implies anything.  Associated with pm2.21i and pm2.24i.
     (Contributed by NM, 27-Feb-2008.)
     set.mm proof: pm2.21i ax-mp.
     """
     lb = ProofBuilder(sys, "pm2.24ii")
-    h1 = lb.hyp("pm2.24ii.1", "ph")
-    h2 = lb.hyp("pm2.24ii.2", "( -. ph )")
-    s1 = lb.ref("s1", "( ph -> ps )", h2, ref="pm2.21i", note="pm2.21i")
+    h1 = lb.hyp("pm2.24ii.1", "φ")
+    h2 = lb.hyp("pm2.24ii.2", "( -. φ )")
+    s1 = lb.ref("s1", "( φ → ψ )", h2, ref="pm2.21i", note="pm2.21i")
     res = lb.mp("res", h1, s1, "MP hyp1, s1")
     return lb.build(res)
 
 
 def prove_pm2_521g2(sys: System) -> Proof:
-    """pm2.521g2: -. ( ph -> ps ) -> ( ch -> ph ).
+    """pm2.521g2: -. ( φ → ψ ) → ( χ → φ ).
 
     A general instance of Theorem *2.521 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)  (Proof shortened by Wolf Lammen,
@@ -1045,17 +1035,15 @@ def prove_pm2_521g2(sys: System) -> Proof:
     set.mm proof: simplim a1d.  Here we derive simplim as con1(pm2.21).
     """
     lb = ProofBuilder(sys, "pm2.521g2")
-    s1 = lb.ref("s1", "( -. ph -> ( ph -> ps ) )", ref="pm2.21", note="pm2.21")
-    s2 = lb.ref(
-        "s2", "( ( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> ph ) )", ref="con1", note="con1"
-    )
+    s1 = lb.ref("s1", "( -. φ → ( φ → ψ ) )", ref="pm2.21", note="pm2.21")
+    s2 = lb.ref("s2", "( ( -. φ → ( φ → ψ ) ) → ( -. ( φ → ψ ) → φ ) )", ref="con1", note="con1")
     s3 = lb.mp("s3", s1, s2, note="MP s1,s2: simplim")
-    res = lb.ref("res", "( -. ( ph -> ps ) -> ( ch -> ph ) )", s3, ref="a1d", note="a1d")
+    res = lb.ref("res", "( -. ( φ → ψ ) → ( χ → φ ) )", s3, ref="a1d", note="a1d")
     return lb.build(res)
 
 
 def prove_pm2_5g(sys: System) -> Proof:
-    """pm2.5g: -. ( ph -> ps ) -> ( -. ph -> ch ).
+    """pm2.5g: -. ( φ → ψ ) → ( -. φ → χ ).
 
     General instance of Theorem *2.5 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
@@ -1063,27 +1051,25 @@ def prove_pm2_5g(sys: System) -> Proof:
     set.mm proof: simplim pm2.24d.
 
     Proof sketch:
-    1. pm2.21: -. ph -> ( ph -> ps )
-    2. con1 on step 1: ( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> ph )
-    3. MP steps 1,2: -. ( ph -> ps ) -> ph  (inline simplim)
-    4. pm2.21: -. ph -> ( ph -> ch )
-    5. com12 on step 4: ph -> ( -. ph -> ch )
+    1. pm2.21: -. φ → ( φ → ψ )
+    2. con1 on step 1: ( -. φ → ( φ → ψ ) ) → ( -. ( φ → ψ ) → φ )
+    3. MP steps 1,2: -. ( φ → ψ ) → φ  (inline simplim)
+    4. pm2.21: -. φ → ( φ → χ )
+    5. com12 on step 4: φ → ( -. φ → χ )
     6. syl(steps 3, 5): conclusion
     """
     lb = ProofBuilder(sys, "pm2.5g")
     # Inline simplim using con1 (no hypothesis) instead of con1i
-    ss1 = lb.ref("ss1", "-. ph -> ( ph -> ps )", ref="pm2.21", note="pm2.21")
-    ss2 = lb.ref(
-        "ss2", "( -. ph -> ( ph -> ps ) ) -> ( -. ( ph -> ps ) -> ph )", ref="con1", note="con1"
-    )
+    ss1 = lb.ref("ss1", "-. φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
+    ss2 = lb.ref("ss2", "( -. φ → ( φ → ψ ) ) → ( -. ( φ → ψ ) → φ )", ref="con1", note="con1")
     s1 = lb.mp("s1", ss1, ss2, note="MP (inline simplim)")
 
-    # pm2.21: -. ph -> ( ph -> ch )
-    s2 = lb.ref("s2", "-. ph -> ( ph -> ch )", ref="pm2.21", note="pm2.21")
-    # com12 on s2: ph -> ( -. ph -> ch )
-    s3 = lb.ref("s3", "ph -> ( -. ph -> ch )", s2, ref="com12", note="com12")
+    # pm2.21: ¬ φ → ( φ → χ )
+    s2 = lb.ref("s2", "-. φ → ( φ → χ )", ref="pm2.21", note="pm2.21")
+    # com12 on s2: φ → ( ¬ φ → χ )
+    s3 = lb.ref("s3", "φ → ( -. φ → χ )", s2, ref="com12", note="com12")
     # syl: combine
-    res = lb.ref("res", "-. ( ph -> ps ) -> ( -. ph -> ch )", s1, s3, ref="syl", note="syl")
+    res = lb.ref("res", "-. ( φ → ψ ) → ( -. φ → χ )", s1, s3, ref="syl", note="syl")
     return lb.build(res)
 
 
@@ -1110,60 +1096,60 @@ def prove_pm2_61d1(sys: System) -> Proof:
 
 
 def prove_pm2_61d2(sys: System) -> Proof:
-    """pm2.61d2: ph -> ch.  Hyps: ph -> (-. ps -> ch), ps -> ch."""
+    """pm2.61d2: φ → χ.  Hyps: φ → (-. ψ → χ), ψ → χ."""
     lb = ProofBuilder(sys, "pm2.61d2")
-    h1 = lb.hyp("pm2.61d2.1", "ph -> ( -. ps -> ch )")
-    h2 = lb.hyp("pm2.61d2.2", "ps -> ch")
-    s1 = lb.ref("s1", "ph -> ( ps -> ch )", h2, ref="a1i", note="a1i")
-    res = lb.ref("res", "ph -> ch", s1, h1, ref="pm2.61d", note="pm2.61d")
+    h1 = lb.hyp("pm2.61d2.1", "φ → ( -. ψ → χ )")
+    h2 = lb.hyp("pm2.61d2.2", "ψ → χ")
+    s1 = lb.ref("s1", "φ → ( ψ → χ )", h2, ref="a1i", note="a1i")
+    res = lb.ref("res", "φ → χ", s1, h1, ref="pm2.61d", note="pm2.61d")
     return lb.build(res)
 
 
 def prove_pm2_61i(sys: System) -> Proof:
-    """pm2.61i: ps. Hyps: ph -> ps, -. ph -> ps.
+    """pm2.61i: ψ. Hyps: φ → ψ, -. φ → ψ.
 
     Inference eliminating an antecedent.
     (Contributed by NM, 5-Apr-1994.)
     set.mm proof: nsyl4 pm2.18i.
     """
     lb = ProofBuilder(sys, "pm2.61i")
-    h1 = lb.hyp("pm2.61i.1", "( ph -> ps )")
-    h2 = lb.hyp("pm2.61i.2", "( -. ph -> ps )")
-    s1 = lb.ref("s1", "( -. ps -> ps )", h1, h2, ref="nsyl4", note="nsyl4")
-    res = lb.ref("res", "ps", s1, ref="pm2.18i", note="pm2.18i")
+    h1 = lb.hyp("pm2.61i.1", "( φ → ψ )")
+    h2 = lb.hyp("pm2.61i.2", "( -. φ → ψ )")
+    s1 = lb.ref("s1", "( -. ψ → ψ )", h1, h2, ref="nsyl4", note="nsyl4")
+    res = lb.ref("res", "ψ", s1, ref="pm2.18i", note="pm2.18i")
     return lb.build(res)
 
 
 def prove_pm2_65d(sys: System) -> Proof:
-    """pm2.65d: ( ph -> -. ps ).
+    """pm2.65d: ( φ → -. ψ ).
 
-    Hypotheses: ( ph -> ( ps -> ch ) ), ( ph -> ( ps -> -. ch ) ).
+    Hypotheses: ( φ → ( ψ → χ ) ), ( φ → ( ψ → -. χ ) ).
     Deduction for proof by contradiction.
     (Contributed by NM, 26-Jun-1994.) (Proof shortened by Wolf Lammen, 26-May-2013.)
 
-    Expanded proof: con3d(h1) -> (ph -> (-.ch -> -.ps)) ; syld(h2, s1) -> (ph -> (ps -> -.ps)) ; pm2.01d -> (ph -> -.ps).
-    syld needs explicit args because chi does not appear in its conclusion.
+    Expanded proof: con3d(h1) → (φ → (-.χ → -.ψ)) ; syld(h2, s1) → (φ → (ψ → -.ψ)) ; pm2.01d → (φ → -.ψ).
+    syld needs explicit args because χ does not appear in its conclusion.
     """
     lb = ProofBuilder(sys, "pm2.65d")
-    h1 = lb.hyp("pm2.65d.1", "ph -> ( ps -> ch )")
-    h2 = lb.hyp("pm2.65d.2", "ph -> ( ps -> -. ch )")
-    s1 = lb.ref("s1", "ph -> ( -. ch -> -. ps )", h1, ref="con3d", note="con3d h1")
-    s2 = lb.ref("s2", "ph -> ( ps -> -. ps )", h2, s1, ref="syld", note="syld h2 s1")
-    res = lb.ref("res", "ph -> -. ps", s2, ref="pm2.01d", note="pm2.01d")
+    h1 = lb.hyp("pm2.65d.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("pm2.65d.2", "φ → ( ψ → -. χ )")
+    s1 = lb.ref("s1", "φ → ( -. χ → -. ψ )", h1, ref="con3d", note="con3d h1")
+    s2 = lb.ref("s2", "φ → ( ψ → -. ψ )", h2, s1, ref="syld", note="syld h2 s1")
+    res = lb.ref("res", "φ → -. ψ", s2, ref="pm2.01d", note="pm2.01d")
     return lb.build(res)
 
 
 def prove_pm2_65i(sys: System) -> Proof:
-    """pm2.65i: -. ph.  Hyps: ph -> ps, ph -> -. ps.
+    """pm2.65i: -. φ.  Hyps: φ → ψ, φ → -. ψ.
 
     Inference for proof by contradiction.
     (Contributed by NM, 18-May-1994.)
     set.mm proof: con2i con3i pm2.61i.
     """
     lb = ProofBuilder(sys, "pm2.65i")
-    h1 = lb.hyp("pm2.65i.1", "( ph -> ps )")
-    h2 = lb.hyp("pm2.65i.2", "( ph -> -. ps )")
-    s_con2i = lb.ref("s_con2i", "( ps -> -. ph )", h2, ref="con2i", note="con2i")
-    s_con3i = lb.ref("s_con3i", "( -. ps -> -. ph )", h1, ref="con3i", note="con3i")
-    res = lb.ref("res", "( -. ph )", s_con2i, s_con3i, ref="pm2.61i", note="pm2.61i")
+    h1 = lb.hyp("pm2.65i.1", "( φ → ψ )")
+    h2 = lb.hyp("pm2.65i.2", "( φ → -. ψ )")
+    s_con2i = lb.ref("s_con2i", "( ψ → -. φ )", h2, ref="con2i", note="con2i")
+    s_con3i = lb.ref("s_con3i", "( -. ψ → -. φ )", h1, ref="con3i", note="con3i")
+    res = lb.ref("res", "( -. φ )", s_con2i, s_con3i, ref="pm2.61i", note="pm2.61i")
     return lb.build(res)

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from logic.propositional.hilbert import System
-from logic.propositional.hilbert._syntactic import DEBUG_RULES
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
+
+from logic.propositional.hilbert import System
+from logic.propositional.hilbert._syntactic import DEBUG_RULES
 
 
 def test_propositional_rules_live_in_logic() -> None:

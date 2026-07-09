@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from skfd.authoring.dsl import CompileEnv, DEFAULT_BUILDERS, RequireRegistry, compile_wff
+from skfd.authoring.dsl import DEFAULT_BUILDERS, CompileEnv, RequireRegistry, compile_wff
 from skfd.authoring.typing import PreludeTypingError
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
@@ -12,7 +12,6 @@ from skfd.names import NameResolver
 from ._builtins import PredicateBuiltins
 from ._structures import All
 from .axioms import make_axioms
-
 
 # Deprecated: _predicate_builders
 # Builders are now registered via @logic_symbol in _structures.py and logic.propositional.hilbert._structures

@@ -4,8 +4,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from prelude.formula import Builtins as FoundationBuiltins
 from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
+from prelude.formula import Builtins as FoundationBuiltins
 from skfd.authoring.formula import TokenSeq, Wff
 from skfd.core.peg import Rule, TokenStream
 from skfd.core.symbols import SymbolId, SymbolInterner
@@ -24,6 +24,12 @@ class PropositionalBuiltins:
     or_: SymbolId
     tru: SymbolId
     fal: SymbolId
+    nand: SymbolId
+    cadd: SymbolId
+    xor: SymbolId
+    had: SymbolId
+    if_: SymbolId
+    nor: SymbolId
 
     @staticmethod
     def ensure(
@@ -52,6 +58,39 @@ class PropositionalBuiltins:
         fal = interner.intern(
             origin_module_id=origin_module_id, local_name="F.", kind="Const", origin_ref=origin_ref
         )
+        nand = interner.intern(
+            origin_module_id=origin_module_id,
+            local_name="-/\\",
+            kind="Const",
+            origin_ref=origin_ref,
+        )
+        cadd = interner.intern(
+            origin_module_id=origin_module_id,
+            local_name="cadd",
+            kind="Const",
+            origin_ref=origin_ref,
+        )
+        xor = interner.intern(
+            origin_module_id=origin_module_id,
+            local_name="\\/_",
+            kind="Const",
+            origin_ref=origin_ref,
+        )
+        had = interner.intern(
+            origin_module_id=origin_module_id,
+            local_name="hadd",
+            kind="Const",
+            origin_ref=origin_ref,
+        )
+        if_ = interner.intern(
+            origin_module_id=origin_module_id, local_name="if-", kind="Const", origin_ref=origin_ref
+        )
+        nor = interner.intern(
+            origin_module_id=origin_module_id,
+            local_name=r"-\/",
+            kind="Const",
+            origin_ref=origin_ref,
+        )
         return PropositionalBuiltins(
             lp=foundation.lp,
             rp=foundation.rp,
@@ -62,6 +101,12 @@ class PropositionalBuiltins:
             or_=or_,
             tru=tru,
             fal=fal,
+            nand=nand,
+            cadd=cadd,
+            xor=xor,
+            had=had,
+            if_=if_,
+            nor=nor,
         )
 
 
@@ -91,6 +136,45 @@ def wtru(b: PropositionalBuiltins) -> Wff:
 
 def wfal(b: PropositionalBuiltins) -> Wff:
     return Wff("wff", (b.fal,))
+
+
+def wnan(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
+    return Wff("wff", (b.lp, *phi.tokens, b.nand, *psi.tokens, b.rp))
+
+
+def w3a(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
+    r"""Ternary conjunction: ( φ /\ ψ /\ χ )."""
+    return Wff("wff", (b.lp, *phi.tokens, b.and_, *psi.tokens, b.and_, *chi.tokens, b.rp))
+
+
+def w3o(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
+    r"""Ternary disjunction: ( φ \/ ψ \/ χ )."""
+    return Wff("wff", (b.lp, *phi.tokens, b.or_, *psi.tokens, b.or_, *chi.tokens, b.rp))
+
+
+def wcad(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
+    r"""Ternary cadd: cadd ( φ , ψ , χ )."""
+    return Wff("wff", (b.cadd, *phi.tokens, *psi.tokens, *chi.tokens))
+
+
+def wxo(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
+    r"""Exclusive or: ( φ \/_ ψ )."""
+    return Wff("wff", (b.lp, *phi.tokens, b.xor, *psi.tokens, b.rp))
+
+
+def whad(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
+    r"""Ternary hadd: hadd ( φ , ψ , χ )."""
+    return Wff("wff", (b.had, *phi.tokens, *psi.tokens, *chi.tokens))
+
+
+def wif(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
+    r"""Ternary conditional: if- ( φ , ψ , χ )."""
+    return Wff("wff", (b.if_, *phi.tokens, *psi.tokens, *chi.tokens))
+
+
+def wnor(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
+    r"""Nor: ( φ -\/ ψ )."""
+    return Wff("wff", (b.lp, *phi.tokens, b.nor, *psi.tokens, b.rp))
 
 
 @dataclass(frozen=True)
@@ -282,6 +366,14 @@ __all__ = [
     "wb",
     "wtru",
     "wfal",
+    "wnan",
+    "w3a",
+    "w3o",
+    "wcad",
+    "wxo",
+    "whad",
+    "wif",
+    "wnor",
     "try_parse_imp",
     "try_parse_wn",
     "try_parse_wa",

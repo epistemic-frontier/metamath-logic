@@ -60,7 +60,7 @@ Or = Definition(
 
 
 # Iff(φ, ψ) := ¬((φ → ψ) → ¬(ψ → φ))
-# This matches set.mm df-bi: ( ph <-> ps ) <-> -. ( ( ph -> ps ) -> -. ( ps -> ph ) )
+# This matches set.mm df-bi: ( φ <→ ψ ) <→ ¬ ( ( φ → ψ ) → ¬ ( ψ → φ ) )
 Iff = Definition(
     name="Iff",
     arity=2,

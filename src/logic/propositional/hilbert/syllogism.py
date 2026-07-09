@@ -1,7 +1,9 @@
 """Propositional logic — syllogism variants."""
 
 from __future__ import annotations
+
 from skfd.proof import Proof, ProofBuilder
+
 from . import System
 
 
@@ -86,14 +88,14 @@ def prove_pm2_04(sys: System) -> Proof:
 
 
 def prove_pm2_07(sys: System) -> Proof:
-    """pm2.07: ph -> ( ph \\/ ph ).
+    """pm2.07: φ → ( φ \\/ φ ).
 
     Theorem *2.07 of [WhiteheadRussell] p. 101.
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: olc.  Here expanded via pm2.24 (df-or form).
     """
     lb = ProofBuilder(sys, "pm2.07")
-    res = lb.ref("res", "( ph -> ( ph \\/ ph ) )", ref="pm2.24", note="pm2.24 (df-or)")
+    res = lb.ref("res", "( φ → ( φ \\/ φ ) )", ref="pm2.24", note="pm2.24 (df-or)")
     return lb.build(res)
 
 
@@ -124,85 +126,81 @@ def prove_pm2_6(sys: System) -> Proof:
 
 
 def prove_pm2_13(sys: System) -> Proof:
-    """pm2.13: ph \\/ -. -. -. ph.
+    """pm2.13: φ \\/ -. -. -. φ.
 
     Theorem *2.13 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: notnot orri.
 
-    Under df-or, ph \\/ -. -. -. ph is -. ph -> -. -. -. ph,
-    which is notnot with ph := -. ph. The framework handles
+    Under df-or, φ \\/ -. -. -. φ is -. φ → -. -. -. φ,
+    which is notnot with φ := -. φ. The framework handles
     df-or unification transparently, so orri is not needed.
     """
     lb = ProofBuilder(sys, "pm2.13")
-    s1 = lb.ref("s1", "-. ph -> -. -. -. ph", ref="notnot", note="notnot")
+    s1 = lb.ref("s1", "-. φ → -. -. -. φ", ref="notnot", note="notnot")
     return lb.build(s1)
 
 
 def prove_pm2_26(sys: System) -> Proof:
-    """pm2.26: -. ph \\/ ( ( ph -> ps ) -> ps ).
+    """pm2.26: -. φ \\/ ( ( φ → ψ ) → ψ ).
 
     Theorem *2.26 of [WhiteheadRussell] p. 107.
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: pm2.27 imori.
 
-    Under df-or, -. ph \\/ X expands to ph -> X.
-    So -. ph \\/ ( ( ph -> ps ) -> ps ) = ph -> ( ( ph -> ps ) -> ps ),
+    Under df-or, -. φ \\/ X expands to φ → X.
+    So -. φ \\/ ( ( φ → ψ ) → ψ ) = φ → ( ( φ → ψ ) → ψ ),
     which is exactly pm2.27.
     """
     lb = ProofBuilder(sys, "pm2.26")
-    s1 = lb.ref("s1", "ph -> ( ( ph -> ps ) -> ps )", ref="pm2.27", note="pm2.27")
+    s1 = lb.ref("s1", "φ → ( ( φ → ψ ) → ψ )", ref="pm2.27", note="pm2.27")
     return lb.build(s1)
 
 
 def prove_syl9(sys: System) -> Proof:
-    """syl9: ph -> ( th -> ( ps -> ta ) ).  Hyps: ph -> (ps -> ch), th -> (ch -> ta)."""
+    """syl9: φ → ( θ → ( ψ → τ ) ).  Hyps: φ → (ψ → χ), θ → (χ → τ)."""
     lb = ProofBuilder(sys, "syl9")
-    h1 = lb.hyp("syl9.1", "ph -> ( ps -> ch )")
-    h2 = lb.hyp("syl9.2", "th -> ( ch -> ta )")
-    s1 = lb.ref("s1", "ch -> ( th -> ta )", h2, ref="com12", note="com12")
-    s2 = lb.ref("s2", "ph -> ( ps -> ( th -> ta ) )", h1, s1, ref="syl6", note="syl6")
-    # Prove (ps->(th->ta)) -> (th->(ps->ta)) via A2+A1+imim1+syl
-    sw_a2 = lb.ref(
-        "sw_a2", "( ps -> ( th -> ta ) ) -> ( ( ps -> th ) -> ( ps -> ta ) )", ref="A2", note="A2"
-    )
-    sw_a1 = lb.ref("sw_a1", "th -> ( ps -> th )", ref="A1", note="A1")
+    h1 = lb.hyp("syl9.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("syl9.2", "θ → ( χ → τ )")
+    s1 = lb.ref("s1", "χ → ( θ → τ )", h2, ref="com12", note="com12")
+    s2 = lb.ref("s2", "φ → ( ψ → ( θ → τ ) )", h1, s1, ref="syl6", note="syl6")
+    # Prove (ψ→(θ→τ)) → (θ→(ψ→τ)) via A2+A1+imim1+syl
+    sw_a2 = lb.ref("sw_a2", "( ψ → ( θ → τ ) ) → ( ( ψ → θ ) → ( ψ → τ ) )", ref="A2", note="A2")
+    sw_a1 = lb.ref("sw_a1", "θ → ( ψ → θ )", ref="A1", note="A1")
     sw_im = lb.ref(
         "sw_im",
-        "( th -> ( ps -> th ) ) -> ( ( ( ps -> th ) -> ( ps -> ta ) ) -> ( th -> ( ps -> ta ) ) )",
+        "( θ → ( ψ → θ ) ) → ( ( ( ψ → θ ) → ( ψ → τ ) ) → ( θ → ( ψ → τ ) ) )",
         ref="imim1",
         note="imim1",
     )
     sw_mp = lb.mp("sw_mp", sw_a1, sw_im, "mp A1, imim1")
     s3 = lb.ref(
         "s3",
-        "( ps -> ( th -> ta ) ) -> ( th -> ( ps -> ta ) )",
+        "( ψ → ( θ → τ ) ) → ( θ → ( ψ → τ ) )",
         sw_a2,
         sw_mp,
         ref="syl",
         note="syl",
     )
-    res = lb.ref("res", "ph -> ( th -> ( ps -> ta ) )", s2, s3, ref="syl", note="syl")
+    res = lb.ref("res", "φ → ( θ → ( ψ → τ ) )", s2, s3, ref="syl", note="syl")
     return lb.build(res)
 
 
 def prove_com23(sys: System) -> Proof:
-    """com23: ph -> ( ch -> ( ps -> th ) ).  Hyp: ph -> (ps -> (ch -> th))."""
+    """com23: φ → ( χ → ( ψ → θ ) ).  Hyp: φ → (ψ → (χ → θ))."""
     lb = ProofBuilder(sys, "com23")
-    h1 = lb.hyp("com23.1", "ph -> ( ps -> ( ch -> th ) )")
-    s1 = lb.ref(
-        "s1", "( ps -> ( ch -> th ) ) -> ( ( ps -> ch ) -> ( ps -> th ) )", ref="A2", note="A2"
-    )
-    s2 = lb.ref("s2", "ph -> ( ( ps -> ch ) -> ( ps -> th ) )", h1, s1, ref="syl", note="syl")
-    s3 = lb.ref("s3", "ch -> ( ps -> ch )", ref="A1", note="A1")
+    h1 = lb.hyp("com23.1", "φ → ( ψ → ( χ → θ ) )")
+    s1 = lb.ref("s1", "( ψ → ( χ → θ ) ) → ( ( ψ → χ ) → ( ψ → θ ) )", ref="A2", note="A2")
+    s2 = lb.ref("s2", "φ → ( ( ψ → χ ) → ( ψ → θ ) )", h1, s1, ref="syl", note="syl")
+    s3 = lb.ref("s3", "χ → ( ψ → χ )", ref="A1", note="A1")
     s4 = lb.ref(
         "s4",
-        "( ch -> ( ps -> ch ) ) -> ( ( ( ps -> ch ) -> ( ps -> th ) ) -> ( ch -> ( ps -> th ) ) )",
+        "( χ → ( ψ → χ ) ) → ( ( ( ψ → χ ) → ( ψ → θ ) ) → ( χ → ( ψ → θ ) ) )",
         ref="imim1",
         note="imim1",
     )
     s5 = lb.mp("s5", s3, s4, "mp A1, imim1")
-    res = lb.ref("res", "ph -> ( ch -> ( ps -> th ) )", s2, s5, ref="syl", note="syl")
+    res = lb.ref("res", "φ → ( χ → ( ψ → θ ) )", s2, s5, ref="syl", note="syl")
     return lb.build(res)
 
 

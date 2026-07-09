@@ -5,18 +5,20 @@ Includes Peirce's law, jarli/ja, basic properties.
 """
 
 from __future__ import annotations
+
 from skfd.proof import Proof, ProofBuilder
+
 from . import System
 
 
 def prove_jarli(sys: System) -> Proof:
     """
-    jarli: ¬ φ → χ. Hyp: ( φ → ψ ) -> χ.
+    jarli: ¬ φ → χ. Hyp: ( φ → ψ ) → χ.
 
     Inference associated with jarl.
     """
     lb = ProofBuilder(sys, "jarli")
-    h1 = lb.hyp("jarli.1", "( φ → ψ ) -> χ")
+    h1 = lb.hyp("jarli.1", "( φ → ψ ) → χ")
 
     s1 = lb.ref("s1", "¬ φ → ( φ → ψ )", ref="pm2.21", note="pm2.21")
     res = lb.ref("res", "¬ φ → χ", s1, h1, ref="syl", note="syl")
@@ -25,7 +27,7 @@ def prove_jarli(sys: System) -> Proof:
 
 def prove_ja(sys: System) -> Proof:
     """
-    ja: ( ( φ → ψ ) -> χ ). Hyp1: ¬ φ → χ, Hyp2: ψ → χ.
+    ja: ( ( φ → ψ ) → χ ). Hyp1: ¬ φ → χ, Hyp2: ψ → χ.
 
     Inference joining antecedents.
     set.mm proof: imim2i pm2.61d1.
@@ -34,8 +36,8 @@ def prove_ja(sys: System) -> Proof:
     h1 = lb.hyp("ja.1", "¬ φ → χ")
     h2 = lb.hyp("ja.2", "ψ → χ")
 
-    s1 = lb.ref("s1", "( φ → ψ ) -> ( φ → χ )", h2, ref="imim2i", note="imim2i")
-    res = lb.ref("res", "( φ → ψ ) -> χ", s1, h1, ref="pm2.61d1", note="pm2.61d1")
+    s1 = lb.ref("s1", "( φ → ψ ) → ( φ → χ )", h2, ref="imim2i", note="imim2i")
+    res = lb.ref("res", "( φ → ψ ) → χ", s1, h1, ref="pm2.61d1", note="pm2.61d1")
     return lb.build(res)
 
 
@@ -46,12 +48,12 @@ def prove_peirce(sys: System) -> Proof:
     Peirce's axiom.
     """
     lb = ProofBuilder(sys, "peirce")
-    s1 = lb.ref("s1", "¬ ( φ → ψ ) -> φ", ref="simplim", note="simplim")
+    s1 = lb.ref("s1", "¬ ( φ → ψ ) → φ", ref="simplim", note="simplim")
     lb.ref("s2", "φ → φ", ref="id", note="id")
-    lb.ref("s3", "( ( φ → ψ ) -> φ ) -> φ", ref="ja", note="ja")
+    lb.ref("s3", "( ( φ → ψ ) → φ ) → φ", ref="ja", note="ja")
     s4 = lb.ref(
         "s4",
-        "( ¬ ( φ → ψ ) -> φ ) -> ( ( ( φ → ψ ) -> φ ) -> φ )",
+        "( ¬ ( φ → ψ ) → φ ) → ( ( ( φ → ψ ) → φ ) → φ )",
         ref="syl",
         note="syl",
     )
@@ -86,15 +88,15 @@ def prove_pm2_36(sys: System) -> Proof:
 
 
 def prove_jaod(sys: System) -> Proof:
-    """jaod: ph->((ps\/th)->ch).  Hyps: ph->(ps->ch), ph->(th->ch).
+    """jaod: φ→((ψ∨θ)→χ).  Hyps: φ→(ψ→χ), φ→(θ→χ).
     set.mm proof: com12 + jaoi + com12."""
     lb = ProofBuilder(sys, "jaod")
-    h1 = lb.hyp("jaod.1", "ph -> ( ps -> ch )")
-    h2 = lb.hyp("jaod.2", "ph -> ( th -> ch )")
-    s1 = lb.ref("s1", "ps -> ( ph -> ch )", h1, ref="com12", note="com12(jaod.1)")
-    s2 = lb.ref("s2", "th -> ( ph -> ch )", h2, ref="com12", note="com12(jaod.2)")
-    s3 = lb.ref("s3", "( ps \\/ th ) -> ( ph -> ch )", s1, s2, ref="jaoi", note="jaoi")
-    res = lb.ref("res", "ph -> ( ( ps \\/ th ) -> ch )", s3, ref="com12", note="com12(s3)")
+    h1 = lb.hyp("jaod.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("jaod.2", "φ → ( θ → χ )")
+    s1 = lb.ref("s1", "ψ → ( φ → χ )", h1, ref="com12", note="com12(jaod.1)")
+    s2 = lb.ref("s2", "θ → ( φ → χ )", h2, ref="com12", note="com12(jaod.2)")
+    s3 = lb.ref("s3", "( ψ ∨ θ ) → ( φ → χ )", s1, s2, ref="jaoi", note="jaoi")
+    res = lb.ref("res", "φ → ( ( ψ ∨ θ ) → χ )", s3, ref="com12", note="com12(s3)")
     return lb.build(res)
 
 
@@ -104,28 +106,28 @@ def prove_jaod(sys: System) -> Proof:
 
 
 def prove_jaoi(sys: System) -> Proof:
-    """jaoi: (ph \/ ch) -> psi.  Hyps: ph->psi, ch->psi.
-    Under df-or: (~ph->ch)->psi.
+    """jaoi: (φ ∨ χ) → ψ.  Hyps: φ→ψ, χ→ψ.
+    Under df-or: (~φ→χ)→ψ.
     Proof: con3 on both hyps, compose via imim1+syl6+pm2.65+notnotr.
     """
     lb = ProofBuilder(sys, "jaoi")
-    h1 = lb.hyp("jaoi.1", "ph -> ps")
-    h2 = lb.hyp("jaoi.2", "ch -> ps")
-    # Under df-or the goal is ( -. ph -> ch ) -> ps, i.e. ja with φ:=-.ph, ψ:=ch.
-    # ja's first hypothesis is ¬φ -> χ = -. -. ph -> ps, obtained by lifting h1
+    h1 = lb.hyp("jaoi.1", "φ → ψ")
+    h2 = lb.hyp("jaoi.2", "χ → ψ")
+    # Under df-or the goal is ( ¬ φ → χ ) → ψ, i.e. ja with φ:=¬φ, ψ:=χ.
+    # ja's first hypothesis is ¬φ → χ = ¬ ¬ φ → ψ, obtained by lifting h1
     # through notnotr.
-    s1 = lb.ref("s1", "-. -. ph -> ph", ref="notnotr", note="notnotr")
-    s2 = lb.ref("s2", "-. -. ph -> ps", s1, h1, ref="syl", note="syl(notnotr, jaoi.1)")
-    res = lb.ref("res", "( -. ph -> ch ) -> ps", s2, h2, ref="ja", note="ja(s2, jaoi.2)")
+    s1 = lb.ref("s1", "-. -. φ → φ", ref="notnotr", note="notnotr")
+    s2 = lb.ref("s2", "-. -. φ → ψ", s1, h1, ref="syl", note="syl(notnotr, jaoi.1)")
+    res = lb.ref("res", "( -. φ → χ ) → ψ", s2, h2, ref="ja", note="ja(s2, jaoi.2)")
     return lb.build(res)
 
 
 def prove_olc(sys: System) -> Proof:
-    """olc: phi -> (psi \/ phi).  From orc(pm2.24) + pm1.4 via syl."""
+    """olc: φ → (ψ ∨ φ).  From orc(pm2.24) + pm1.4 via syl."""
     lb = ProofBuilder(sys, "olc")
-    s1 = lb.ref("s1", "ph -> ( ph \\/ ps )", ref="pm2.24", note="pm2.24 (orc)")
-    s2 = lb.ref("s2", "( ph \\/ ps ) -> ( ps \\/ ph )", ref="pm1.4", note="pm1.4")
-    res = lb.ref("res", "ph -> ( ps \\/ ph )", s1, s2, ref="syl", note="syl(orc, pm1.4)")
+    s1 = lb.ref("s1", "φ → ( φ ∨ ψ )", ref="pm2.24", note="pm2.24 (orc)")
+    s2 = lb.ref("s2", "( φ ∨ ψ ) → ( ψ ∨ φ )", ref="pm1.4", note="pm1.4")
+    res = lb.ref("res", "φ → ( ψ ∨ φ )", s1, s2, ref="syl", note="syl(orc, pm1.4)")
     return lb.build(res)
 
 
@@ -136,13 +138,13 @@ def prove_olc(sys: System) -> Proof:
 
 def prove_pm2_621(sys: System) -> Proof:
     """Theorem *2.621 of [WhiteheadRussell] p. 107.
-    ( ph -> ps ) -> ( ( ph \\/ ps ) -> ps ).
+    ( φ → ψ ) → ( ( φ ∨ ψ ) → ψ ).
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: id + idd + jaod.
-    Under df-or: ( ph -> ps ) -> ( ( -. ph -> ps ) -> ps ).
+    Under df-or: ( φ → ψ ) → ( ( -. φ → ψ ) → ψ ).
     This is exactly pm2.61."""
     lb = ProofBuilder(sys, "pm2.621")
-    res = lb.ref("res", "( ph -> ps ) -> ( ( -. ph -> ps ) -> ps )", ref="pm2.61", note="pm2.61")
+    res = lb.ref("res", "( φ → ψ ) → ( ( -. φ → ψ ) → ψ )", ref="pm2.61", note="pm2.61")
     return lb.build(res)
 
 
@@ -161,16 +163,16 @@ def prove_pm2_67(sys: System) -> Proof:
 
 def prove_pm2_67_2(sys: System) -> Proof:
     """Theorem *2.67-2 of [WhiteheadRussell] p. 107.
-    ( ( ph \\/ ch ) -> ps ) -> ( ph -> ps ).
+    ( ( φ ∨ χ ) → ψ ) → ( φ → ψ ).
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: orc + imim1i.
-    Under df-or: ( ( -. ph -> ch ) -> ps ) -> ( ph -> ps ).
+    Under df-or: ( ( -. φ → χ ) → ψ ) → ( φ → ψ ).
     Proof: pm2.24 + imim1 via mp."""
     lb = ProofBuilder(sys, "pm2.67-2")
-    s1 = lb.ref("s1", "ph -> ( -. ph -> ch )", ref="pm2.24", note="pm2.24")
+    s1 = lb.ref("s1", "φ → ( -. φ → χ )", ref="pm2.24", note="pm2.24")
     s2 = lb.ref(
         "s2",
-        "( ph -> ( -. ph -> ch ) ) -> ( ( ( -. ph -> ch ) -> ps ) -> ( ph -> ps ) )",
+        "( φ → ( -. φ → χ ) ) → ( ( ( -. φ → χ ) → ψ ) → ( φ → ψ ) )",
         ref="imim1",
         note="imim1",
     )
@@ -247,8 +249,8 @@ def prove_pm2_74(sys: System) -> Proof:
     (Contributed by NM, 3-Jan-2005.)
     (Proof shortened by Andrew Salmon, 7-May-2011.)
 
-    In set.mm ∨-notation: ( ( ps -> ph ) ->
-      ( ( ( ph \\/ ps ) \\/ ch ) -> ( ph \\/ ch ) ) ).
+    In set.mm ∨-notation: ( ( ψ → φ ) →
+      ( ( ( φ ∨ ψ ) ∨ χ ) → ( φ ∨ χ ) ) ).
     """
     lb = ProofBuilder(sys, "pm2.74")
     # pm2.61 with φ↦ψ, ψ↦φ: ( ψ → φ ) → ( ( ¬ ψ → φ ) → φ )
@@ -350,8 +352,8 @@ def prove_pm2_76(sys: System) -> Proof:
     Theorem *2.76 of [WhiteheadRussell] p. 108.
     (Contributed by NM, 3-Jan-2005.)
 
-    In set.mm ∨-notation: ( ( ph \\/ ( ps -> ch ) ) ->
-      ( ( ph \\/ ps ) -> ( ph \\/ ch ) ) ).
+    In set.mm ∨-notation: ( ( φ ∨ ( ψ → χ ) ) →
+      ( ( φ ∨ ψ ) → ( φ ∨ χ ) ) ).
     This is A2 (ax-2) with φ ↦ ¬ φ.
     """
     lb = ProofBuilder(sys, "pm2.76")
@@ -372,28 +374,27 @@ def prove_pm2_81(sys: System) -> Proof:
     (Contributed by NM, 3-Jan-2005.)
 
     set.mm proof: orim2 pm2.76 syl6.
-    Under df-or: (ps→(ch→th))→((¬ph→ps)→((¬ph→ch)→(¬ph→th))).
-    imim2: (ps→(ch→th))→((¬ph→ps)→(¬ph→(ch→th))).
-    A2: (¬ph→(ch→th))→((¬ph→ch)→(¬ph→th)).
+    Under df-or: (ψ→(χ→θ))→((¬φ→ψ)→((¬φ→χ)→(¬φ→θ))).
+    imim2: (ψ→(χ→θ))→((¬φ→ψ)→(¬φ→(χ→θ))).
+    A2: (¬φ→(χ→θ))→((¬φ→χ)→(¬φ→θ)).
     syl6 chains them.
     """
     lb = ProofBuilder(sys, "pm2.81")
     s_imim2 = lb.ref(
         "s_imim2",
-        "( ( ps -> ( ch -> th ) ) -> ( ( -. ph -> ps ) -> ( -. ph -> ( ch -> th ) ) ) )",
+        "( ( ψ → ( χ → θ ) ) → ( ( -. φ → ψ ) → ( -. φ → ( χ → θ ) ) ) )",
         ref="imim2",
         note="imim2",
     )
     s_A2 = lb.ref(
         "s_A2",
-        "( ( -. ph -> ( ch -> th ) ) -> ( ( -. ph -> ch ) -> ( -. ph -> th ) ) )",
+        "( ( -. φ → ( χ → θ ) ) → ( ( -. φ → χ ) → ( -. φ → θ ) ) )",
         ref="A2",
         note="A2",
     )
     res = lb.ref(
         "res",
-        "( ( ps -> ( ch -> th ) ) -> "
-        "( ( -. ph -> ps ) -> ( ( -. ph -> ch ) -> ( -. ph -> th ) ) ) )",
+        "( ( ψ → ( χ → θ ) ) → ( ( -. φ → ψ ) → ( ( -. φ → χ ) → ( -. φ → θ ) ) ) )",
         s_imim2,
         s_A2,
         ref="syl6",
@@ -403,19 +404,17 @@ def prove_pm2_81(sys: System) -> Proof:
 
 
 def prove_pm2_83(sys: System) -> Proof:
-    """pm2.83: (ph -> (ps -> ch)) -> ((ph -> (ch -> th)) -> (ph -> (ps -> th))).
+    """pm2.83: (φ → (ψ → χ)) → ((φ → (χ → θ)) → (φ → (ψ → θ))).
 
     Closed form of syld.  Theorem *2.83 of [WhiteheadRussell] p. 108.
     (Contributed by NM, 3-Jan-2005.)
     set.mm proof: imim1 imim3i.
     """
     lb = ProofBuilder(sys, "pm2.83")
-    s1 = lb.ref(
-        "s1", "( ( ps -> ch ) -> ( ( ch -> th ) -> ( ps -> th ) ) )", ref="imim1", note="imim1"
-    )
+    s1 = lb.ref("s1", "( ( ψ → χ ) → ( ( χ → θ ) → ( ψ → θ ) ) )", ref="imim1", note="imim1")
     res = lb.ref(
         "res",
-        "( ( ph -> ( ps -> ch ) ) -> ( ( ph -> ( ch -> th ) ) -> ( ph -> ( ps -> th ) ) ) )",
+        "( ( φ → ( ψ → χ ) ) → ( ( φ → ( χ → θ ) ) → ( φ → ( ψ → θ ) ) ) )",
         s1,
         ref="imim3i",
         note="imim3i",
@@ -424,13 +423,13 @@ def prove_pm2_83(sys: System) -> Proof:
 
 
 def prove_pm2_85(sys: System) -> Proof:
-    """pm2.85: ((ph \/ ps) -> (ph \/ ch)) -> (ph \/ (ps -> ch)).
-    Under df-or, this is pm2.86 with -.ph for ph.
+    """pm2.85: ((φ ∨ ψ) → (φ ∨ χ)) → (φ ∨ (ψ → χ)).
+    Under df-or, this is pm2.86 with -.φ for φ.
     """
     lb = ProofBuilder(sys, "pm2.85")
     res = lb.ref(
         "res",
-        "(( -. ph -> ps ) -> ( -. ph -> ch )) -> ( -. ph -> ( ps -> ch ))",
+        "(( -. φ → ψ ) → ( -. φ → χ )) → ( -. φ → ( ψ → χ ))",
         ref="pm2.86",
         note="pm2.86 (df-or)",
     )
@@ -438,17 +437,17 @@ def prove_pm2_85(sys: System) -> Proof:
 
 
 def prove_pm2_86(sys: System) -> Proof:
-    """pm2.86: ((ph -> ps) -> (ph -> ch)) -> (ph -> (ps -> ch))."""
+    """pm2.86: ((φ → ψ) → (φ → χ)) → (φ → (ψ → χ))."""
     lb = ProofBuilder(sys, "pm2.86")
     s1 = lb.ref(
         "s1",
-        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) )",
+        "( ( φ → ψ ) → ( φ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )",
         ref="id",
         note="id",
     )
     res = lb.ref(
         "res",
-        "( ( ph -> ps ) -> ( ph -> ch ) ) -> ( ph -> ( ps -> ch ) )",
+        "( ( φ → ψ ) → ( φ → χ ) ) → ( φ → ( ψ → χ ) )",
         s1,
         ref="pm2.86d",
         note="pm2.86d",
@@ -457,60 +456,54 @@ def prove_pm2_86(sys: System) -> Proof:
 
 
 def prove_pm2_82(sys: System) -> Proof:
-    """pm2.82: (((ph \/ ps) \/ ch) -> (((ph \/ -. ch) \/ th) -> ((ph \/ ps) \/ th))).
+    """pm2.82: (((φ ∨ ψ) ∨ χ) → (((φ ∨ -. χ) ∨ θ) → ((φ ∨ ψ) ∨ θ))).
 
     Theorem *2.82 of [WhiteheadRussell] p. 108.
-    Under df-or: A = (-. ph -> ps), B = (-. ph -> -. ch).
-    Goal: (-. A -> ch) -> ((-. B -> th) -> (-. A -> th)).
+    Under df-or: A = (-. φ → ψ), B = (-. φ → -. χ).
+    Goal: (-. A → χ) → ((-. B → θ) → (-. A → θ)).
 
     set.mm proof: pm2.24 orim2d jao1i orim1d.
     Direct transliteration using df-or expansion.
     """
     lb = ProofBuilder(sys, "pm2.82")
 
-    # Under df-or: (ph \/ ps) = (-. ph -> ps)
-    # Let A = (-. ph -> ps), B = (-. ph -> -. ch)
+    # Under df-or: (φ ∨ ψ) = (¬ φ → ψ)
+    # Let A = (¬ φ → ψ), B = (¬ φ → ¬ χ)
     # Goal in df-or:
-    # (-. (-. ph -> ps) -> ch) -> ((-. (-. ph -> -. ch) -> th) -> (-. (-. ph -> ps) -> th))
+    # (¬ (¬ φ → ψ) → χ) → ((¬ (¬ φ → ¬ χ) → θ) → (¬ (¬ φ → ψ) → θ))
 
-    # Step 1: pm2.24: ch -> (-. ch -> ps)
-    s1 = lb.ref("s1", "ch -> ( -. ch -> ps )", ref="pm2.24", note="pm2.24")
+    # Step 1: pm2.24: χ → (¬ χ → ψ)
+    s1 = lb.ref("s1", "χ → ( -. χ → ψ )", ref="pm2.24", note="pm2.24")
 
-    # Step 2: imim2: (-. ch -> ps) -> ((-. ph -> -. ch) -> (-. ph -> ps))
+    # Step 2: imim2: (¬ χ → ψ) → ((¬ φ → ¬ χ) → (¬ φ → ψ))
     s2 = lb.ref(
         "s2",
-        "( -. ch -> ps ) -> ( ( -. ph -> -. ch ) -> ( -. ph -> ps ) )",
+        "( -. χ → ψ ) → ( ( -. φ → -. χ ) → ( -. φ → ψ ) )",
         ref="imim2",
         note="imim2",
     )
 
-    # Step 3: syl(s1, s2): ch -> ((-. ph -> -. ch) -> (-. ph -> ps))
-    s3 = lb.ref(
-        "s3", "ch -> ( ( -. ph -> -. ch ) -> ( -. ph -> ps ) )", s1, s2, ref="syl", note="syl"
-    )
+    # Step 3: syl(s1, s2): χ → ((¬ φ → ¬ χ) → (¬ φ → ψ))
+    s3 = lb.ref("s3", "χ → ( ( -. φ → -. χ ) → ( -. φ → ψ ) )", s1, s2, ref="syl", note="syl")
 
-    # Step 4: con3: ((-. ph -> -. ch) -> (-. ph -> ps)) -> (-. (-. ph -> ps) -> -. (-. ph -> -. ch))
+    # Step 4: con3: ((¬ φ → ¬ χ) → (¬ φ → ψ)) → (¬ (¬ φ → ψ) → ¬ (¬ φ → ¬ χ))
     s4 = lb.ref(
         "s4",
-        "( ( -. ph -> -. ch ) -> ( -. ph -> ps ) ) -> ( -. ( -. ph -> ps ) -> -. ( -. ph -> -. ch ) )",
+        "( ( -. φ → -. χ ) → ( -. φ → ψ ) ) → ( -. ( -. φ → ψ ) → -. ( -. φ → -. χ ) )",
         ref="con3",
         note="con3",
     )
 
-    # Step 5: syl(s3, s4): ch -> (-. (-. ph -> ps) -> -. (-. ph -> -. ch))
-    s5 = lb.ref(
-        "s5", "ch -> ( -. ( -. ph -> ps ) -> -. ( -. ph -> -. ch ) )", s3, s4, ref="syl", note="syl"
-    )
+    # Step 5: syl(s3, s4): χ → (¬ (¬ φ → ψ) → ¬ (¬ φ → ¬ χ))
+    s5 = lb.ref("s5", "χ → ( -. ( -. φ → ψ ) → -. ( -. φ → -. χ ) )", s3, s4, ref="syl", note="syl")
 
-    # Step 6: com12(s5): -. (-. ph -> ps) -> (ch -> -. (-. ph -> -. ch))
-    s6 = lb.ref(
-        "s6", "-. ( -. ph -> ps ) -> ( ch -> -. ( -. ph -> -. ch ) )", s5, ref="com12", note="com12"
-    )
+    # Step 6: com12(s5): ¬ (¬ φ → ψ) → (χ → ¬ (¬ φ → ¬ χ))
+    s6 = lb.ref("s6", "-. ( -. φ → ψ ) → ( χ → -. ( -. φ → -. χ ) )", s5, ref="com12", note="com12")
 
-    # Step 7: imim1: (ch -> -. (-. ph -> -. ch)) -> ((-. (-. ph -> -. ch) -> th) -> (ch -> th))
+    # Step 7: imim1: (χ → ¬ (¬ φ → ¬ χ)) → ((¬ (¬ φ → ¬ χ) → θ) → (χ → θ))
     s7 = lb.ref(
         "s7",
-        "( ch -> -. ( -. ph -> -. ch ) ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( ch -> th ) )",
+        "( χ → -. ( -. φ → -. χ ) ) → ( ( -. ( -. φ → -. χ ) → θ ) → ( χ → θ ) )",
         ref="imim1",
         note="imim1",
     )
@@ -518,7 +511,7 @@ def prove_pm2_82(sys: System) -> Proof:
     # Step 8: syl(s6, s7)
     s8 = lb.ref(
         "s8",
-        "-. ( -. ph -> ps ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( ch -> th ) )",
+        "-. ( -. φ → ψ ) → ( ( -. ( -. φ → -. χ ) → θ ) → ( χ → θ ) )",
         s6,
         s7,
         ref="syl",
@@ -528,7 +521,7 @@ def prove_pm2_82(sys: System) -> Proof:
     # Step 9: com12(s8)
     s9 = lb.ref(
         "s9",
-        "( -. ( -. ph -> -. ch ) -> th ) -> ( -. ( -. ph -> ps ) -> ( ch -> th ) )",
+        "( -. ( -. φ → -. χ ) → θ ) → ( -. ( -. φ → ψ ) → ( χ → θ ) )",
         s8,
         ref="com12",
         note="com12",
@@ -537,7 +530,7 @@ def prove_pm2_82(sys: System) -> Proof:
     # Step 10: A2
     s10 = lb.ref(
         "s10",
-        "( -. ( -. ph -> ps ) -> ( ch -> th ) ) -> ( ( -. ( -. ph -> ps ) -> ch ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        "( -. ( -. φ → ψ ) → ( χ → θ ) ) → ( ( -. ( -. φ → ψ ) → χ ) → ( -. ( -. φ → ψ ) → θ ) )",
         ref="A2",
         note="A2",
     )
@@ -545,7 +538,7 @@ def prove_pm2_82(sys: System) -> Proof:
     # Step 11: syl(s9, s10)
     s11 = lb.ref(
         "s11",
-        "( -. ( -. ph -> -. ch ) -> th ) -> ( ( -. ( -. ph -> ps ) -> ch ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        "( -. ( -. φ → -. χ ) → θ ) → ( ( -. ( -. φ → ψ ) → χ ) → ( -. ( -. φ → ψ ) → θ ) )",
         s9,
         s10,
         ref="syl",
@@ -555,7 +548,7 @@ def prove_pm2_82(sys: System) -> Proof:
     # Step 12: com12(s11) — final
     res = lb.ref(
         "res",
-        "( -. ( -. ph -> ps ) -> ch ) -> ( ( -. ( -. ph -> -. ch ) -> th ) -> ( -. ( -. ph -> ps ) -> th ) )",
+        "( -. ( -. φ → ψ ) → χ ) → ( ( -. ( -. φ → -. χ ) → θ ) → ( -. ( -. φ → ψ ) → θ ) )",
         s11,
         ref="com12",
         note="com12",

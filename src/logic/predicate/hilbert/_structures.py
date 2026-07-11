@@ -6,7 +6,7 @@ from skfd.authoring.dsl import Var, symbol
 from skfd.authoring.formula import Wff
 from skfd.authoring.typing import WFF
 
-from logic.propositional.hilbert._structures import Imp, Not
+from logic.propositional.hilbert._structures import And, Iff, Imp, Not, Or
 
 from ._builtins import PredicateBuiltins
 from ._builtins import cv as mk_cv
@@ -22,10 +22,20 @@ from ._builtins import wsb as mk_wsb
 # Formal variable placeholder (reuse wff sort discipline)
 phi = Var(name="φ")
 psi = Var(name="ψ")
+chi = Var(name="χ")
+th = Var(name="θ")
+ta = Var(name="τ")
 x = Var(name="x")
 y = Var(name="y")
 z = Var(name="z")
 w = Var(name="w")
+t = Var(name="t")
+u = Var(name="u")
+v = Var(name="v")
+
+
+f = Var(name="f")
+g = Var(name="g")
 
 
 # Binary forall constructor (variable + body)
@@ -93,6 +103,7 @@ def Mo(b: PredicateBuiltins, xs: Sequence[Wff]) -> Wff:
     notes="not free (F/)",
     precedence=40,
     assoc="right",
+    aliases=["Ⅎ"],
 )
 def NF(b: PredicateBuiltins, xs: Sequence[Wff]) -> Wff:
     return mk_nf(b, xs[0], xs[1])
@@ -108,7 +119,7 @@ def Eq(b: PredicateBuiltins, xs: Sequence[Wff]) -> Wff:
     return mk_eq(b, xs[0], xs[1])
 
 
-@symbol("e.", 2, (WFF, WFF), WFF, notes="membership", precedence=30, assoc="none")
+@symbol("e.", 2, (WFF, WFF), WFF, notes="membership", precedence=30, assoc="none", aliases=["∈"])
 def Elem(b: PredicateBuiltins, xs: Sequence[Wff]) -> Wff:
     return mk_elem(b, xs[0], xs[1])
 
@@ -121,6 +132,9 @@ def Cv(b: PredicateBuiltins, xs: Sequence[Wff]) -> Wff:
 __all__ = [
     "phi",
     "psi",
+    "chi",
+    "th",
+    "ta",
     "x",
     "All",
     "Cv",
@@ -128,12 +142,20 @@ __all__ = [
     "Exists",
     "Eq",
     "Elem",
+    "And",
+    "Iff",
     "Imp",
     "Mo",
     "NF",
     "Not",
+    "Or",
     "Wsb",
     "y",
     "z",
     "w",
+    "t",
+    "u",
+    "v",
+    "f",
+    "g",
 ]

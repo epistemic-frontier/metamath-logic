@@ -1,4 +1,4 @@
-# metamath-logic Authoring Style Guide (Draft)
+# metamath-logic Authoring Style Guide
 
 This document defines the authoring conventions for `metamath-logic`.
 It is aligned with the ProofScaffold **BuilderV2 v1 frozen contract** and the migration plan:
@@ -73,9 +73,14 @@ logic/propositional/hilbert/
   constants.py
   syllogism.py       # frozen legacy subdivision of implication (see below)
   lemmas.py          # pure re-export shim (NO proof defs)
-  theorems.py        # set.mm label → local lemma constructor registry (shim)
+  theorems.py        # explicit set.mm label → constructor registry
   __init__.py        # System facade (author_env/compile/apply)
 ```
+
+The predicate facade is `logic/predicate/hilbert/__init__.py` and exposes
+`PredicateSystem`. Predicate internals are `_builtins.py`, `_structures.py`,
+and `_internal.py`; public mathematical content is in `axioms.py`, `lemmas.py`,
+and `theorems.py`. There is no predicate `system.py` or `definitions.py`.
 
 ### Proof placement rule (where a `prove_*` lives)
 
@@ -105,18 +110,18 @@ logic/propositional/hilbert/
 - Known legacy misplacements exist (e.g. `notnot`/`notnotr`/`pm2_18` in
   `implication.py`, `pm2_01`/`pm2_43` in `syllogism.py`). Do not mass-relocate
   them (pure churn); apply the rule to new and moved code.
-- `lemmas.py` and `theorems.py` are **pure re-export shims** — they must contain
-  no `def prove_*`. `lemmas.py` re-exports the full surface (imports from the
-  category files + `__all__`); `theorems.py` holds the
-  `SETMM_TO_HILBERT_LEMMAS` registry.
+- `lemmas.py` and `theorems.py` contain no propositional `def prove_*`.
+  `lemmas.py` re-exports the full constructor surface (imports from category
+  files + `__all__`); `theorems.py` explicitly defines the
+  `SETMM_TO_HILBERT_LEMMAS` label-to-constructor registry.
 
 Current code references:
 
-- Language skeleton: [hilbert/_structures.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/_structures.py)
-- Axioms: [hilbert/axioms.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/axioms.py)
-- Proof scripts by category: [hilbert/implication.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/implication.py), [negation.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/negation.py), [disjunction.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/disjunction.py), [constants.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/constants.py)
-- Re-export shim: [hilbert/lemmas.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/lemmas.py)
-- Registry: [hilbert/theorems.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/theorems.py)
+- Language structures: [`hilbert/_structures.py`](src/logic/propositional/hilbert/_structures.py)
+- Axioms: [`hilbert/axioms.py`](src/logic/propositional/hilbert/axioms.py)
+- Proof scripts by category: [`hilbert/implication.py`](src/logic/propositional/hilbert/implication.py), [`negation.py`](src/logic/propositional/hilbert/negation.py), [`disjunction.py`](src/logic/propositional/hilbert/disjunction.py), [`constants.py`](src/logic/propositional/hilbert/constants.py)
+- Re-export surface: [`hilbert/lemmas.py`](src/logic/propositional/hilbert/lemmas.py)
+- Registry: [`hilbert/theorems.py`](src/logic/propositional/hilbert/theorems.py)
 
 ## 3. Naming Conventions
 
@@ -139,9 +144,9 @@ Current code references:
 ### 3.3 Files and functions
 
 - For a set.mm theorem `pm2.24`, the preferred local constructor is `prove_pm2_24`.
-- Keep a single registry mapping in [theorems.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/propositional/hilbert/theorems.py).
-- Keep [LEMMA_CATALOGUE.md](file:///Users/mingli/MetaMath/metamath-logic/LEMMA_CATALOGUE.md) generated from the registry and current build lowering filter:
-  `uv run python tools/generate_lemma_catalogue.py`.
+- Keep a single registry mapping in [`theorems.py`](src/logic/propositional/hilbert/theorems.py).
+- Keep [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) generated from both registries and the build emission surface:
+  `uv run --no-sync python tools/generate_lemma_catalogue.py`.
 
 ## 4. Authoring DSL Rules (Expr)
 
@@ -185,7 +190,7 @@ This is aligned with the lowered emission support in:
 Hard requirements:
 
 - Every catalogue row with status `lowered/exported` must be lowerable and verifier-backed.
-- Catalogue rows with status `registered only` are allowed during migration but must not be exported by `build.py`.
+- Every registered catalogue proof must be emitted by `build.py` and verifier-backed.
 
 ### 5.2 Separate semantics from commentary
 
@@ -197,14 +202,14 @@ Bad pattern:
 
 Good pattern:
 
-- `lb.ref(..., ref="A1", note="...")` makes the dependency explicit
-- `note="A1 with (phi, psi) = (φ, ¬ψ)"` is commentary only
+- `lb.ref(..., ref="ax-1", note="...")` makes the dependency explicit
+- `note="ax-1 with (phi, psi) = (φ, ¬ψ)"` is commentary only
 
 ### 5.3 Stub policy (allowed, but explicit)
 
 Stub lemmas are allowed only for experimental work that is not part of the public catalogue.
 
-- A lemma listed in [LEMMA_CATALOGUE.md](file:///Users/mingli/MetaMath/metamath-logic/LEMMA_CATALOGUE.md) must not be stubbed.
+- A lemma listed in [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) must not be stubbed.
 - If a lemma is stubbed, it must not be exported.
 
 ## 6. build.py Style (Orchestration Only)
@@ -223,7 +228,7 @@ It should not:
 - access any private fields of `mm`
 - bake dependency naming policy (dist vs module) into author code
 
-See: [logic/build.py](file:///Users/mingli/MetaMath/metamath-logic/src/logic/build.py)
+See: [`logic/build.py`](src/logic/build.py)
 
 ## 7. Unicode / Canonicalization Rules
 
@@ -253,8 +258,11 @@ To preserve deterministic builds:
 
 The expected “green path” for this repository:
 
-- `proof-scaffold`: `uv run pytest`
-- `metamath-logic`: `uv run python -m skfd.cli verify metamath-logic`
+- `proof-scaffold`: `uv run --no-sync pytest`
+- `metamath-logic`: `uv run --no-sync skfd verify --level 1 metamath-logic`
+
+The latest run reports 1,684 declared, 3,610 emitted, and 0
+declared-but-unemitted proofs; all three configured verifiers pass.
 
 Note: `verify` targets the dist/project name from `pyproject.toml`, not the module name.
 

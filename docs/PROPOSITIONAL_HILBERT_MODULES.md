@@ -1,7 +1,7 @@
 # Propositional Hilbert Module Map
 
-This document records the planned module boundaries for migrating the late
-propositional material from `set.mm` into `logic.propositional.hilbert`.
+This document records the implemented module boundaries for propositional
+material from `set.mm` in `logic.propositional.hilbert`.
 
 Engineering guardrails for applying this plan live in
 `docs/ENGINEERING_GUARDRAILS.md`.
@@ -12,42 +12,36 @@ environment, not as independent proof kernels.
 
 | set.mm section | set.mm range | Target module |
 | --- | ---: | --- |
-| Biconditional calculus | 2390-4043 | `logic.propositional.hilbert.equivalence` |
-| Conjunction calculus | 4044-7288 | `logic.propositional.hilbert.conjunction` |
-| True and false constants | 11967-12295 | `logic.propositional.hilbert.constants` |
-| Truth tables | 12296-12587 | `logic.propositional.hilbert.truth_tables` |
-| Full adder | 12588-12835 | `logic.propositional.hilbert.adder` |
-| Other axiomatizations | 12836-14279 | `logic.propositional.hilbert.axiomatizations` |
-| Stoic logic | 14280-14552 | `logic.propositional.hilbert.stoic` |
+| Biconditional calculus | 2411-4048 | `logic.propositional.hilbert.equivalence` |
+| Conjunction calculus | 4049-7376 | `logic.propositional.hilbert.conjunction` |
+| True and false constants | 12135-12463 | `logic.propositional.hilbert.constants` |
+| Truth tables | 12464-12755 | `logic.propositional.hilbert.truth_tables` |
+| Half and full adders | 12756-13003 | `logic.propositional.hilbert.adder` |
+| Other axiomatizations | 13004-14447 | `logic.propositional.hilbert.axiomatizations` |
+| Stoic logic | 14448-14720 | `logic.propositional.hilbert.stoic` |
 
 ## Registry Pattern
 
-Each module owns a local `THEOREMS` mapping from set.mm labels to proof
-constructor functions. The top-level `theorems.py` should eventually aggregate
-these local maps instead of maintaining one large hand-written dictionary.
+Category modules own proof constructors. `lemmas.py` re-exports those
+constructors, and `theorems.py` explicitly maps every canonical set.mm label to
+its constructor. Category modules do not define per-module registries.
 
 ```python
-from .constants import THEOREMS as CONSTANTS
-from .truth_tables import THEOREMS as TRUTH_TABLES
+from .lemmas import prove_df_fal, prove_df_tru
 
 SETMM_TO_HILBERT_LEMMAS = {
-    **CONSTANTS,
-    **TRUTH_TABLES,
+    "df-tru": prove_df_tru,
+    "df-fal": prove_df_fal,
 }
 ```
 
-## Migration Order
+## Current status
 
-1. Move biconditional and conjunction helpers into `equivalence.py` and
-   `conjunction.py`.
-2. Extend lowering support for `<->`, `/\`, and `\/`, then remove the
-   registered-only status for `pm2.07`.
-3. Populate `constants.py` with the purely propositional `T.` and `F.`
-   theorems.
-4. Populate `truth_tables.py`.
-5. Add the late connective support needed for `adder.py`.
-6. Populate `axiomatizations` and `stoic.py` after their dependency closure is
-   explicit.
+The propositional registry contains 1,353 proofs and every row is emitted.
+Connective lowering and the late modules are integrated; there are no
+registered-only propositional proofs. `dfifp4` is registered and emitted, and
+the canonical `mto` replaces the former duplicate package-local
+`prove_modus_tollens`.
 
 ## Boundary Notes
 

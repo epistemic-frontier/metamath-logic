@@ -29,15 +29,16 @@ module plans.
 
 ## Registry Guardrails
 
-- Each theorem-owning module exposes a local `THEOREMS` mapping.
-- Aggregate registries live in `theorems.py` for the package:
+- Proof constructors have one owning module. Propositional `lemmas.py`
+  re-exports its category constructors; predicate constructors live directly
+  in predicate `lemmas.py`.
+- The single authoritative registry for each package lives in `theorems.py`:
   - `SETMM_TO_HILBERT_LEMMAS`
-  - future `SETMM_TO_PREDICATE_THEOREMS`
+  - `SETMM_TO_PREDICATE_THEOREMS`
 - Registry keys must be exact set.mm labels.
 - A constructor registered under label `L` must produce proof name `L`.
 - Do not register a theorem until its constructor can be validated locally.
-- Registered-but-not-emitted entries must be explicit and documented, with the
-  blocking reason recorded in catalogue output or roadmap text.
+- Registered entries must be emitted and covered by verification.
 - Registry aggregation order must be deterministic. Prefer explicit module maps
   over `globals()` collection.
 
@@ -49,11 +50,8 @@ module plans.
   - its syntax constructors lower to the intended token sequence,
   - its direct dependencies are emitted or dependency-provided,
   - unresolved references fail fast during build.
-- Keep authoring registry size and emitted proof surface distinct:
-  - authoring registry can lead,
-  - emitted coverage must state what was dropped and why.
-- If a theorem depends on a connective outside the current lowering subset, keep
-  it registered-only or unregistered until the lowering path exists.
+- Keep registry size and total emitted proof surface distinct; emitted support
+  proofs make the latter larger.
 
 ## Predicate-Specific Guardrails
 
@@ -74,30 +72,30 @@ Run the smallest useful gate for the change, and document anything skipped.
 For documentation-only changes:
 
 ```bash
-uv run ruff check docs/MODULE_PLAN.md docs/PROPOSITIONAL_HILBERT_MODULES.md docs/PREDICATE_HILBERT_MODULES.md docs/ENGINEERING_GUARDRAILS.md
+uv run --no-sync ruff check docs/MODULE_PLAN.md docs/PROPOSITIONAL_HILBERT_MODULES.md docs/PREDICATE_HILBERT_MODULES.md docs/ENGINEERING_GUARDRAILS.md
 ```
 
-For skeleton or import-only Python changes:
+For internal-structure or import-only Python changes:
 
 ```bash
 python3 -m compileall -q src/logic/propositional src/logic/predicate
-uv run ruff check src/logic/propositional src/logic/predicate docs
-uv run python -c 'from logic.propositional.hilbert import axiomatizations'
-uv run python -c 'from logic.predicate.hilbert import PredicateSystem'
+uv run --no-sync ruff check src/logic/propositional src/logic/predicate docs
+uv run --no-sync python -c 'from logic.propositional.hilbert import axiomatizations'
+uv run --no-sync python -c 'from logic.predicate.hilbert import PredicateSystem'
 ```
 
 For theorem registry changes:
 
 ```bash
-uv run ruff check .
-uv run mypy .
-uv run python -m pytest
-uv run python tools/generate_lemma_catalogue.py
-uv run skfd verify --coverage declared --level 1 metamath-logic
+uv run --no-sync ruff check .
+uv run --no-sync mypy .
+uv run --no-sync python -m pytest
+uv run --no-sync python tools/generate_lemma_catalogue.py
+uv run --no-sync skfd verify --level 1 metamath-logic
 ```
 
-`--coverage declared` is allowed to fail only when the failure is the expected
-declared-vs-emitted gap and the final report states the gap explicitly.
+The current gate is expected to report 1,684 declared, 3,610 emitted, and 0
+declared-but-unemitted proofs.
 
 ## Counting and Roadmap Guardrails
 

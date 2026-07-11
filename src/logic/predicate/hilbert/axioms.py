@@ -39,7 +39,9 @@ AX13: Axiom = Imp(Not(Eq(x, y)), Imp(Eq(y, z), All(x, Eq(y, z))))
 
 
 def make_axioms() -> Mapping[str, Axiom]:
-    return cast(Mapping[str, Axiom], export_axioms(globals()))
+    raw = cast(Mapping[str, Axiom], export_axioms(globals()))
+    name_map = {f"AX{number}": f"ax-{number}" for number in range(4, 14)}
+    return {name_map.get(name, name): axiom for name, axiom in raw.items()}
 
 
 __all__ = ["AX4", "AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13", "make_axioms"]

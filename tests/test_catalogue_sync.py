@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from logic.predicate.hilbert import SETMM_TO_PREDICATE_AXIOMS
+from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
 from logic.propositional.hilbert import SETMM_TO_HILBERT_AXIOMS, SETMM_TO_HILBERT_RULES
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
@@ -19,8 +21,10 @@ def test_lemma_catalogue_matches_current_registry() -> None:
 
     expected = (
         set(SETMM_TO_HILBERT_AXIOMS)
+        | set(SETMM_TO_PREDICATE_AXIOMS)
         | set(SETMM_TO_HILBERT_RULES)
         | set(SETMM_TO_HILBERT_LEMMAS)
+        | set(SETMM_TO_PREDICATE_THEOREMS)
         | {"wo", "wtru", "wfal", "idi", "a1ii"}
     )
     assert set(rows) == expected
@@ -28,5 +32,5 @@ def test_lemma_catalogue_matches_current_registry() -> None:
     registered_only = {
         label for label, status in rows.items() if status.startswith("registered only:")
     }
-    assert registered_only <= set(SETMM_TO_HILBERT_LEMMAS)
-    assert registered_only == {"pm2.07"}
+    assert registered_only <= set(SETMM_TO_HILBERT_LEMMAS) | set(SETMM_TO_PREDICATE_THEOREMS)
+    assert not registered_only

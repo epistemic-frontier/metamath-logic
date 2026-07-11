@@ -12,6 +12,7 @@ from skfd.authoring.rules import RuleBundle
 from skfd.authoring.typing import HypothesisAny, RuleApp
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
+from skfd.names.lexicon import LexiconEntry, builtin_lexicon
 from skfd.proof import TacticRegistry
 
 from ._builtins import PropositionalBuiltins
@@ -133,8 +134,25 @@ class System:
         return {}
 
 
+def _extend_names(names: NameResolver) -> NameResolver:
+    """Extend a resolver with all set.mm wff variables used by this package."""
+    lex = names._lexicon
+    lex.add(LexiconEntry(kind="Var", canonical="et", aliases=("η",), display="η"))
+    lex.add(LexiconEntry(kind="Var", canonical="ze", aliases=("ζ",), display="ζ"))
+    lex.add(LexiconEntry(kind="Var", canonical="si", aliases=("σ",), display="σ"))
+    lex.add(LexiconEntry(kind="Var", canonical="rh", aliases=("ρ",), display="ρ"))
+    lex.add(LexiconEntry(kind="Var", canonical="mu", aliases=("μ",), display="μ"))
+    lex.add(LexiconEntry(kind="Var", canonical="la", aliases=("λ",), display="λ"))
+    return names
+
+
+def _make_names() -> NameResolver:
+    """Create a resolver with the extended set.mm wff-variable lexicon."""
+    return _extend_names(NameResolver(lexicon=builtin_lexicon()))
+
+
 def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
-    return System.make(interner=interner, names=NameResolver(), origin_ref=origin_ref)
+    return System.make(interner=interner, names=_make_names(), origin_ref=origin_ref)
 
 
 SETMM_TO_HILBERT_RULES: Mapping[str, str] = {

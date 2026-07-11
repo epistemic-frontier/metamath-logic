@@ -1,19 +1,88 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
+from dataclasses import dataclass
 
 from skfd.api_v2 import BuildContextV2
 from skfd.authoring.emit import emit_axioms, emit_lowered_lemmas
+from skfd.authoring.formula import Wff
 from skfd.builder_v2 import MMBuilderV2
-from skfd.core.symbols import SymbolId
+from skfd.core.symbols import SymbolId, SymbolInterner
 
+from logic.predicate.hilbert import PredicateSystem
+from logic.predicate.hilbert import lemmas as predicate_lemmas
 from logic.predicate.hilbert._builtins import PredicateBuiltins
-from logic.propositional.hilbert import System
+from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
+from logic.propositional.hilbert import System, _extend_names
 from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.lemmas import Proof
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 _log = logging.getLogger(__name__)
+
+_PREDICATE_SUPPORT_CTORS = (
+    predicate_lemmas.prove_alim,
+    predicate_lemmas.prove_alimi,
+    predicate_lemmas.prove_2alimi,
+    predicate_lemmas.prove_al2im,
+    predicate_lemmas.prove_al2imi,
+    predicate_lemmas.prove_alimdh,
+    predicate_lemmas.prove_alimdv,
+    predicate_lemmas.prove_2alimdv,
+    predicate_lemmas.prove_alrimdh,
+    predicate_lemmas.prove_alrimdv,
+    predicate_lemmas.prove_alrimih,
+    predicate_lemmas.prove_alrimiv,
+    predicate_lemmas.prove_alrimivv,
+    predicate_lemmas.prove_ax5d,
+    predicate_lemmas.prove_ax6v,
+    predicate_lemmas.prove_ax7v,
+    predicate_lemmas.prove_ax7v1,
+    predicate_lemmas.prove_ax7v2,
+    predicate_lemmas.prove_equid,
+    predicate_lemmas.prove_ax8v,
+    predicate_lemmas.prove_ax8v1,
+    predicate_lemmas.prove_ax8v2,
+    predicate_lemmas.prove_ax9v,
+    predicate_lemmas.prove_ax9v1,
+    predicate_lemmas.prove_ax9v2,
+    predicate_lemmas.prove_ax12v,
+    predicate_lemmas.prove_ax13w,
+    predicate_lemmas.prove_gen2,
+    predicate_lemmas.prove_sylg,
+    predicate_lemmas.prove_sylgt,
+    predicate_lemmas.prove_nfrd,
+    predicate_lemmas.prove_nfnbi,
+    predicate_lemmas.prove_nfnt,
+    predicate_lemmas.prove_nfbid,
+    predicate_lemmas.prove_nfa1,
+    predicate_lemmas.prove_mpgbi,
+    predicate_lemmas.prove_stdpc5v,
+    predicate_lemmas.prove_hbe1a,
+    predicate_lemmas.prove_alcom,
+    predicate_lemmas.prove_alcoms,
+    predicate_lemmas.prove_ala1,
+    predicate_lemmas.prove_hbth,
+    predicate_lemmas.prove_hbal,
+    predicate_lemmas.prove_hbald,
+    predicate_lemmas.prove_exsbim,
+    predicate_lemmas.prove_sbimi,
+    predicate_lemmas.prove_spvw,
+    predicate_lemmas.prove_19_37v,
+    predicate_lemmas.prove_calemos,
+    predicate_lemmas.prove_darapti,
+)
+
+
+@dataclass(frozen=True)
+class _PredicateEmissionProvider:
+    interner: SymbolInterner
+    builtins: PredicateBuiltins
+    statements: Mapping[str, Wff]
+
+    def compile_axioms(self) -> Mapping[str, Wff]:
+        return self.statements
 
 
 def _emit_rule_skeleton(mm: MMBuilderV2, system: System, *, provable: SymbolId) -> None:
@@ -31,11 +100,16 @@ def build(ctx: BuildContextV2) -> None:
     mm = ctx.mm
     prelude = ctx.deps["metamath-prelude"]
 
-    system = System.make(interner=mm.interner, names=ctx.names)
+    system = System.make(interner=mm.interner, names=_extend_names(ctx.names))
     builtins = system.builtins
+    predicate_system = PredicateSystem.make(
+        interner=mm.interner,
+        names=system.names,
+    )
     coverage = getattr(ctx, "coverage", None)
     if coverage is not None:
-        coverage.declare_registry("hilbert", SETMM_TO_HILBERT_LEMMAS)
+        coverage.declare_registry("propositional-hilbert", SETMM_TO_HILBERT_LEMMAS)
+        coverage.declare_registry("predicate-hilbert", SETMM_TO_PREDICATE_THEOREMS)
 
     wff = prelude["wff"]
     provable = prelude["|-"]
@@ -49,7 +123,7 @@ def build(ctx: BuildContextV2) -> None:
         mm,
         system,
         typecode=provable,
-        label_ids={"A1": ax_1, "A2": ax_2, "A3": ax_3},
+        label_ids={"ax-1": ax_1, "ax-2": ax_2, "ax-3": ax_3},
     )
     _emit_rule_skeleton(mm, system, provable=provable)
 
@@ -67,17 +141,11 @@ def build(ctx: BuildContextV2) -> None:
     wb = mm.sym.label("wb")
     idi = mm.sym.label("idi")
     a1ii = mm.sym.label("a1ii")
-    df_fal = mm.sym.label("df-fal")
-
     mm.a(wo, tc=wff, expr=[builtins.lp, ph, builtins.or_, ps, builtins.rp])
     mm.a(wa, tc=wff, expr=[builtins.lp, ph, builtins.and_, ps, builtins.rp])
     mm.a(wtru, tc=wff, expr=[builtins.tru])
+
     mm.a(wfal, tc=wff, expr=[builtins.fal])
-    mm.a(
-        df_fal,
-        tc=provable,
-        expr=[builtins.lp, builtins.fal, builtins.iff, builtins.neg, builtins.tru, builtins.rp],
-    )
     mm.a(wb, tc=wff, expr=[builtins.lp, ph, builtins.iff, ps, builtins.rp])
 
     w3a_label = mm.sym.label("w3a")
@@ -101,6 +169,30 @@ def build(ctx: BuildContextV2) -> None:
     mm.a(wxo_label, tc=wff, expr=[builtins.lp, ph, builtins.xor, ps, builtins.rp])
 
     whad_label = mm.sym.label("whad")
+
+    df_had_label = mm.sym.label("df-had")
+    mm.a(
+        df_had_label,
+        tc=provable,
+        expr=[
+            builtins.lp,
+            builtins.had,
+            ph,
+            ps,
+            ch,
+            builtins.iff,
+            builtins.lp,
+            builtins.lp,
+            ph,
+            builtins.xor,
+            ps,
+            builtins.rp,
+            builtins.xor,
+            ch,
+            builtins.rp,
+            builtins.rp,
+        ],
+    )
     mm.a(whad_label, tc=wff, expr=[builtins.had, ph, ps, ch])
 
     wif_label = mm.sym.label("wif")
@@ -117,7 +209,7 @@ def build(ctx: BuildContextV2) -> None:
     wcel_cA = mm.f(mm.sym.label("wcel.cA"), tc=wff, var=cA)
     wcel_cB = mm.f(mm.sym.label("wcel.cB"), tc=wff, var=cB)
 
-    builtins_pred = PredicateBuiltins.ensure(mm.interner)
+    builtins_pred = predicate_system.builtins
     wcel = mm.sym.label("wcel")
     mm.a(wcel, tc=wff, expr=[cA, builtins_pred.elem, cB])
 
@@ -141,7 +233,20 @@ def build(ctx: BuildContextV2) -> None:
     wvx_cv = mm.f(mm.sym.label("vx.cv"), tc=wff, var=vx_cv)
 
     cv = mm.sym.label("cv")
-    mm.a(cv, tc=wff, expr=[vx_cv])
+    mm.a(cv, tc=wff, expr=[builtins_pred.cv, vx_cv])
+
+    # weq: wff x = y
+    vx_weq = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vx.weq", kind="Var", origin_ref=0
+    )
+    wvx_weq = mm.f(mm.sym.label("vx.weq"), tc=wff, var=vx_weq)
+    vy_weq = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vy.weq", kind="Var", origin_ref=0
+    )
+    wvy_weq = mm.f(mm.sym.label("vy.weq"), tc=wff, var=vy_weq)
+
+    weq_label = mm.sym.label("weq")
+    mm.a(weq_label, tc=wff, expr=[vx_weq, builtins_pred.eq, vy_weq])
 
     # wex: existential quantifier (wff)
     vx_wex = mm.interner.intern(
@@ -242,6 +347,7 @@ def build(ctx: BuildContextV2) -> None:
             builtins_pred.forall,
             vx_ax4,
             ps,
+            builtins.rp,
             builtins.rp,
         ],
     )
@@ -435,6 +541,45 @@ def build(ctx: BuildContextV2) -> None:
             builtins.rp,
         ],
     )
+    # ax-13: ¬ x = y → ( y = z → ∀ x y = z )
+    vx_ax13 = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vx.ax13", kind="Var", origin_ref=0
+    )
+    wvx_ax13 = mm.f(mm.sym.label("vx.ax13"), tc=wff, var=vx_ax13)
+    vy_ax13 = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vy.ax13", kind="Var", origin_ref=0
+    )
+    wvy_ax13 = mm.f(mm.sym.label("vy.ax13"), tc=wff, var=vy_ax13)
+    vz_ax13 = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vz.ax13", kind="Var", origin_ref=0
+    )
+    wvz_ax13 = mm.f(mm.sym.label("vz.ax13"), tc=wff, var=vz_ax13)
+
+    ax_13_label = mm.sym.label("ax-13")
+    mm.a(
+        ax_13_label,
+        tc=provable,
+        expr=[
+            builtins.lp,
+            builtins.neg,
+            vx_ax13,
+            builtins_pred.eq,
+            vy_ax13,
+            builtins.imp,
+            builtins.lp,
+            vy_ax13,
+            builtins_pred.eq,
+            vz_ax13,
+            builtins.imp,
+            builtins_pred.forall,
+            vx_ax13,
+            vy_ax13,
+            builtins_pred.eq,
+            vz_ax13,
+            builtins.rp,
+            builtins.rp,
+        ],
+    )
     # weu: there exists a unique (wff)
     vx_weu = mm.interner.intern(
         origin_module_id=LOGIC_MODULE, local_name="vx.weu", kind="Var", origin_ref=0
@@ -569,6 +714,108 @@ def build(ctx: BuildContextV2) -> None:
         ],
     )
 
+    # df-eu: "there exists a unique" definition
+    vx_dfeu = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vx.dfeu", kind="Var", origin_ref=0
+    )
+    wvx_dfeu = mm.f(mm.sym.label("vx.dfeu"), tc=wff, var=vx_dfeu)
+
+    df_eu_label = mm.sym.label("df-eu")
+    mm.a(
+        df_eu_label,
+        tc=provable,
+        expr=[
+            builtins.lp,
+            builtins_pred.eu,
+            vx_dfeu,
+            ph,
+            builtins.iff,
+            builtins.lp,
+            builtins_pred.exist,
+            vx_dfeu,
+            ph,
+            builtins.and_,
+            builtins_pred.moeu,
+            vx_dfeu,
+            ph,
+            builtins.rp,
+            builtins.rp,
+        ],
+    )
+
+    # df-sb: proper substitution definition
+    vt_dfsb = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vt.dfsb", kind="Var", origin_ref=0
+    )
+    wvt_dfsb = mm.f(mm.sym.label("vt.dfsb"), tc=wff, var=vt_dfsb)
+    vx_dfsb = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vx.dfsb", kind="Var", origin_ref=0
+    )
+    wvx_dfsb = mm.f(mm.sym.label("vx.dfsb"), tc=wff, var=vx_dfsb)
+    vy_dfsb = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vy.dfsb", kind="Var", origin_ref=0
+    )
+    wvy_dfsb = mm.f(mm.sym.label("vy.dfsb"), tc=wff, var=vy_dfsb)
+    vz_dfsb = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vz.dfsb", kind="Var", origin_ref=0
+    )
+    wvz_dfsb = mm.f(mm.sym.label("vz.dfsb"), tc=wff, var=vz_dfsb)
+
+    df_sb_label = mm.sym.label("df-sb")
+    df_sb_expr = (
+        builtins.lp,
+        builtins_pred.sb_lb,
+        vt_dfsb,
+        builtins_pred.sb_slash,
+        vx_dfsb,
+        builtins_pred.sb_rb,
+        ph,
+        builtins.iff,
+        builtins.lp,
+        builtins_pred.forall,
+        vy_dfsb,
+        builtins.lp,
+        vy_dfsb,
+        builtins_pred.eq,
+        vt_dfsb,
+        builtins.imp,
+        builtins_pred.forall,
+        vx_dfsb,
+        builtins.lp,
+        vx_dfsb,
+        builtins_pred.eq,
+        vy_dfsb,
+        builtins.imp,
+        ph,
+        builtins.rp,
+        builtins.rp,
+        builtins.and_,
+        builtins_pred.forall,
+        vz_dfsb,
+        builtins.lp,
+        vz_dfsb,
+        builtins_pred.eq,
+        vt_dfsb,
+        builtins.imp,
+        builtins_pred.forall,
+        vx_dfsb,
+        builtins.lp,
+        vx_dfsb,
+        builtins_pred.eq,
+        vz_dfsb,
+        builtins.imp,
+        ph,
+        builtins.rp,
+        builtins.rp,
+        builtins.rp,
+        builtins.rp,
+    )
+    mm.a(
+        df_sb_label,
+        tc=provable,
+        expr=df_sb_expr,
+    )
+
     with mm.block():
         mm.e(mm.sym.label("idi.1"), tc=provable, expr=[ph])
         mm.p(idi, tc=provable, expr=[ph], proof=[mm.sym.label("idi.1")])
@@ -580,19 +827,33 @@ def build(ctx: BuildContextV2) -> None:
 
     compiled_axioms = system.compile_axioms()
     reserved = {"wi", "wn", "wtru", "wfal"}
-    # Tokens for which a proof has an emittable lowering path. Disjunction is
-    # declared above, but it is not listed here: proving a ∨-stated theorem
-    # (e.g. pm2.07) requires df-or plus biconditional rewriting, which this
-    # pure ¬→ Hilbert lowering path does not provide. The nullary top/bottom
-    # constants T. / F. are emittable because they only appear as opaque
-    # substitution targets during ref-unification.
+    # Tokens for which a proof has an emittable lowering path. The nullary
+    # top/bottom constants T. / F. are emittable because they only appear as
+    # opaque substitution targets during ref-unification.
     supported_tokens = {
         builtins.neg,
         builtins.imp,
+        builtins.and_,
+        builtins.iff,
+        builtins.or_,
+        builtins.nand,
+        builtins.nor,
+        builtins.xor,
+        builtins.cadd,
+        builtins.if_,
         builtins.tru,
         builtins.fal,
         builtins.lp,
         builtins.rp,
+    }
+    binary_tokens = {
+        builtins.imp,
+        builtins.and_,
+        builtins.iff,
+        builtins.or_,
+        builtins.nand,
+        builtins.nor,
+        builtins.xor,
     }
     # Propositional variables that have a floating hypothesis in the prelude.
     floating_by_var = {
@@ -601,6 +862,12 @@ def build(ctx: BuildContextV2) -> None:
         prelude["ch"]: prelude["wch"],
         prelude["th"]: prelude["wth"],
         prelude["ta"]: prelude["wta"],
+        prelude["et"]: prelude["wet"],
+        prelude["ze"]: prelude["wze"],
+        prelude["si"]: prelude["wsi"],
+        prelude["rh"]: prelude["wrh"],
+        prelude["mu"]: prelude["wmu"],
+        prelude["la"]: prelude["wla"],
     }
 
     def _refs(p: Proof) -> set[str]:
@@ -614,17 +881,29 @@ def build(ctx: BuildContextV2) -> None:
 
     def _emittable(p: Proof) -> bool:
         """A proof is emittable only if every token is a supported connective
-        (¬, →, parens) or a propositional variable with a floating hypothesis.
-        Proofs stated with e.g. ∨ cannot be lowered until the logic package has
-        a df-or based lowering path."""
+        or a propositional variable with a floating hypothesis."""
         for st in getattr(p, "steps", ()):
             w = getattr(st, "wff", None)
             if w is None:
                 continue
+            operator_stack: list[list[SymbolId]] = []
             for t in w.tokens:
                 if t in supported_tokens or t in floating_by_var:
-                    continue
-                return False
+                    if t == builtins.lp:
+                        operator_stack.append([])
+                    elif t == builtins.rp:
+                        operators = operator_stack.pop()
+                        if len(operators) > 2:
+                            return False
+                        if len(operators) == 2 and not (
+                            operators[0] == operators[1]
+                            and operators[0] in {builtins.and_, builtins.or_}
+                        ):
+                            return False
+                    elif t in binary_tokens and operator_stack:
+                        operator_stack[-1].append(t)
+                else:
+                    return False
         return True
 
     # Emit the maximal subset of the declared registry. Drop:
@@ -687,20 +966,205 @@ def build(ctx: BuildContextV2) -> None:
             "wfal": wfal,
             "wb": wb,
             "mp": ax_mp,
-            "A1": ax_1,
-            "A2": ax_2,
-            "A3": ax_3,
+            "ax-1": ax_1,
+            "ax-2": ax_2,
+            "ax-3": ax_3,
         },
         floating_by_var=floating_by_var,
     )
 
+    predicate_compiled_axioms = predicate_system.compile_axioms()
+    predicate_foundations = {
+        "ax-gen": Wff("wff", (builtins_pred.forall, vx_wal, ph)),
+        "df-sb": Wff("wff", df_sb_expr),
+        "df-ex": Wff(
+            "wff",
+            (
+                builtins.lp,
+                builtins_pred.exist,
+                vx_dfex,
+                ph,
+                builtins.iff,
+                builtins.neg,
+                builtins_pred.forall,
+                vx_dfex,
+                builtins.neg,
+                ph,
+                builtins.rp,
+            ),
+        ),
+        "df-nf": Wff(
+            "wff",
+            (
+                builtins.lp,
+                builtins_pred.nf,
+                vx_dfnf,
+                ph,
+                builtins.iff,
+                builtins.lp,
+                builtins_pred.exist,
+                vx_dfnf,
+                ph,
+                builtins.imp,
+                builtins_pred.forall,
+                vx_dfnf,
+                ph,
+                builtins.rp,
+                builtins.rp,
+            ),
+        ),
+        "df-eu": Wff(
+            "wff",
+            (
+                builtins.lp,
+                builtins_pred.eu,
+                vx_dfeu,
+                ph,
+                builtins.iff,
+                builtins.lp,
+                builtins_pred.exist,
+                vx_dfeu,
+                ph,
+                builtins.and_,
+                builtins_pred.moeu,
+                vx_dfeu,
+                ph,
+                builtins.rp,
+                builtins.rp,
+            ),
+        ),
+        "df-mo": Wff(
+            "wff",
+            (
+                builtins.lp,
+                builtins_pred.moeu,
+                vx_dfmo,
+                ph,
+                builtins.iff,
+                builtins_pred.exist,
+                vy_dfmo,
+                builtins_pred.forall,
+                vx_dfmo,
+                builtins.lp,
+                ph,
+                builtins.imp,
+                vx_dfmo,
+                builtins_pred.eq,
+                vy_dfmo,
+                builtins.rp,
+                builtins.rp,
+            ),
+        ),
+        **{f"ax-{number}": compiled_axioms[f"ax-{number}"] for number in range(1, 4)},
+        **{f"ax-{number}": predicate_compiled_axioms[f"ax-{number}"] for number in range(4, 14)},
+    }
+    predicate_constructed: dict[str, Proof] = {}
+    predicate_excluded: dict[str, str] = {}
+    for ctor in _PREDICATE_SUPPORT_CTORS:
+        proof = ctor(predicate_system)
+        predicate_constructed[proof.name] = proof
+    for name, ctor in SETMM_TO_PREDICATE_THEOREMS.items():
+        try:
+            predicate_constructed[name] = ctor(predicate_system)
+        except Exception as exc:
+            predicate_excluded[name] = f"construction failed: {exc}"
+
+    predicate_base_refs = (
+        set(compiled_axioms)
+        | set(predicate_compiled_axioms)
+        | set(predicate_foundations)
+        | set(constructed)
+    )
+    changed = True
+    while changed:
+        changed = False
+        for name in list(predicate_constructed):
+            for ref in _refs(predicate_constructed[name]):
+                if ref not in predicate_base_refs and ref not in predicate_constructed:
+                    predicate_excluded[name] = f"depends on unavailable theorem {ref!r}"
+                    del predicate_constructed[name]
+                    changed = True
+                    break
+
+    if predicate_excluded:
+        _log.info(
+            "emitting %d/%d predicate theorems; excluded %d: %s",
+            len(predicate_constructed),
+            len(SETMM_TO_PREDICATE_THEOREMS),
+            len(predicate_excluded),
+            "; ".join(f"{n} ({r})" for n, r in sorted(predicate_excluded.items())),
+        )
+
+    predicate_floating_by_var: dict[SymbolId, SymbolId] = {}
+    predicate_vars: set[SymbolId] = set()
+    for proof in predicate_constructed.values():
+        for step in proof.steps:
+            predicate_vars.update(mm.auto.vars_in(step.wff.tokens))
+    predicate_var_order = {
+        name: index
+        for index, name in enumerate(
+            ("ph", "ps", "ch", "th", "ta", "et", "ze", "si", "rh", "mu", "la")
+        )
+    }
+    for var in sorted(
+        predicate_vars,
+        key=lambda symbol: (
+            predicate_var_order.get(mm.interner.symbol_table()[symbol].local_name, 100),
+            symbol,
+        ),
+    ):
+        local_name = mm.interner.symbol_table()[var].local_name
+        predicate_floating_by_var[var] = mm.f(
+            mm.sym.label(f"predicate.w{local_name}"),
+            tc=wff,
+            var=var,
+        )
+
+    predicate_provider = _PredicateEmissionProvider(
+        interner=mm.interner,
+        builtins=builtins_pred,
+        statements={
+            **compiled_axioms,
+            **predicate_compiled_axioms,
+            **predicate_foundations,
+            **{name: proof.statement for name, proof in constructed.items()},
+        },
+    )
+    emit_lowered_lemmas(
+        mm,
+        predicate_provider,
+        list(predicate_constructed.values()),
+        typecode=provable,
+        wff_typecode=wff,
+        label_ids={
+            "wi": prelude["wi"],
+            "wn": prelude["wn"],
+            "mp": ax_mp,
+            "ax-1": ax_1,
+            "ax-2": ax_2,
+            "ax-3": ax_3,
+            **{f"ax-{number}": mm.sym.label(f"ax-{number}") for number in range(4, 14)},
+        },
+        floating_by_var=predicate_floating_by_var,
+        hypotheses_by_label={
+            "ax-gen": (Wff("wff", (ph,)),),
+            **{
+                name: tuple(step.wff for step in proof.steps if step.op == "hyp")
+                for name, proof in constructed.items()
+            },
+        },
+    )
+
     export_labels = [
         "cv",
+        "weq",
         "wmo",
         "weu",
         "wex",
         "wal",
         "wa",
+        "df-an",
+        "df-nan",
         "wcel",
         "wceq",
         "wo",
@@ -712,9 +1176,17 @@ def build(ctx: BuildContextV2) -> None:
         "wtru",
         "w3a",
         "w3o",
+        "df-or",
+        "df-bi",
+        "df-xor",
+        "df-had",
+        "df-3or",
         "wnan",
         "wnor",
+        "df-nor",
         "wcad",
+        "df-cad",
+        "df-ifp",
         "wb",
         "wfal",
         "df-fal",
@@ -734,9 +1206,12 @@ def build(ctx: BuildContextV2) -> None:
         "ax-7",
         "ax-8",
         "ax-9",
+        "ax-13",
         "df-ex",
         "df-nf",
         "df-mo",
+        "df-eu",
+        "df-sb",
         *sorted(constructed.keys()),
     ]
     mm.export(
@@ -751,8 +1226,11 @@ def build(ctx: BuildContextV2) -> None:
         wvx_dfex,
         wvx_dfnf,
         wvx_dfmo,
+        wvx_dfeu,
         wvy_dfmo,
         wvx_cv,
+        wvx_weq,
+        wvy_weq,
         wcel_cA,
         wcel_cB,
         wceq_cA,
@@ -769,7 +1247,14 @@ def build(ctx: BuildContextV2) -> None:
         wvx_ax9,
         wvy_ax9,
         wvz_ax9,
+        wvx_ax13,
+        wvy_ax13,
+        wvz_ax13,
         wvy_wsb,
         wvx_wsb,
+        wvt_dfsb,
+        wvx_dfsb,
+        wvy_dfsb,
+        wvz_dfsb,
         *(mm.sym.label(n) for n in export_labels),
     )

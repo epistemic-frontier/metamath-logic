@@ -42,6 +42,13 @@ psi = Var("ψ")
 chi = Var("χ")
 th = Var("θ")
 ta = Var("τ")
+et = Var("η")
+ze = Var("ζ")
+
+si = Var("σ")
+rh = Var("ρ")
+mu = Var("μ")
+la = Var("λ")
 
 
 @symbol("->", 2, (WFF, WFF), WFF, op="rshift", precedence=20, assoc="right", aliases=["→", "⇒"])
@@ -84,7 +91,7 @@ def Nand(b: PropositionalBuiltins, args: Sequence[Wff]) -> Wff:
     return wnan(b, args[0], args[1])
 
 
-@symbol("-\\/", 2, (WFF, WFF), WFF, precedence=30, assoc="right", aliases=[])
+@symbol("-\\/", 2, (WFF, WFF), WFF, precedence=30, assoc="right", aliases=["⊽"])
 def Nor(b: PropositionalBuiltins, args: Sequence[Wff]) -> Wff:
     return wnor(b, args[0], args[1])
 
@@ -156,6 +163,21 @@ def _and_combined(
 
 DEFAULT_BUILDERS.register("/\\", _and_combined)
 
+for _alias in ("∧", "&"):
+    _binary_alias_spec = DEFAULT_REQUIRE._by_name.pop(_alias, None)
+    _ternary_alias_ctor = Constructor(_alias, 3)
+    require(
+        _ternary_alias_ctor,
+        in_sorts=(WFF, WFF, WFF),
+        out_sort=WFF,
+        registry=DEFAULT_REQUIRE,
+        precedence=25,
+        assoc="left",
+    )
+    if _binary_alias_spec is not None:
+        DEFAULT_REQUIRE._by_name[_alias] = _binary_alias_spec
+    DEFAULT_BUILDERS.register(_alias, _and_combined)
+
 
 And3 = _ternary_and_ctor
 
@@ -204,6 +226,21 @@ def _or_combined(
 
 DEFAULT_BUILDERS.register(r"\/", _or_combined)
 
+for _alias in ("∨", "|"):
+    _binary_alias_spec = DEFAULT_REQUIRE._by_name.pop(_alias, None)
+    _ternary_alias_ctor = Constructor(_alias, 3)
+    require(
+        _ternary_alias_ctor,
+        in_sorts=(WFF, WFF, WFF),
+        out_sort=WFF,
+        registry=DEFAULT_REQUIRE,
+        precedence=24,
+        assoc="left",
+    )
+    if _binary_alias_spec is not None:
+        DEFAULT_REQUIRE._by_name[_alias] = _binary_alias_spec
+    DEFAULT_BUILDERS.register(_alias, _or_combined)
+
 
 Or3 = _ternary_or_ctor
 
@@ -213,6 +250,12 @@ __all__ = [
     "chi",
     "th",
     "ta",
+    "et",
+    "ze",
+    "si",
+    "rh",
+    "mu",
+    "la",
     "Imp",
     "Not",
     "And",

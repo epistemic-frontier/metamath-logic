@@ -24,3 +24,12 @@ def test_propositional_builtins_extend_foundation() -> None:
 
     names = {d.local_name for d in interner.symbol_table().values()}
     assert {"(", ")", "->", "-.", "/\\", "<->", "\\/", "T.", "F."} <= names
+
+
+def test_propositional_axioms_use_setmm_labels() -> None:
+    system = System.make(interner=SymbolInterner(), names=NameResolver())
+
+    labels = set(system.compile_axioms())
+
+    assert {"ax-1", "ax-2", "ax-3"} <= labels
+    assert {"A1", "A2", "A3"}.isdisjoint(labels)

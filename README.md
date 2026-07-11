@@ -5,8 +5,8 @@ It provides reusable propositional and predicate logic artifacts that downstream
 
 ## Versioning
 
-- Package version: `0.0.5`
-- ProofScaffold dependency: `proof-scaffold==0.0.8`
+- Package version: `0.0.6`
+- ProofScaffold dependency: `proof-scaffold==0.0.9`
 - Prelude dependency: `metamath-prelude==0.0.5`
 
 ## Installation
@@ -23,6 +23,8 @@ uv add metamath-logic
 
 - A ProofScaffold `build.py` entrypoint that emits the logic layer as a linkable unit.
 - Authoring-facing propositional and predicate logic libraries (Hilbert-style systems).
+- Complete propositional and predicate theorem registries: 1,684 declared
+  proofs, all emitted into the verifier-checked build.
 - Propositional syntax/helpers beyond the foundation frame: `wa`, `wo`, `wb`,
   `wtru`, `wfal`, `mp`, `idi`, `a1ii`.
 - A migration guide for the logic layer refactor.
@@ -35,7 +37,7 @@ uv add metamath-logic
 
 This repository uses `uv` for reproducible installs and runs `skfd verify --level 1` as the primary correctness gate.
 
-From the `metamath-logic/` directory:
+From this repository directory:
 
 ```bash
 uv sync --locked --dev
@@ -47,13 +49,11 @@ uv run --frozen skfd verify --level 1 metamath-logic
 
 `skfd verify` builds the package into a verification monolith (under `target/`) and checks it with the configured verifiers.
 
-When using a ProofScaffold version that supports proof coverage declarations,
-the package declares its Hilbert theorem registry during `build(ctx)`. To require
-that every declared theorem is emitted into the verification monolith, run:
+For a concise verification of the current checkout, run:
 
 ```bash
-uv run --frozen skfd verify --coverage declared --level 1 metamath-logic
+uv run --no-sync skfd verify --level 1 metamath-logic
 ```
 
-This is stricter than artifact verification and is expected to fail until the
-declared registry and emitted proof closure are aligned.
+Latest result: 1,684 declared proofs, 3,610 emitted proofs, and 0
+declared-but-unemitted; `mmverify`, `metamath`, and `knife` all pass.

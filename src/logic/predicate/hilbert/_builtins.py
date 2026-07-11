@@ -20,6 +20,16 @@ class PredicateBuiltins:
     imp: SymbolId
     neg: SymbolId
     and_: SymbolId
+    iff: SymbolId
+    or_: SymbolId
+    tru: SymbolId
+    fal: SymbolId
+    nand: SymbolId
+    cadd: SymbolId
+    xor: SymbolId
+    had: SymbolId
+    if_: SymbolId
+    nor: SymbolId
     forall: SymbolId  # "∀"
     exist: SymbolId  # "∃"
     eu: SymbolId  # "E!"
@@ -79,6 +89,16 @@ class PredicateBuiltins:
             imp=core.imp,
             neg=core.neg,
             and_=core.and_,
+            iff=core.iff,
+            or_=core.or_,
+            tru=core.tru,
+            fal=core.fal,
+            nand=core.nand,
+            cadd=core.cadd,
+            xor=core.xor,
+            had=core.had,
+            if_=core.if_,
+            nor=core.nor,
             forall=forall,
             exist=exist,
             eu=eu,

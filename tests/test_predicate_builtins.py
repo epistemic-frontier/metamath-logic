@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from skfd.authoring import dsl
+from skfd.authoring.dsl import App
+from skfd.authoring.parsing import wff
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
+from skfd.proof import ProofBuilder
 
 from logic.predicate.hilbert import PredicateSystem
 
@@ -12,7 +16,9 @@ def test_predicate_system_owns_predicate_tokens() -> None:
     system = PredicateSystem.make(interner=interner, names=NameResolver())
     compiled = system.compile_axioms()
 
-    assert {"AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13"} <= set(compiled)
+    predicate_axioms = {f"ax-{number}" for number in range(4, 14)}
+    assert predicate_axioms <= set(compiled)
+    assert not {f"AX{number}" for number in range(4, 14)} & set(compiled)
 
     token_owners: dict[str, set[str]] = {}
     for d in interner.symbol_table().values():
@@ -21,3 +27,35 @@ def test_predicate_system_owns_predicate_tokens() -> None:
 
     assert token_owners.keys() == {"A.", "E.", "=", "e."}
     assert all("logic.predicate" in owners for owners in token_owners.values())
+
+
+def test_predicate_parser_right_associates_quantifiers() -> None:
+    interner = SymbolInterner()
+    system = PredicateSystem.make(interner=interner, names=NameResolver())
+
+    formula = ProofBuilder(system, "quantifiers").ref("result", "∀ y ∀ x φ", ref="unused")
+
+    symbol_table = interner.symbol_table()
+    assert [symbol_table[token].local_name for token in formula.tokens] == [
+        "A.",
+        "y",
+        "A.",
+        "x",
+        "ph",
+    ]
+
+
+def test_predicate_parser_preserves_ternary_connective_with_quantified_operands() -> None:
+    expr = wff("( ∀ x φ ∧ ∀ x ψ ∧ ∀ x χ )")
+
+    assert isinstance(expr, App)
+    assert expr.ctor.name == "∧"
+    assert len(expr.args) == 3
+
+
+def test_predicate_parser_accepts_standard_substitution_notation() -> None:
+    expr = wff("[ t / x ] φ")
+
+    assert isinstance(expr, App)
+    assert expr.ctor.name == "["
+    assert expr.args == (dsl.Var("t"), dsl.Var("x"), dsl.Var("φ"))

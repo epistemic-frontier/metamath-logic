@@ -70,6 +70,9 @@ jobs:
       - name: Run tests (pytest)
         run: uv run --frozen python -m pytest
 
+      - name: Check generated lemma catalogue
+        run: uv run --frozen python tools/generate_lemma_catalogue.py --check
+
       - name: Verify (skfd)
         run: uv run --frozen skfd verify --level 1 metamath-logic
 

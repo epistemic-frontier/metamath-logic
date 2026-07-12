@@ -6989,3 +6989,8 @@ def prove_ax13b(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
+
+# New migrations register here beside their implementation. The aggregate
+# registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}

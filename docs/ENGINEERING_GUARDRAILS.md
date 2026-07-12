@@ -90,9 +90,13 @@ For theorem registry changes:
 uv run --no-sync ruff check .
 uv run --no-sync mypy .
 uv run --no-sync python -m pytest
-uv run --no-sync python tools/generate_lemma_catalogue.py
 uv run --no-sync skfd verify --level 1 metamath-logic
 ```
+
+Routine theorem migrations do not edit `LEMMA_CATALOGUE.md`; it is a derived
+release artifact. Before a release, regenerate it once with
+`uv run --no-sync python tools/generate_lemma_catalogue.py` and validate the
+checked-in result with the same command plus `--check`.
 
 The current gate is expected to report 1,684 declared, 3,610 emitted, and 0
 declared-but-unemitted proofs.
@@ -108,8 +112,8 @@ declared-but-unemitted proofs.
 - Update `MODULE_PLAN.md` whenever the migration status, target module, or
   priority changes.
 - Update the relevant module map when ownership boundaries move.
-- Regenerate `LEMMA_CATALOGUE.md` whenever the Hilbert theorem registry or
-  current lowering filter changes.
+- Regenerate `LEMMA_CATALOGUE.md` once during release preparation after all
+  Hilbert registry and lowering-filter changes have landed.
 
 ## Definition of Done
 

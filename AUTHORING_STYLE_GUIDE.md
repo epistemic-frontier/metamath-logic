@@ -144,9 +144,17 @@ Current code references:
 ### 3.3 Files and functions
 
 - For a set.mm theorem `pm2.24`, the preferred local constructor is `prove_pm2_24`.
-- Keep a single registry mapping in [`theorems.py`](src/logic/propositional/hilbert/theorems.py).
-- Keep [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) generated from both registries and the build emission surface:
-  `uv run --no-sync python tools/generate_lemma_catalogue.py`.
+- Register new constructors in `MIGRATION_THEOREMS` at the end of their owning
+  category module. [`theorems.py`](src/logic/propositional/hilbert/theorems.py)
+  composes those local mappings with the legacy registry.
+- [`lemmas.py`](src/logic/propositional/hilbert/lemmas.py) is a frozen
+  compatibility shim; routine migrations must not extend it. New theorem
+  transactions therefore touch only their owning category module.
+- [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) is a release artifact generated from
+  both registries and the build emission surface. Routine proof migrations must
+  not edit it. Release preparation runs
+  `uv run --no-sync python tools/generate_lemma_catalogue.py`; strict validation
+  uses the same command with `--check`.
 
 ## 4. Authoring DSL Rules (Expr)
 

@@ -6,9 +6,13 @@ contradiction and reduction.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+
 from skfd.proof import Proof, ProofBuilder
 
 from . import System
+
+LemmaCtor = Callable[[System], Proof]
 
 # -----------------------------------------------------------------------------
 # Migration Expansion (set.mm compatibility)
@@ -3409,3 +3413,8 @@ def prove_ax3(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
+
+# New migrations register here beside their implementation. The aggregate
+# registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}

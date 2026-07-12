@@ -9,6 +9,7 @@ from skfd.authoring.emit import emit_axioms, emit_lowered_lemmas
 from skfd.authoring.formula import Wff
 from skfd.builder_v2 import MMBuilderV2
 from skfd.core.symbols import SymbolId, SymbolInterner
+from skfd.proof import Proof
 
 from logic.predicate.hilbert import PredicateSystem
 from logic.predicate.hilbert import lemmas as predicate_lemmas
@@ -16,7 +17,6 @@ from logic.predicate.hilbert._builtins import PredicateBuiltins
 from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
 from logic.propositional.hilbert import System, _extend_names
 from logic.propositional.hilbert._structures import Imp, phi, psi
-from logic.propositional.hilbert.lemmas import Proof
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 _log = logging.getLogger(__name__)

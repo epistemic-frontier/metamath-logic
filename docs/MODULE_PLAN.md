@@ -61,5 +61,7 @@ the canonical set.mm theorem `mto`.
 uv run --no-sync skfd verify --level 1 metamath-logic
 ```
 
-Regenerate the catalogue after registry changes with
-`uv run --no-sync python tools/generate_lemma_catalogue.py`.
+The catalogue is a derived release artifact, not part of each theorem change.
+Regenerate it once during release preparation with
+`uv run --no-sync python tools/generate_lemma_catalogue.py`, then validate it
+with the same command plus `--check`.

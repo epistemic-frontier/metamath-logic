@@ -6,9 +6,13 @@ Operators: → and ¬ (∨ derived: φ∨ψ = ¬φ→ψ).
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+
 from skfd.proof import Proof, ProofBuilder
 
 from . import System
+
+LemmaCtor = Callable[[System], Proof]
 
 
 def prove_a1i(sys: System) -> Proof:
@@ -11163,3 +11167,8 @@ def prove_luklem7(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
+
+# New migrations register here beside their implementation. The aggregate
+# registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}

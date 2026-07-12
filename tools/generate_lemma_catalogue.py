@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import ast
 import inspect
 import sys
@@ -34,7 +35,7 @@ def _proof_constructors() -> dict[str, Path]:
     return constructors
 
 
-def main() -> None:
+def render_catalogue() -> str:
     sys.path.insert(0, str(SRC))
 
     from logic.build import _PREDICATE_SUPPORT_CTORS
@@ -111,7 +112,28 @@ def main() -> None:
         f"| {label} | {local} | {category} | {source} | {status} |"
         for label, local, category, source, status in rows
     )
-    OUT.write_text("\n".join(md) + "\n", encoding="utf-8")
+    return "\n".join(md) + "\n"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate the emitted lemma catalogue")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="fail instead of writing when LEMMA_CATALOGUE.md is stale",
+    )
+    args = parser.parse_args()
+
+    rendered = render_catalogue()
+    if args.check:
+        current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""
+        if current != rendered:
+            raise SystemExit(
+                "LEMMA_CATALOGUE.md is stale; run "
+                "`uv run --no-sync python tools/generate_lemma_catalogue.py`"
+            )
+        return
+    OUT.write_text(rendered, encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,11 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 
 from . import System
+from .conjunction import MIGRATION_THEOREMS as CONJUNCTION_MIGRATIONS
+from .constants import MIGRATION_THEOREMS as CONSTANT_MIGRATIONS
+from .disjunction import MIGRATION_THEOREMS as DISJUNCTION_MIGRATIONS
+from .equivalence import MIGRATION_THEOREMS as EQUIVALENCE_MIGRATIONS
+from .implication import MIGRATION_THEOREMS as IMPLICATION_MIGRATIONS
 from .lemmas import (
     Proof,
     prove_1fpid3,
@@ -1360,11 +1365,12 @@ from .lemmas import (
     prove_xorcom,
     prove_xordi,
 )
+from .negation import MIGRATION_THEOREMS as NEGATION_MIGRATIONS
 
 LemmaCtor = Callable[[System], Proof]
 
 
-SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
+_LEGACY_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "1fpid3": prove_1fpid3,
     "ifpimpda": prove_ifpimpda,
     "ifptru": prove_ifptru,
@@ -2719,5 +2725,27 @@ SETMM_TO_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "axia2": prove_axia2,
     "axia3": prove_axia3,
 }
+
+
+def _merge_migration_registries() -> Mapping[str, LemmaCtor]:
+    merged = dict(_LEGACY_HILBERT_LEMMAS)
+    registries = (
+        IMPLICATION_MIGRATIONS,
+        NEGATION_MIGRATIONS,
+        EQUIVALENCE_MIGRATIONS,
+        CONJUNCTION_MIGRATIONS,
+        DISJUNCTION_MIGRATIONS,
+        CONSTANT_MIGRATIONS,
+    )
+    for registry in registries:
+        duplicates = merged.keys() & registry.keys()
+        if duplicates:
+            raise RuntimeError(f"duplicate Hilbert theorem registrations: {sorted(duplicates)}")
+        merged.update(registry)
+    return merged
+
+
+SETMM_TO_HILBERT_LEMMAS = _merge_migration_registries()
+
 
 __all__ = ["LemmaCtor", "SETMM_TO_HILBERT_LEMMAS"]

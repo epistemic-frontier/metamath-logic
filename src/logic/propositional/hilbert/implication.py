@@ -11169,6 +11169,440 @@ def prove_luklem7(sys: System) -> Proof:
     return lb.build(res)
 
 
-# New migrations register here beside their implementation. The aggregate
-# registry imports this mapping, avoiding another edit to global shim files.
-MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}
+def prove_ax2(sys: System) -> Proof:
+    """ax2: ( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) ).
+
+    Standard propositional axiom derived from Łukasiewicz axioms.
+    (Contributed by NM, 22-Dec-2002.)
+    """
+    lb = ProofBuilder(sys, "ax2")
+
+    # s1: ( φ → ( ψ → χ ) ) → ( ψ → ( φ → χ ) )    [luklem7]
+    s1 = lb.ref(
+        "s1",
+        "( φ → ( ψ → χ ) ) → ( ψ → ( φ → χ ) )",
+        ref="luklem7",
+        note="luklem7",
+    )
+
+    # s2: ( ψ → ( φ → χ ) ) → ( ( φ → ψ ) → ( φ → ( φ → χ ) ) )    [luklem8]
+    s2 = lb.ref(
+        "s2",
+        "( ψ → ( φ → χ ) ) → ( ( φ → ψ ) → ( φ → ( φ → χ ) ) )",
+        ref="luklem8",
+        note="luklem8",
+    )
+
+    # s3: ( φ → ( φ → χ ) ) → ( φ → χ )    [luklem6]
+    s3 = lb.ref(
+        "s3",
+        "( φ → ( φ → χ ) ) → ( φ → χ )",
+        ref="luklem6",
+        note="luklem6",
+    )
+
+    # s4: ( ( φ → ( φ → χ ) ) → ( φ → χ ) ) → ( ( ( φ → ψ ) → ( φ → ( φ → χ ) ) ) → ( ( φ → ψ ) → ( φ → χ ) ) )    [luklem8]
+    s4 = lb.ref(
+        "s4",
+        "( ( φ → ( φ → χ ) ) → ( φ → χ ) ) → ( ( ( φ → ψ ) → ( φ → ( φ → χ ) ) ) → ( ( φ → ψ ) → ( φ → χ ) ) )",
+        ref="luklem8",
+        note="luklem8",
+    )
+
+    # s5: ( ( φ → ψ ) → ( φ → ( φ → χ ) ) ) → ( ( φ → ψ ) → ( φ → χ ) )    [MP s3, s4]
+    s5 = lb.mp("s5", s3, s4, "MP s3, s4")
+
+    # s6: ( ψ → ( φ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )    [luklem1 s2, s5]
+    s6 = lb.ref(
+        "s6",
+        "( ψ → ( φ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )",
+        s2,
+        s5,
+        ref="luklem1",
+        note="luklem1",
+    )
+
+    # res: ( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )    [luklem1 s1, s6]
+    res = lb.ref(
+        "res",
+        "( φ → ( ψ → χ ) ) → ( ( φ → ψ ) → ( φ → χ ) )",
+        s1,
+        s6,
+        ref="luklem1",
+        note="luklem1",
+    )
+
+    return lb.build(res)
+
+
+def prove_sylancb(sys: System) -> Proof:
+    r"""sylancb: φ → θ.
+
+    Hyp 1: φ ↔ ψ
+    Hyp 2: φ ↔ χ
+    Hyp 3: ( ψ ∧ χ ) → θ
+    Concl: φ → θ
+
+    Inference joining two biconditionals with a conjunction;
+    sylanc with biconditional replacements for the hypotheses.
+    (Contributed by NM, 1-May-1995.)
+    set.mm proof: syl2anb anidms.
+    """
+    lb = ProofBuilder(sys, "sylancb")
+    h1 = lb.hyp("sylancb.1", "( φ ↔ ψ )")
+    h2 = lb.hyp("sylancb.2", "( φ ↔ χ )")
+    h3 = lb.hyp("sylancb.3", "( ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ φ ) → θ",
+        h1,
+        h2,
+        h3,
+        ref="syl2anb",
+        note="syl2anb sylancb.1, sylancb.2, sylancb.3",
+    )
+    res = lb.ref("res", "φ → θ", s1, ref="anidms", note="anidms s1")
+    return lb.build(res)
+
+
+def prove_mpanl12(sys: System) -> Proof:
+    """mpanl12: χ → θ.
+
+    Inference joining two conjuncts to the left of an antecedent:
+    given φ, ψ, and ( ( φ ∧ ψ ) ∧ χ ) → θ, conclude χ → θ.
+    (Contributed by NM, 12-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "mpanl12")
+    h1 = lb.hyp("mpanl12.1", "φ")
+    h2 = lb.hyp("mpanl12.2", "ψ")
+    h3 = lb.hyp("mpanl12.3", "( ( φ ∧ ψ ) ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ χ ) → θ",
+        h1,
+        h3,
+        ref="mpanl1",
+        note="mpanl1 mpanl12.1, mpanl12.3",
+    )
+
+    res = lb.ref(
+        "res",
+        "χ → θ",
+        h2,
+        s1,
+        ref="mpan",
+        note="mpan mpanl12.2, s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_mpanr12(sys: System) -> Proof:
+    """mpanr12: φ → θ.
+
+    Inference joining a right conjunct with an antecedent to form
+    a single consequent: given ψ, χ, and ( φ ∧ ( ψ ∧ χ ) ) → θ,
+    conclude φ → θ.  (Contributed by NM, 3-May-1994.)
+    """
+    lb = ProofBuilder(sys, "mpanr12")
+    h1 = lb.hyp("mpanr12.1", "ψ")
+    h2 = lb.hyp("mpanr12.2", "χ")
+    h3 = lb.hyp("mpanr12.3", "( φ ∧ ( ψ ∧ χ ) ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ) → θ",
+        h1,
+        h3,
+        ref="mpanr1",
+        note="mpanr1 mpanr12.1, mpanr12.3",
+    )
+    res = lb.ref(
+        "res",
+        "φ → θ",
+        h2,
+        s1,
+        ref="mpan2",
+        note="mpan2 mpanr12.2, s1",
+    )
+    return lb.build(res)
+
+
+def prove_mp3an2(sys: System) -> Proof:
+    r"""mp3an2: ( φ ∧ χ ) → θ.
+
+    Hyp 1: ψ
+    Hyp 2: ( φ ∧ ψ ∧ χ ) → θ
+    Concl: ( φ ∧ χ ) → θ
+
+    Triple modus ponens with the second antecedent fixed.
+    (Contributed by NM, 5-May-1996.)
+    set.mm proof: 3expa mpanl2.
+    """
+    lb = ProofBuilder(sys, "mp3an2")
+    h1 = lb.hyp("mp3an2.1", "ψ")
+    h2 = lb.hyp("mp3an2.2", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h2,
+        ref="3expa",
+        note="3expa mp3an2.2",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ) → θ",
+        h1,
+        s1,
+        ref="mpanl2",
+        note="mpanl2 mp3an2.1, s1",
+    )
+    return lb.build(res)
+
+
+def prove_ecase3ad(sys: System) -> Proof:
+    """ecase3ad: φ → θ.  Hyps: φ → (ψ → θ), φ → (χ → θ), φ → ((¬ ψ ∧ ¬ χ) → θ).
+
+    Deduction for elimination by cases with three alternatives.
+    (Contributed by NM, 29-Dec-1992.)
+    """
+    lb = ProofBuilder(sys, "ecase3ad")
+    h1 = lb.hyp("ecase3ad.1", "φ → ( ψ → θ )")
+    h2 = lb.hyp("ecase3ad.2", "φ → ( χ → θ )")
+    h3 = lb.hyp("ecase3ad.3", "φ → ( ( ¬ ψ ∧ ¬ χ ) → θ )")
+    s1 = lb.ref("s1", "( φ ∧ ψ ) → θ", h1, ref="imp", note="imp")
+    s2 = lb.ref("s2", "( φ ∧ χ ) → θ", h2, ref="imp", note="imp")
+    s3 = lb.ref("s3", "( φ ∧ ( ¬ ψ ∧ ¬ χ ) ) → θ", h3, ref="imp", note="imp")
+    res = lb.ref("res", "φ → θ", s1, s2, s3, ref="pm2.61ddan", note="pm2.61ddan")
+    return lb.build(res)
+
+
+def prove_ecase13d(sys: System) -> Proof:
+    """ecase13d: φ → ψ.
+
+    Hyps: φ → ¬ χ, φ → ¬ θ, φ → ( χ ∨ ψ ∨ θ ).
+
+    Deduction for elimination by cases with three alternatives, where the
+    first and third are eliminated by their negations.
+    (Contributed by Jeff Hankins, 18-Aug-2009.)
+    """
+    lb = ProofBuilder(sys, "ecase13d")
+    h1 = lb.hyp("ecase13d.1", "φ → ¬ χ")
+    h2 = lb.hyp("ecase13d.2", "φ → ¬ θ")
+    h3 = lb.hyp("ecase13d.3", "φ → ( χ ∨ ψ ∨ θ )")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∨ ψ ∨ θ ) ↔ ( χ ∨ ( ψ ∨ θ ) )",
+        ref="3orass",
+        note="3orass",
+    )
+    s2 = lb.ref(
+        "s2",
+        "( χ ∨ ( ψ ∨ θ ) ) ↔ ( ¬ χ → ( ψ ∨ θ ) )",
+        ref="df-or",
+        note="df-or",
+    )
+    s3 = lb.ref(
+        "s3",
+        "( χ ∨ ψ ∨ θ ) ↔ ( ¬ χ → ( ψ ∨ θ ) )",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+    s4 = lb.ref(
+        "s4",
+        "φ → ( ¬ χ → ( ψ ∨ θ ) )",
+        h3,
+        s3,
+        ref="sylib",
+        note="sylib h3, s3",
+    )
+    s5 = lb.ref(
+        "s5",
+        "φ → ( ψ ∨ θ )",
+        h1,
+        s4,
+        ref="mpd",
+        note="mpd h1, s4",
+    )
+    res = lb.ref(
+        "res",
+        "φ → ψ",
+        s5,
+        h2,
+        ref="olcnd",
+        note="olcnd s5, h2",
+    )
+    return lb.build(res)
+
+
+def prove_luklem8(sys: System) -> Proof:
+    """luklem8: ( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) ).
+
+    Commutation of antecedents; used to rederive standard propositional
+    axioms from Łukasiewicz'.
+    (Contributed by NM, 22-Dec-2002.)
+    """
+    lb = ProofBuilder(sys, "luklem8")
+
+    # s1: ( χ → φ ) → ( ( φ → ψ ) → ( χ → ψ ) )    [luk-1]
+    s1 = lb.ref(
+        "s1",
+        "( χ → φ ) → ( ( φ → ψ ) → ( χ → ψ ) )",
+        ref="luk-1",
+        note="luk-1",
+    )
+
+    # s2: ( ( χ → φ ) → ( ( φ → ψ ) → ( χ → ψ ) ) ) → ( ( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) ) )    [luklem7]
+    s2 = lb.ref(
+        "s2",
+        "( ( χ → φ ) → ( ( φ → ψ ) → ( χ → ψ ) ) ) → ( ( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) ) )",
+        ref="luklem7",
+        note="luklem7",
+    )
+
+    # res: ( φ → ψ ) → ( ( χ → φ ) → ( χ → ψ ) )    [MP s1, s2]
+    res = lb.mp("res", s1, s2, "MP s1, s2")
+
+    return lb.build(res)
+
+
+def prove_merco1lem18(sys: System) -> Proof:
+    """merco1lem18: ( φ → ( ψ → χ ) ) → ( ( ψ → φ ) → ( ψ → χ ) ).
+
+    Used to rederive the Tarski-Bernays-Wajsberg axioms from merco1.
+    (Contributed by Anthony Hart, 18-Sep-2011.)
+    """
+    lb = ProofBuilder(sys, "merco1lem18")
+
+    # Define subformula abbreviations for readability
+    A = "( ψ → χ )"
+    B = "( ψ → φ )"
+    Z = f"( ( φ → {A} ) → ( {B} → {A} ) )"  # conclusion
+    I1 = f"( {B} → {Z} )"
+    D = f"( ( {Z} → ⊥ ) → ( {I1} → ⊥ ) )"
+
+    # Step 1: merco1
+    s1 = lb.ref(
+        "s1",
+        f"( ( ( ( ( {A} → ψ ) → ( {B} → ⊥ ) ) → ( {A} → ψ ) ) → φ ) → {Z} )",
+        ref="merco1",
+        note="merco1",
+    )
+
+    # Step 2: merco1lem17
+    s2 = lb.ref(
+        "s2",
+        f"( ( ( ( ( ( {A} → ψ ) → ( {B} → ⊥ ) ) → ( {A} → ψ ) ) → φ ) → {Z} ) → ( ( ( {A} → ψ ) → φ ) → {Z} ) )",
+        ref="merco1lem17",
+        note="merco1lem17",
+    )
+
+    # Step 3: ax-mp from s1, s2
+    s3 = lb.mp("s3", s1, s2, "ax-mp 1,2")
+
+    # Step 4: merco1lem17
+    s4 = lb.ref(
+        "s4",
+        f"( ( ( ( {A} → ψ ) → φ ) → {Z} ) → ( {B} → ( ( φ → {A} ) → ( {B} → {A} ) ) ) )",
+        ref="merco1lem17",
+        note="merco1lem17",
+    )
+
+    # Step 5: ax-mp from s3, s4
+    s5 = lb.mp("s5", s3, s4, "ax-mp 3,4")
+
+    # Step 6: merco1lem5
+    s6 = lb.ref(
+        "s6",
+        f"( ( ( ( {D} → ⊥ ) → ⊥ ) → ⊥ ) → ( {D} → ⊥ ) )",
+        ref="merco1lem5",
+        note="merco1lem5",
+    )
+
+    # Step 7: merco1lem3
+    s7 = lb.ref(
+        "s7",
+        f"( ( ( ( ( {D} → ⊥ ) → ⊥ ) → ⊥ ) → ( {D} → ⊥ ) ) → ( {D} → ( ( {D} → ⊥ ) → ⊥ ) ) )",
+        ref="merco1lem3",
+        note="merco1lem3",
+    )
+
+    # Step 8: ax-mp from s6, s7
+    s8 = lb.mp("s8", s6, s7, "ax-mp 6,7")
+
+    # Step 9: merco1lem5
+    s9 = lb.ref(
+        "s9",
+        f"( ( {D} → ( ( {D} → ⊥ ) → ⊥ ) ) → ( {Z} → ( ( {D} → ⊥ ) → ⊥ ) ) )",
+        ref="merco1lem5",
+        note="merco1lem5",
+    )
+
+    # Step 10: ax-mp from s8, s9
+    s10 = lb.mp("s10", s8, s9, "ax-mp 8,9")
+
+    # Step 11: merco1lem4
+    s11 = lb.ref(
+        "s11",
+        f"( ( {Z} → ( ( {D} → ⊥ ) → ⊥ ) ) → ( ( {B} → {A} ) → ( ( {D} → ⊥ ) → ⊥ ) ) )",
+        ref="merco1lem4",
+        note="merco1lem4",
+    )
+
+    # Step 12: ax-mp from s10, s11
+    s12 = lb.mp("s12", s10, s11, "ax-mp 10,11")
+
+    # Step 13: merco1
+    s13 = lb.ref(
+        "s13",
+        f"( ( ( {D} → ⊥ ) → {B} ) → ( {I1} → ( {I1} → {Z} ) ) )",
+        ref="merco1",
+        note="merco1",
+    )
+
+    # Step 14: merco1lem2
+    s14 = lb.ref(
+        "s14",
+        f"( ( ( ( {D} → ⊥ ) → {B} ) → ( {I1} → ( {I1} → {Z} ) ) ) → ( ( ( {B} → {A} ) → ( ( {D} → ⊥ ) → ⊥ ) ) → ( {I1} → ( {I1} → {Z} ) ) ) )",
+        ref="merco1lem2",
+        note="merco1lem2",
+    )
+
+    # Step 15: ax-mp from s13, s14
+    s15 = lb.mp("s15", s13, s14, "ax-mp 13,14")
+
+    # Step 16: ax-mp from s12, s15
+    s16 = lb.mp("s16", s12, s15, "ax-mp 12,15")
+
+    # Step 17: merco1lem9
+    s17 = lb.ref(
+        "s17",
+        f"( ( {I1} → ( {I1} → {Z} ) ) → ( {I1} → {Z} ) )",
+        ref="merco1lem9",
+        note="merco1lem9",
+    )
+
+    # Step 18: ax-mp from s16, s17
+    s18 = lb.mp("s18", s16, s17, "ax-mp 16,17")
+
+    # Step 19: ax-mp from s5, s18
+    res = lb.mp("res", s5, s18, "ax-mp 5,18")
+
+    return lb.build(res)
+
+
+# New migrations register here beside their implementation.
+# The aggregate registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "ax2": prove_ax2,
+    "ecase13d": prove_ecase13d,
+    "ecase3ad": prove_ecase3ad,
+    "luklem8": prove_luklem8,
+    "merco1lem18": prove_merco1lem18,
+    "mp3an2": prove_mp3an2,
+    "mpanl12": prove_mpanl12,
+    "mpanr12": prove_mpanr12,
+    "sylancb": prove_sylancb,
+}

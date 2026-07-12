@@ -116,3 +116,23 @@ __all__ = [
     "prove_stoic2a",
     "prove_stoic2b",
 ]
+
+
+def prove_stoic3(sys: System) -> Proof:
+    """stoic3: ( φ ∧ ψ ∧ θ ) → τ.
+
+    Syllogism with ternary conjunction: from ( φ ∧ ψ ) → χ and
+    ( χ ∧ θ ) → τ, deduce ( φ ∧ ψ ∧ θ ) → τ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "stoic3")
+    h1 = lb.hyp("stoic3.1", "( φ ∧ ψ ) → χ")
+    h2 = lb.hyp("stoic3.2", "( χ ∧ θ ) → τ")
+    s1 = lb.ref("s1", "( ( φ ∧ ψ ) ∧ θ ) → τ", h1, h2, ref="sylan", note="sylan")
+    res = lb.ref("res", "( φ ∧ ψ ∧ θ ) → τ", s1, ref="3impa", note="3impa")
+    return lb.build(res)
+
+
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "stoic3": prove_stoic3,
+}

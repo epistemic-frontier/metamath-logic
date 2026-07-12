@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from typing import TypeAlias
 
 from skfd.proof import Proof, ProofBuilder, SystemCore
@@ -12,6 +13,7 @@ from . import _structures  # noqa: F401
 # the concrete propositional Hilbert system. Keep the short annotation used by
 # the generated constructors while enforcing that boundary.
 System: TypeAlias = SystemCore
+PredicateTheoremCtor = Callable[[SystemCore], Proof]
 
 
 def prove_alim(sys: System) -> Proof:
@@ -14174,3 +14176,719 @@ def prove_dfeu(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
+
+def prove_ax12i(sys: System) -> Proof:
+    """ax12i: x = y → ( φ → ∀ x ( x = y → φ ) ).
+
+    Inference from ax-12 via biimprcd, alrimih, and biimtrdi.
+    (Contributed by NM, 5-Aug-1993.)
+    set.mm proof: weq wi wal biimprcd alrimih biimtrdi.
+    """
+    lb = ProofBuilder(sys, "ax12i")
+    h1 = lb.hyp("ax12i.1", "x = y → ( φ ↔ ψ )")
+    h2 = lb.hyp("ax12i.2", "ψ → ∀ x ψ")
+    # biimprcd ax12i.1: ψ → ( x = y → φ )
+    s1 = lb.ref(
+        "s1",
+        "ψ → ( x = y → φ )",
+        h1,
+        ref="biimprcd",
+        note="biimprcd",
+    )
+    # alrimih ax12i.2, s1: ψ → ∀ x ( x = y → φ )
+    s2 = lb.ref(
+        "s2",
+        "ψ → ∀ x ( x = y → φ )",
+        h2,
+        s1,
+        ref="alrimih",
+        note="alrimih",
+    )
+    # biimtrdi ax12i.1, s2: x = y → ( φ → ∀ x ( x = y → φ ) )
+    res = lb.ref(
+        "res",
+        "x = y → ( φ → ∀ x ( x = y → φ ) )",
+        h1,
+        s2,
+        ref="biimtrdi",
+        note="biimtrdi",
+    )
+    return lb.build(res)
+
+
+def prove_ax12wlem(sys: System) -> Proof:
+    """ax12wlem: x = y → ( φ → ∀ x ( x = y → φ ) ).
+
+    Weak lemma for ax-12.  ax-5 on ψ yields ψ → ∀ x ψ, then ax12i
+    combines that with the hypothesis to produce the conclusion.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "ax12wlem")
+    hyp = lb.hyp("ax12wlemw.1", "x = y → ( φ ↔ ψ )")
+    # ax-5: ψ → ∀ x ψ
+    s1 = lb.ref("s1", "ψ → ∀ x ψ", ref="ax-5", note="ax-5")
+    # ax12i ax12wlemw.1, s1: x = y → ( φ → ∀ x ( x = y → φ ) )
+    res = lb.ref(
+        "res",
+        "x = y → ( φ → ∀ x ( x = y → φ ) )",
+        hyp,
+        s1,
+        ref="ax12i",
+        note="ax12i ax12wlemw.1, ax-5",
+    )
+    return lb.build(res)
+
+
+def prove_ax12w(sys: System) -> Proof:
+    """ax12w: x = y → ( ∀ y φ → ∀ x ( x = y → φ ) ).
+
+    Weak version of ax-12.  ax12wlem gives the inner implication, spw
+    instantiates with the second hypothesis to replace the antecedent,
+    and syl5 combines them.
+    (Contributed by NM, 29-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "ax12w")
+    hyp1 = lb.hyp("ax12w.1", "x = y → ( φ ↔ ψ )")
+    hyp2 = lb.hyp("ax12w.2", "y = z → ( φ ↔ χ )")
+
+    # spw with ax12w.2: ∀ y φ → φ
+    s1 = lb.ref(
+        "s1",
+        "∀ y φ → φ",
+        hyp2,
+        ref="spw",
+        note="spw ax12w.2",
+    )
+
+    # ax12wlem with ax12w.1: x = y → ( φ → ∀ x ( x = y → φ ) )
+    s2 = lb.ref(
+        "s2",
+        "x = y → ( φ → ∀ x ( x = y → φ ) )",
+        hyp1,
+        ref="ax12wlem",
+        note="ax12wlem ax12w.1",
+    )
+
+    # syl5 combines the two: x = y → ( ∀ y φ → ∀ x ( x = y → φ ) )
+    res = lb.ref(
+        "res",
+        "x = y → ( ∀ y φ → ∀ x ( x = y → φ ) )",
+        s1,
+        s2,
+        ref="syl5",
+        note="syl5 spw, ax12wlem",
+    )
+    return lb.build(res)
+
+
+def prove_19_8a(sys: System) -> Proof:
+    """19.8a: φ → ∃ x φ.
+
+    From ax12v and alequexv via syl6 to get x = y → ( φ → ∃ x φ ),
+    then eliminate the antecedent with ax6evr and exlimiiv.
+    (Contributed by NM, 10-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "19.8a")
+
+    # ax12v: x = y → ( φ → ∀ x ( x = y → φ ) )
+    s1 = lb.ref(
+        "s1",
+        "x = y → ( φ → ∀ x ( x = y → φ ) )",
+        ref="ax12v",
+        note="ax12v",
+    )
+
+    # alequexv: ∀ x ( x = y → φ ) → ∃ x φ
+    s2 = lb.ref(
+        "s2",
+        "∀ x ( x = y → φ ) → ∃ x φ",
+        ref="alequexv",
+        note="alequexv",
+    )
+
+    # syl6 s1, s2: x = y → ( φ → ∃ x φ )
+    s3 = lb.ref(
+        "s3",
+        "x = y → ( φ → ∃ x φ )",
+        s1,
+        s2,
+        ref="syl6",
+        note="syl6 ax12v, alequexv",
+    )
+
+    # ax6evr: ∃ y x = y
+    s4 = lb.ref(
+        "s4",
+        "∃ y x = y",
+        ref="ax6evr",
+        note="ax6evr",
+    )
+
+    # exlimiiv s3, s4: φ → ∃ x φ
+    res = lb.ref(
+        "res",
+        "φ → ∃ x φ",
+        s3,
+        s4,
+        ref="exlimiiv",
+        note="exlimiiv",
+    )
+
+    return lb.build(res)
+
+
+def prove_19_8ad(sys: System) -> Proof:
+    """19.8ad: φ → ∃ x ψ.
+
+    Deduction form of 19.8a.  (Contributed by NM, 10-Jan-1993.)
+    set.mm proof: wex 19.8a syl.
+    """
+    lb = ProofBuilder(sys, "19.8ad")
+    hyp = lb.hyp("19.8ad.1", "φ → ψ")
+    # 19.8a with ψ: ψ → ∃ x ψ
+    s1 = lb.ref(
+        "s1",
+        "ψ → ∃ x ψ",
+        ref="19.8a",
+        note="19.8a",
+    )
+    # syl: (φ → ψ), (ψ → ∃ x ψ) ⊢ φ → ∃ x ψ
+    res = lb.ref(
+        "res",
+        "φ → ∃ x ψ",
+        hyp,
+        s1,
+        ref="syl",
+        note="syl 19.8ad.1, 19.8a",
+    )
+    return lb.build(res)
+
+
+def prove_sp(sys: System) -> Proof:
+    """sp: ∀ x φ → φ.
+
+    From alex, 19.8a, con1i, and sylbi.
+    (Contributed by NM, 19-Apr-1994.)
+    """
+    lb = ProofBuilder(sys, "sp")
+
+    # 19.8a with ¬ φ: ¬ φ → ∃ x ¬ φ
+    s1 = lb.ref(
+        "s1",
+        "¬ φ → ∃ x ¬ φ",
+        ref="19.8a",
+        note="19.8a",
+    )
+
+    # con1i s1: ¬ ∃ x ¬ φ → φ
+    s2 = lb.ref(
+        "s2",
+        "¬ ∃ x ¬ φ → φ",
+        s1,
+        ref="con1i",
+        note="con1i",
+    )
+
+    # alex: ∀ x φ ↔ ¬ ∃ x ¬ φ
+    s3 = lb.ref(
+        "s3",
+        "∀ x φ ↔ ¬ ∃ x ¬ φ",
+        ref="alex",
+        note="alex",
+    )
+
+    # sylbi s3, s2: ∀ x φ → φ
+    res = lb.ref(
+        "res",
+        "∀ x φ → φ",
+        s3,
+        s2,
+        ref="sylbi",
+        note="sylbi alex, con1i",
+    )
+
+    return lb.build(res)
+
+
+def prove_sps(sys: System) -> Proof:
+    """sps: ( ∀ x φ → ψ ).
+
+    Syllogism with sp. (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "sps")
+    hyp = lb.hyp("sps.1", "φ → ψ")
+    sp_step = lb.ref(
+        "s1",
+        "∀ x φ → φ",
+        ref="sp",
+        note="sp",
+    )
+    res = lb.ref(
+        "res",
+        "∀ x φ → ψ",
+        sp_step,
+        hyp,
+        ref="syl",
+        note="syl sp, sps.1",
+    )
+    return lb.build(res)
+
+
+def prove_2exnaln(sys: System) -> Proof:
+    """2exnaln: ( ∃ x ∃ y φ ↔ ¬ ∀ x ∀ y ¬ φ ).
+
+    Equivalence of double existence with negated double universal of negation.
+    From df-ex, alnex, albii, and xchbinxr.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "2exnaln")
+
+    # df-ex with formula ∃ y φ and variable x:
+    #   ∃ x ∃ y φ ↔ ¬ ∀ x ¬ ∃ y φ
+    s_dfex = lb.ref(
+        "s_dfex",
+        "∃ x ∃ y φ ↔ ¬ ∀ x ¬ ∃ y φ",
+        ref="df-ex",
+        note="df-ex",
+    )
+
+    # alnex with variable y:
+    #   ∀ y ¬ φ ↔ ¬ ∃ y φ
+    s_alnex = lb.ref(
+        "s_alnex",
+        "∀ y ¬ φ ↔ ¬ ∃ y φ",
+        ref="alnex",
+        note="alnex",
+    )
+
+    # albii applied to alnex with variable x:
+    #   ∀ x ∀ y ¬ φ ↔ ∀ x ¬ ∃ y φ
+    s_albii = lb.ref(
+        "s_albii",
+        "∀ x ∀ y ¬ φ ↔ ∀ x ¬ ∃ y φ",
+        s_alnex,
+        ref="albii",
+        note="albii alnex",
+    )
+
+    # xchbinxr with s_dfex (φ ↔ ¬ ψ) and s_albii (χ ↔ ψ):
+    #   ∃ x ∃ y φ ↔ ¬ ∀ x ∀ y ¬ φ
+    res = lb.ref(
+        "res",
+        "∃ x ∃ y φ ↔ ¬ ∀ x ∀ y ¬ φ",
+        s_dfex,
+        s_albii,
+        ref="xchbinxr",
+        note="xchbinxr df-ex, albii",
+    )
+
+    return lb.build(res)
+
+
+def prove_19_41v(sys: System) -> Proof:
+    """19.41v: ∃ x ( φ ∧ ψ ) ↔ ( ∃ x φ ∧ ψ ).
+
+    Existential quantifier distributes over conjunction when the second
+    conjunct does not contain the bound variable.
+    (Contributed by NM, 5-Aug-1993.)
+    set.mm proof: wa wex 19.40 ax5e anim2i syl pm3.21 eximdv impcom impbii.
+    """
+    lb = ProofBuilder(sys, "19.41v")
+
+    # Forward direction: ∃ x ( φ ∧ ψ ) → ( ∃ x φ ∧ ψ )
+    # 19.40: ∃ x ( φ ∧ ψ ) → ( ∃ x φ ∧ ∃ x ψ )
+    s_19_40 = lb.ref(
+        "s_19_40",
+        "∃ x ( φ ∧ ψ ) → ( ∃ x φ ∧ ∃ x ψ )",
+        ref="19.40",
+        note="19.40",
+    )
+    # ax5e: ∃ x ψ → ψ
+    s_ax5e = lb.ref(
+        "s_ax5e",
+        "∃ x ψ → ψ",
+        ref="ax5e",
+        note="ax5e",
+    )
+    # anim2i: ( ∃ x φ ∧ ∃ x ψ ) → ( ∃ x φ ∧ ψ )
+    s_anim2i = lb.ref(
+        "s_anim2i",
+        "( ∃ x φ ∧ ∃ x ψ ) → ( ∃ x φ ∧ ψ )",
+        s_ax5e,
+        ref="anim2i",
+        note="anim2i ax5e",
+    )
+    # syl: ∃ x ( φ ∧ ψ ) → ( ∃ x φ ∧ ψ )
+    s_fwd = lb.ref(
+        "s_fwd",
+        "∃ x ( φ ∧ ψ ) → ( ∃ x φ ∧ ψ )",
+        s_19_40,
+        s_anim2i,
+        ref="syl",
+        note="syl 19.40, anim2i",
+    )
+
+    # Reverse direction: ( ∃ x φ ∧ ψ ) → ∃ x ( φ ∧ ψ )
+    # pm3.21 with swapped variables: ψ → ( φ → ( φ ∧ ψ ) )
+    s_pm3_21 = lb.ref(
+        "s_pm3_21",
+        "ψ → ( φ → ( φ ∧ ψ ) )",
+        ref="pm3.21",
+        note="pm3.21",
+    )
+    # eximdv: ψ → ( ∃ x φ → ∃ x ( φ ∧ ψ ) )
+    s_eximdv = lb.ref(
+        "s_eximdv",
+        "ψ → ( ∃ x φ → ∃ x ( φ ∧ ψ ) )",
+        s_pm3_21,
+        ref="eximdv",
+        note="eximdv pm3.21",
+    )
+    # impcom: ( ∃ x φ ∧ ψ ) → ∃ x ( φ ∧ ψ )
+    s_rev = lb.ref(
+        "s_rev",
+        "( ( ∃ x φ ∧ ψ ) → ∃ x ( φ ∧ ψ ) )",
+        s_eximdv,
+        ref="impcom",
+        note="impcom eximdv",
+    )
+
+    # impbii: ∃ x ( φ ∧ ψ ) ↔ ( ∃ x φ ∧ ψ )
+    res = lb.ref(
+        "res",
+        "∃ x ( φ ∧ ψ ) ↔ ( ∃ x φ ∧ ψ )",
+        s_fwd,
+        s_rev,
+        ref="impbii",
+        note="impbii",
+    )
+    return lb.build(res)
+
+
+def prove_19_42v(sys: System) -> Proof:
+    """19.42v: ∃ x ( φ ∧ ψ ) ↔ ( φ ∧ ∃ x ψ ).
+
+    Existential quantifier distributes over conjunction when the first
+    conjunct does not contain the bound variable.
+    (Contributed by NM, 5-Aug-1993.)
+    set.mm proof: wa wex 19.41v exancom ancom 3bitr4i.
+    """
+    lb = ProofBuilder(sys, "19.42v")
+
+    # 19.41v with swapped variables: ∃ x ( ψ ∧ φ ) ↔ ( ∃ x ψ ∧ φ )
+    s_19_41v = lb.ref(
+        "s_19_41v",
+        "∃ x ( ψ ∧ φ ) ↔ ( ∃ x ψ ∧ φ )",
+        ref="19.41v",
+        note="19.41v",
+    )
+
+    # exancom: ∃ x ( φ ∧ ψ ) ↔ ∃ x ( ψ ∧ φ )
+    s_exancom = lb.ref(
+        "s_exancom",
+        "∃ x ( φ ∧ ψ ) ↔ ∃ x ( ψ ∧ φ )",
+        ref="exancom",
+        note="exancom",
+    )
+
+    # ancom: ( φ ∧ ∃ x ψ ) ↔ ( ∃ x ψ ∧ φ )
+    s_ancom = lb.ref(
+        "s_ancom",
+        "( φ ∧ ∃ x ψ ) ↔ ( ∃ x ψ ∧ φ )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    # 3bitr4i: ∃ x ( φ ∧ ψ ) ↔ ( φ ∧ ∃ x ψ )
+    res = lb.ref(
+        "res",
+        "∃ x ( φ ∧ ψ ) ↔ ( φ ∧ ∃ x ψ )",
+        s_19_41v,
+        s_exancom,
+        s_ancom,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+    return lb.build(res)
+
+
+def prove_trujust(sys: System) -> Proof:
+    """trujust: ( ( ∀ x x = x → ∀ x x = x ) ↔ ( ∀ y y = y → ∀ y y = y ) ).
+
+    Two instances of the law of identity with universal quantifiers are
+    equivalent; proved via monothetic with ∀x x=x for ph and ∀y y=y for ps.
+    (Contributed by NM, 10-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "trujust")
+    res = lb.ref(
+        "res",
+        "( ( ∀ x x = x → ∀ x x = x ) ↔ ( ∀ y y = y → ∀ y y = y ) )",
+        ref="monothetic",
+        note="monothetic",
+    )
+    return lb.build(res)
+
+
+def prove_moimi(sys: System) -> Proof:
+    """moimi: ( ∃* x ψ → ∃* x φ ).
+
+    Inference form of moim.  Given φ → ψ, conclude ∃* x ψ → ∃* x φ.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "moimi")
+    hyp = lb.hyp("moimi.1", "φ → ψ")
+    # moim: ∀ x ( φ → ψ ) → ( ∃* x ψ → ∃* x φ )
+    s1 = lb.ref(
+        "s1",
+        "∀ x ( φ → ψ ) → ( ∃* x ψ → ∃* x φ )",
+        ref="moim",
+        note="moim",
+    )
+    # mpg: ( ∀ x ( φ → ψ ) → ( ∃* x ψ → ∃* x φ ) ), ( φ → ψ ) ⊢ ( ∃* x ψ → ∃* x φ )
+    res = lb.ref(
+        "res",
+        "( ∃* x ψ → ∃* x φ )",
+        s1,
+        hyp,
+        ref="mpg",
+        note="mpg moim, moimi.1",
+    )
+    return lb.build(res)
+
+
+def prove_ax6e(sys: System) -> Proof:
+    """ax6e: ∃ x x = y.
+
+    There exists a set equal to another, with no distinct variable
+    restrictions.  The proof uses a fresh variable w and case
+    analysis (pm2.61i) to drop the distinct variable condition
+    from ax6ev.
+    (Contributed by NM, 10-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ax6e")
+
+    # ax6ev: ∃ w w = y
+    s1 = lb.ref(
+        "s1",
+        "∃ w w = y",
+        ref="ax6ev",
+        note="ax6ev",
+    )
+
+    # ax6ev: ∃ x x = w
+    s2 = lb.ref(
+        "s2",
+        "∃ x x = w",
+        ref="ax6ev",
+        note="ax6ev",
+    )
+
+    # equtr: x = w → ( w = y → x = y )
+    s3 = lb.ref(
+        "s3",
+        "x = w → ( w = y → x = y )",
+        ref="equtr",
+        note="equtr",
+    )
+
+    # eximii (s2, s3): ∃ x ( w = y → x = y )
+    s4 = lb.ref(
+        "s4",
+        "∃ x ( w = y → x = y )",
+        s2,
+        s3,
+        ref="eximii",
+        note="eximii ax6ev, equtr",
+    )
+
+    # 19.35i (s4): ∀ x w = y → ∃ x x = y
+    s5 = lb.ref(
+        "s5",
+        "∀ x w = y → ∃ x x = y",
+        s4,
+        ref="19.35i",
+        note="19.35i eximii",
+    )
+
+    # ax13lem1: ¬ x = y → ( w = y → ∀ x w = y )
+    s6 = lb.ref(
+        "s6",
+        "¬ x = y → ( w = y → ∀ x w = y )",
+        ref="ax13lem1",
+        note="ax13lem1",
+    )
+
+    # syl6com (s6, s5): w = y → ( ¬ x = y → ∃ x x = y )
+    s7 = lb.ref(
+        "s7",
+        "w = y → ( ¬ x = y → ∃ x x = y )",
+        s6,
+        s5,
+        ref="syl6com",
+        note="syl6com ax13lem1, 19.35i",
+    )
+
+    # exlimiiv (s7, s1): ¬ x = y → ∃ x x = y
+    s8 = lb.ref(
+        "s8",
+        "¬ x = y → ∃ x x = y",
+        s7,
+        s1,
+        ref="exlimiiv",
+        note="exlimiiv syl6com, ax6ev",
+    )
+
+    # 19.8a: x = y → ∃ x x = y
+    s9 = lb.ref(
+        "s9",
+        "x = y → ∃ x x = y",
+        ref="19.8a",
+        note="19.8a",
+    )
+
+    # pm2.61i (s9, s8): ∃ x x = y
+    res = lb.ref(
+        "res",
+        "∃ x x = y",
+        s9,
+        s8,
+        ref="pm2.61i",
+        note="pm2.61i 19.8a, exlimiiv",
+    )
+
+    return lb.build(res)
+
+
+def prove_wel(sys: System) -> Proof:
+    """wel: wff x ∈ y.
+
+    Membership wff combining cv and wcel.
+    (Contributed by NM, 24-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "wel")
+    s1 = lb.ref("s1", "cv x", ref="cv", note="cv")
+    res = lb.ref("res", "cv x e. y", s1, ref="wcel", note="wcel")
+    return lb.build(res)
+
+
+def prove_excom(sys: System) -> Proof:
+    """excom: ∃ x ∃ y φ ↔ ∃ y ∃ x φ.
+
+    Commutation of existential quantifiers.
+    From alcom, notbii, 2exnaln, and 3bitr4i.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "excom")
+    # alcom with ¬φ: ∀ x ∀ y ¬ φ ↔ ∀ y ∀ x ¬ φ
+    s1 = lb.ref(
+        "s1",
+        "∀ x ∀ y ¬ φ ↔ ∀ y ∀ x ¬ φ",
+        ref="alcom",
+        note="alcom",
+    )
+    # notbii: ¬ ∀ x ∀ y ¬ φ ↔ ¬ ∀ y ∀ x ¬ φ
+    s2 = lb.ref(
+        "s2",
+        "¬ ∀ x ∀ y ¬ φ ↔ ¬ ∀ y ∀ x ¬ φ",
+        s1,
+        ref="notbii",
+        note="notbii",
+    )
+    # 2exnaln: ∃ x ∃ y φ ↔ ¬ ∀ x ∀ y ¬ φ
+    s3 = lb.ref(
+        "s3",
+        "∃ x ∃ y φ ↔ ¬ ∀ x ∀ y ¬ φ",
+        ref="2exnaln",
+        note="2exnaln",
+    )
+    # 2exnaln with x and y swapped: ∃ y ∃ x φ ↔ ¬ ∀ y ∀ x ¬ φ
+    s4 = lb.ref(
+        "s4",
+        "∃ y ∃ x φ ↔ ¬ ∀ y ∀ x ¬ φ",
+        ref="2exnaln",
+        note="2exnaln",
+    )
+    # 3bitr4i: ∃ x ∃ y φ ↔ ∃ y ∃ x φ
+    res = lb.ref(
+        "res",
+        "∃ x ∃ y φ ↔ ∃ y ∃ x φ",
+        s2,
+        s3,
+        s4,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+    return lb.build(res)
+
+
+# New predicate migrations are registered beside their implementations.  The
+# central theorem module retains only the frozen legacy registry and aggregates
+# this map with duplicate detection.
+MIGRATION_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
+    "alim": prove_alim,
+    "alimi": prove_alimi,
+    "2alimi": prove_2alimi,
+    "al2im": prove_al2im,
+    "al2imi": prove_al2imi,
+    "alimdh": prove_alimdh,
+    "alimdv": prove_alimdv,
+    "2alimdv": prove_2alimdv,
+    "alrimdh": prove_alrimdh,
+    "alrimdv": prove_alrimdv,
+    "alrimih": prove_alrimih,
+    "alrimiv": prove_alrimiv,
+    "alrimivv": prove_alrimivv,
+    "ax5d": prove_ax5d,
+    "ax6v": prove_ax6v,
+    "ax7v": prove_ax7v,
+    "ax7v1": prove_ax7v1,
+    "ax7v2": prove_ax7v2,
+    "equid": prove_equid,
+    "ax8v": prove_ax8v,
+    "ax8v1": prove_ax8v1,
+    "ax8v2": prove_ax8v2,
+    "ax9v": prove_ax9v,
+    "ax9v1": prove_ax9v1,
+    "ax9v2": prove_ax9v2,
+    "ax12v": prove_ax12v,
+    "ax13w": prove_ax13w,
+    "gen2": prove_gen2,
+    "sylg": prove_sylg,
+    "sylgt": prove_sylgt,
+    "nfrd": prove_nfrd,
+    "nfnbi": prove_nfnbi,
+    "nfnt": prove_nfnt,
+    "nfbid": prove_nfbid,
+    "nfa1": prove_nfa1,
+    "mpgbi": prove_mpgbi,
+    "stdpc5v": prove_stdpc5v,
+    "hbe1a": prove_hbe1a,
+    "alcom": prove_alcom,
+    "alcoms": prove_alcoms,
+    "ala1": prove_ala1,
+    "hbth": prove_hbth,
+    "hbal": prove_hbal,
+    "hbald": prove_hbald,
+    "exsbim": prove_exsbim,
+    "sbimi": prove_sbimi,
+    "spvw": prove_spvw,
+    "19.37v": prove_19_37v,
+    "calemos": prove_calemos,
+    "darapti": prove_darapti,
+    "19.41v": prove_19_41v,
+    "19.42v": prove_19_42v,
+    "19.8a": prove_19_8a,
+    "19.8ad": prove_19_8ad,
+    "2exnaln": prove_2exnaln,
+    "ax12i": prove_ax12i,
+    "ax12w": prove_ax12w,
+    "ax12wlem": prove_ax12wlem,
+    "ax6e": prove_ax6e,
+    "excom": prove_excom,
+    "moimi": prove_moimi,
+    "sp": prove_sp,
+    "sps": prove_sps,
+    "trujust": prove_trujust,
+    "wel": prove_wel,
+}

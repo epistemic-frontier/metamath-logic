@@ -5,6 +5,9 @@ from collections.abc import Callable, Mapping
 from skfd.proof import Proof, SystemCore
 
 from logic.predicate.hilbert.lemmas import (
+    MIGRATION_THEOREMS as PREDICATE_MIGRATIONS,
+)
+from logic.predicate.hilbert.lemmas import (
     prove_2albidv,
     prove_2albii,
     prove_2albiim,
@@ -350,7 +353,7 @@ from logic.propositional.hilbert.negation import (
 
 PredicateTheoremCtor = Callable[[SystemCore], Proof]
 
-SETMM_TO_PREDICATE_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
+_LEGACY_PREDICATE_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
     "imnang": prove_imnang,
     "ax5e": prove_ax5e,
     "ax5ea": prove_ax5ea,
@@ -683,5 +686,20 @@ SETMM_TO_PREDICATE_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
     "exsimpl": prove_exsimpl,
     "exsimpr": prove_exsimpr,
 }
+
+
+def _merge_migration_registries() -> Mapping[str, PredicateTheoremCtor]:
+    merged = dict(_LEGACY_PREDICATE_THEOREMS)
+    duplicates = merged.keys() & PREDICATE_MIGRATIONS.keys()
+    if duplicates:
+        raise RuntimeError(
+            f"duplicate predicate theorem registrations: {sorted(duplicates)}"
+        )
+    merged.update(PREDICATE_MIGRATIONS)
+    return merged
+
+
+SETMM_TO_PREDICATE_THEOREMS = _merge_migration_registries()
+
 
 __all__ = ["PredicateTheoremCtor", "SETMM_TO_PREDICATE_THEOREMS"]

@@ -7676,6 +7676,188 @@ def prove_axio(sys: System) -> Proof:
     return lb.build(res)
 
 
-# New migrations register here beside their implementation. The aggregate
-# registry imports this mapping, avoiding another edit to global shim files.
-MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}
+def prove_pm4_39(sys: System) -> Proof:
+    """pm4.39: ( ( φ ↔ χ ) ∧ ( ψ ↔ θ ) ) → ( ( φ ∨ ψ ) ↔ ( χ ∨ θ ) ).
+
+    Distributing a conjunction of biconditionals over a disjunction.
+    """
+    lb = ProofBuilder(sys, "pm4.39")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ↔ χ ) ∧ ( ψ ↔ θ ) ) → ( φ ↔ χ )",
+        ref="simpl",
+        note="simpl",
+    )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ↔ χ ) ∧ ( ψ ↔ θ ) ) → ( ψ ↔ θ )",
+        ref="simpr",
+        note="simpr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ↔ χ ) ∧ ( ψ ↔ θ ) ) → ( ( φ ∨ ψ ) ↔ ( χ ∨ θ ) )",
+        s1,
+        s2,
+        ref="orbi12d",
+        note="orbi12d",
+    )
+    return lb.build(res)
+
+
+def prove_ornld(sys: System) -> Proof:
+    """ornld: φ → ( ( ( φ → ( θ ∨ τ ) ) ∧ ¬ θ ) → τ ).
+
+    From a disjunctive implication remove the left disjunct.
+    """
+    lb = ProofBuilder(sys, "ornld")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( φ → ( θ ∨ τ ) ) ) → ( θ ∨ τ )",
+        ref="pm3.35",
+        note="pm3.35",
+    )
+    s2 = lb.ref(
+        "s2",
+        "( φ ∧ ( φ → ( θ ∨ τ ) ) ) → ( ¬ θ → τ )",
+        s1,
+        ref="ord",
+        note="ord",
+    )
+    res = lb.ref(
+        "res",
+        "φ → ( ( ( φ → ( θ ∨ τ ) ) ∧ ¬ θ ) → τ )",
+        s2,
+        ref="expimpd",
+        note="expimpd",
+    )
+    return lb.build(res)
+
+
+def prove_ifpor(sys: System) -> Proof:
+    """ifpor: if- φ ψ χ → ( ψ ∨ χ ).
+
+    The conditional operator implies the disjunction of its second
+    and third arguments.
+    """
+    lb = ProofBuilder(sys, "ifpor")
+    s1 = lb.ref("s1", "( φ ∧ ψ ) → ψ", ref="simpr", note="simpr")
+    s2 = lb.ref("s2", "( ¬ φ ∧ χ ) → χ", ref="simpr", note="simpr")
+    s3 = lb.ref(
+        "s3",
+        "( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ χ ) ) → ( ψ ∨ χ )",
+        s1,
+        s2,
+        ref="orim12i",
+        note="orim12i",
+    )
+    s4 = lb.ref(
+        "s4",
+        "if- φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ χ ) )",
+        ref="df-ifp",
+        note="df-ifp",
+    )
+    res = lb.ref(
+        "res",
+        "if- φ ψ χ → ( ψ ∨ χ )",
+        s4,
+        s3,
+        ref="sylbi",
+        note="sylbi",
+    )
+    return lb.build(res)
+
+
+def prove_xor(sys: System) -> Proof:
+    """xor: ¬ ( φ ↔ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ).
+
+    Exclusive-or expressed with negation, conjunction, and disjunction.
+    """
+    lb = ProofBuilder(sys, "xor")
+
+    s1 = lb.ref("s1", "( φ → ψ ) ↔ ¬ ( φ ∧ ¬ ψ )", ref="iman", note="iman")
+    s2 = lb.ref("s2", "( ψ → φ ) ↔ ¬ ( ψ ∧ ¬ φ )", ref="iman", note="iman")
+    s3 = lb.ref(
+        "s3",
+        "( ( φ → ψ ) ∧ ( ψ → φ ) ) ↔ ( ¬ ( φ ∧ ¬ ψ ) ∧ ¬ ( ψ ∧ ¬ φ ) )",
+        s1,
+        s2,
+        ref="anbi12i",
+        note="anbi12i",
+    )
+    s4 = lb.ref(
+        "s4",
+        "( φ ↔ ψ ) ↔ ( ( φ → ψ ) ∧ ( ψ → φ ) )",
+        ref="dfbi2",
+        note="dfbi2",
+    )
+    s5 = lb.ref(
+        "s5",
+        "¬ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ) ↔ ( ¬ ( φ ∧ ¬ ψ ) ∧ ¬ ( ψ ∧ ¬ φ ) )",
+        ref="ioran",
+        note="ioran",
+    )
+    s6 = lb.ref(
+        "s6",
+        "¬ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ) ↔ ( φ ↔ ψ )",
+        s3,
+        s4,
+        s5,
+        ref="3bitr4ri",
+        note="3bitr4ri",
+    )
+    res = lb.ref(
+        "res",
+        "¬ ( φ ↔ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        s6,
+        ref="con1bii",
+        note="con1bii",
+    )
+
+    return lb.build(res)
+
+
+def prove_pm5_24(sys: System) -> Proof:
+    """pm5.24: ¬ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ).
+
+    Negation of biconditional equivalence expressed as a disjunction of
+    exclusive cases.
+    """
+    lb = ProofBuilder(sys, "pm5.24")
+
+    s_xor = lb.ref(
+        "s_xor",
+        "¬ ( φ ↔ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        ref="xor",
+        note="xor",
+    )
+
+    s_dfbi3 = lb.ref(
+        "s_dfbi3",
+        "( φ ↔ ψ ) ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) )",
+        ref="dfbi3",
+        note="dfbi3",
+    )
+
+    res = lb.ref(
+        "res",
+        "¬ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        s_xor,
+        s_dfbi3,
+        ref="xchnxbi",
+        note="xchnxbi",
+    )
+
+    return lb.build(res)
+
+
+# New migrations register here beside their implementation.
+# The aggregate registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "ifpor": prove_ifpor,
+    "ornld": prove_ornld,
+    "pm4.39": prove_pm4_39,
+    "pm5.24": prove_pm5_24,
+    "xor": prove_xor,
+}

@@ -3415,6 +3415,62 @@ def prove_ax3(sys: System) -> Proof:
     return lb.build(res)
 
 
-# New migrations register here beside their implementation. The aggregate
-# registry imports this mapping, avoiding another edit to global shim files.
-MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}
+def prove_pm2_61dan(sys: System) -> Proof:
+    """pm2.61dan: φ → χ.
+
+    Hypotheses: ( φ ∧ ψ ) → χ, ( φ ∧ ¬ ψ ) → χ.
+    Deduction eliminating a conjunction antecedent.
+    (Contributed by NM, 17-May-2012.)
+    """
+    lb = ProofBuilder(sys, "pm2.61dan")
+    h1 = lb.hyp("pm2.61dan.1", "( ( φ ∧ ψ ) → χ )")
+    h2 = lb.hyp("pm2.61dan.2", "( ( φ ∧ ¬ ψ ) → χ )")
+    s1 = lb.ref("s1", "( φ → ( ψ → χ ) )", h1, ref="ex", note="ex pm2.61dan.1")
+    s2 = lb.ref("s2", "( φ → ( ¬ ψ → χ ) )", h2, ref="ex", note="ex pm2.61dan.2")
+    res = lb.ref("res", "( φ → χ )", s1, s2, ref="pm2.61d", note="pm2.61d s1 s2")
+    return lb.build(res)
+
+
+def prove_pm2_61ddan(sys: System) -> Proof:
+    """pm2.61ddan: φ → θ.
+
+    Hypotheses: ( φ ∧ ψ ) → θ, ( φ ∧ χ ) → θ, ( φ ∧ ( ¬ ψ ∧ ¬ χ ) ) → θ.
+    Deduction eliminating two conjunction antecedents.
+    (Contributed by NM, 17-May-2012.)
+    """
+    lb = ProofBuilder(sys, "pm2.61ddan")
+    h1 = lb.hyp("pm2.61ddan.1", "( ( φ ∧ ψ ) → θ )")
+    h2 = lb.hyp("pm2.61ddan.2", "( ( φ ∧ χ ) → θ )")
+    h3 = lb.hyp("pm2.61ddan.3", "( ( φ ∧ ( ¬ ψ ∧ ¬ χ ) ) → θ )")
+    s1 = lb.ref("s1", "( ( φ ∧ ¬ ψ ) ∧ χ ) → θ", h2, ref="adantlr", note="adantlr")
+    s2 = lb.ref("s2", "( ( φ ∧ ¬ ψ ) ∧ ¬ χ ) → θ", h3, ref="anassrs", note="anassrs")
+    s3 = lb.ref("s3", "( φ ∧ ¬ ψ ) → θ", s1, s2, ref="pm2.61dan", note="pm2.61dan")
+    res = lb.ref("res", "φ → θ", h1, s3, ref="pm2.61dan", note="pm2.61dan")
+    return lb.build(res)
+
+
+def prove_pm2_61dda(sys: System) -> Proof:
+    """pm2.61dda: φ → θ.
+
+    Hypotheses: ( φ ∧ ¬ ψ ) → θ, ( φ ∧ ¬ χ ) → θ, ( φ ∧ ( ψ ∧ χ ) ) → θ.
+    Deduction eliminating two conjunction antecedents.
+    (Contributed by NM, 16-Dec-2017.)
+    """
+    lb = ProofBuilder(sys, "pm2.61dda")
+    h1 = lb.hyp("pm2.61dda.1", "( ( φ ∧ ¬ ψ ) → θ )")
+    h2 = lb.hyp("pm2.61dda.2", "( ( φ ∧ ¬ χ ) → θ )")
+    h3 = lb.hyp("pm2.61dda.3", "( ( φ ∧ ( ψ ∧ χ ) ) → θ )")
+    s1 = lb.ref("s1", "( ( φ ∧ ψ ) ∧ χ ) → θ", h3, ref="anassrs", note="anassrs")
+    s2 = lb.ref("s2", "( ( φ ∧ ψ ) ∧ ¬ χ ) → θ", h2, ref="adantlr", note="adantlr")
+    s3 = lb.ref("s3", "( φ ∧ ψ ) → θ", s1, s2, ref="pm2.61dan", note="pm2.61dan")
+    res = lb.ref("res", "φ → θ", s3, h1, ref="pm2.61dan", note="pm2.61dan")
+    return lb.build(res)
+
+
+# New migrations register here beside their implementation.
+# The aggregate registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "pm2.61dan": prove_pm2_61dan,
+    "pm2.61dda": prove_pm2_61dda,
+    "pm2.61ddan": prove_pm2_61ddan,
+}

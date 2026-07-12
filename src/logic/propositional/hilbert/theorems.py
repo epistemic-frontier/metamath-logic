@@ -1366,6 +1366,7 @@ from .lemmas import (
     prove_xordi,
 )
 from .negation import MIGRATION_THEOREMS as NEGATION_MIGRATIONS
+from .stoic import MIGRATION_THEOREMS as STOIC_MIGRATIONS
 
 LemmaCtor = Callable[[System], Proof]
 
@@ -2732,6 +2733,7 @@ def _merge_migration_registries() -> Mapping[str, LemmaCtor]:
     registries = (
         IMPLICATION_MIGRATIONS,
         NEGATION_MIGRATIONS,
+        STOIC_MIGRATIONS,
         EQUIVALENCE_MIGRATIONS,
         CONJUNCTION_MIGRATIONS,
         DISJUNCTION_MIGRATIONS,

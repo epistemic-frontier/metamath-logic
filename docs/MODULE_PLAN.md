@@ -8,12 +8,12 @@ for unfinished work.
 ## Current status
 
 The implementation is split into `logic.propositional.hilbert` and
-`logic.predicate.hilbert`. Their registries contain 1,353 and 331 proofs,
-respectively (1,684 total), and the complete registry is emitted.
+`logic.predicate.hilbert`. Their registries contain 1,500 and 396 proofs,
+respectively (1,896 total), and the complete registry is emitted.
 
-The source closure audit reports 1,734 unique `prove_*` identities: 1,684
-registry identities plus 50 support-only identities, with 0 uncovered. Latest
-verification reports 1,684 declared, 3,610 emitted, and 0
+The source closure audit reports 1,896 unique `prove_*` identities, all in the
+registries, with 0 support-only and 0 uncovered. Latest verification reports
+1,896 declared, 3,931 emitted, and 0
 declared-but-unemitted proofs. `mmverify`, `metamath`, and `knife` pass.
 
 Propositional mathematical content is divided by connective among

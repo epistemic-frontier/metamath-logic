@@ -49,6 +49,7 @@ si = Var("σ")
 rh = Var("ρ")
 mu = Var("μ")
 la = Var("λ")
+ka = Var("κ")
 
 
 @symbol("->", 2, (WFF, WFF), WFF, op="rshift", precedence=20, assoc="right", aliases=["→", "⇒"])
@@ -256,6 +257,7 @@ __all__ = [
     "rh",
     "mu",
     "la",
+    "ka",
     "Imp",
     "Not",
     "And",

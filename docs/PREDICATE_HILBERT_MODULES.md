@@ -13,8 +13,8 @@ logic/predicate/hilbert/
   _structures.py    # Expr variables and constructors
   _internal.py      # compilation/application implementation
   axioms.py         # ax-4 through ax-13 Expr schemas
-  lemmas.py         # predicate prove_* constructors
-  theorems.py       # SETMM_TO_PREDICATE_THEOREMS registry
+  lemmas.py         # predicate prove_* constructors and new-migration map
+  theorems.py       # frozen legacy bucket and aggregate registry
 ```
 
 `system.py` and predicate `definitions.py` no longer exist. Consumers import
@@ -24,17 +24,20 @@ canonical set.mm names `ax-5` through `ax-13` (and likewise for `ax-4`).
 
 ## Current status
 
-- `SETMM_TO_PREDICATE_THEOREMS` contains 331 proofs.
+- `SETMM_TO_PREDICATE_THEOREMS` contains 396 proofs.
 - Predicate syntax and axioms are integrated into `logic.build`.
 - Every predicate registry proof is emitted; none is registered-only.
 - Predicate theorem constructors live in `lemmas.py`, and the catalogue links
   there directly.
-- Together with 1,353 propositional registry proofs, the build declares all
-  1,684 registry proofs.
+- New migrations are registered in the local `MIGRATION_THEOREMS` map in
+  `lemmas.py`. `theorems.py` deterministically merges it with the frozen
+  `_LEGACY_PREDICATE_THEOREMS` bucket and rejects duplicate labels.
+- Together with 1,500 propositional registry proofs, the build declares all
+  1,896 registry proofs.
 
-The complete source audit finds 1,734 unique `prove_*` constructors: 1,684
-registry constructors and 50 support-only constructors, with 0 uncovered.
-Latest verification emitted 3,610 proofs with 0 declared-but-unemitted;
+The complete source audit finds 1,896 unique `prove_*` constructors, all in the
+registries, with 0 support-only and 0 uncovered. Latest verification emitted
+3,931 proofs with 0 declared-but-unemitted;
 `mmverify`, `metamath`, and `knife` all pass.
 
 ## Boundaries

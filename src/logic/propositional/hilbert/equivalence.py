@@ -6991,6 +6991,533 @@ def prove_ax13b(sys: System) -> Proof:
     return lb.build(res)
 
 
-# New migrations register here beside their implementation. The aggregate
-# registry imports this mapping, avoiding another edit to global shim files.
-MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}
+def prove_nbbn(sys: System) -> Proof:
+    """nbbn: ( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) ).
+
+    A biconditional with a negated left side is equivalent to the negation
+    of the plain biconditional.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "nbbn")
+
+    # pm5.18 with φ:=¬φ, ψ:=ψ → ( ( ¬ φ ↔ ψ ) ↔ ¬ ( ¬ φ ↔ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ( ¬ φ ↔ ψ ) ↔ ¬ ( ¬ φ ↔ ¬ ψ ) )",
+        ref="pm5.18",
+        note="pm5.18",
+    )
+
+    # notbi: ( ( φ ↔ ψ ) ↔ ( ¬ φ ↔ ¬ ψ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ↔ ψ ) ↔ ( ¬ φ ↔ ¬ ψ ) )",
+        ref="notbi",
+        note="notbi",
+    )
+
+    # xchbinxr with s1 and s2: ( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) )
+    res = lb.ref(
+        "res",
+        "( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) )",
+        s1,
+        s2,
+        ref="xchbinxr",
+        note="xchbinxr",
+    )
+
+    return lb.build(res)
+
+
+def prove_mpbiran2d(sys: System) -> Proof:
+    """mpbiran2d: φ → ( ψ ↔ χ ).
+
+    Deduction form of mpbiran2: from φ → θ and φ → ( ψ ↔ ( χ ∧ θ ) ),
+    conclude φ → ( ψ ↔ χ ).
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "mpbiran2d")
+
+    h1 = lb.hyp("mpbiran2d.1", "φ → θ")
+    h2 = lb.hyp("mpbiran2d.2", "φ → ( ψ ↔ ( χ ∧ θ ) )")
+
+    # biancomd: φ → ( ψ ↔ ( χ ∧ θ ) ) → φ → ( ψ ↔ ( θ ∧ χ ) )
+    s1 = lb.ref("s1", "φ → ( ψ ↔ ( θ ∧ χ ) )", h2, ref="biancomd", note="biancomd")
+
+    # mpbirand: φ → θ, φ → ( ψ ↔ ( θ ∧ χ ) ) → φ → ( ψ ↔ χ )
+    res = lb.ref("res", "φ → ( ψ ↔ χ )", h1, s1, ref="mpbirand", note="mpbirand")
+
+    return lb.build(res)
+
+
+def prove_mpbirand(sys: System) -> Proof:
+    """mpbirand: φ → ( ψ ↔ θ ).
+
+    Deduction form of mpbiran: from φ → χ and φ → ( ψ ↔ ( χ ∧ θ ) ),
+    conclude φ → ( ψ ↔ θ ).
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "mpbirand")
+
+    h1 = lb.hyp("mpbirand.1", "φ → χ")
+    h2 = lb.hyp("mpbirand.2", "φ → ( ψ ↔ ( χ ∧ θ ) )")
+
+    # biantrurd: φ → χ ⊢ φ → ( θ ↔ ( χ ∧ θ ) )
+    s_biantrurd = lb.ref(
+        "s_biantrurd",
+        "φ → ( θ ↔ ( χ ∧ θ ) )",
+        h1,
+        ref="biantrurd",
+        note="biantrurd",
+    )
+
+    # bitr4d: φ → ( ψ ↔ ( χ ∧ θ ) ), φ → ( θ ↔ ( χ ∧ θ ) )
+    # ⊢ φ → ( ψ ↔ θ )
+    res = lb.ref(
+        "res",
+        "φ → ( ψ ↔ θ )",
+        h2,
+        s_biantrurd,
+        ref="bitr4d",
+        note="bitr4d",
+    )
+
+    return lb.build(res)
+
+
+def prove_nannot(sys: System) -> Proof:
+    """nannot: ¬ φ ↔ ( φ ⊼ φ ).
+
+    Negation expressed as NAND with a single proposition.
+    """
+    lb = ProofBuilder(sys, "nannot")
+
+    # dfnan2 with ψ := φ: ( φ ⊼ φ ) ↔ ( φ → ¬ φ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊼ φ ) ↔ ( φ → ¬ φ )",
+        ref="dfnan2",
+        note="dfnan2",
+    )
+
+    # pm4.8: ( φ → ¬ φ ) ↔ ¬ φ
+    s2 = lb.ref(
+        "s2",
+        "( φ → ¬ φ ) ↔ ¬ φ",
+        ref="pm4.8",
+        note="pm4.8",
+    )
+
+    # bitr2i: from s1 and s2: ¬ φ ↔ ( φ ⊼ φ )
+    res = lb.ref(
+        "res",
+        "¬ φ ↔ ( φ ⊼ φ )",
+        s1,
+        s2,
+        ref="bitr2i",
+        note="bitr2i",
+    )
+
+    return lb.build(res)
+
+
+def prove_biass(sys: System) -> Proof:
+    """biass: ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ).
+
+    Biconditional associativity.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "biass")
+
+    # ---- case φ ----
+    # pm5.501: φ → ( ψ ↔ ( φ ↔ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "φ → ( ψ ↔ ( φ ↔ ψ ) )",
+        ref="pm5.501",
+        note="pm5.501",
+    )
+
+    # bibi1d(s1): φ → ( ( ψ ↔ χ ) ↔ ( ( φ ↔ ψ ) ↔ χ ) )
+    s2 = lb.ref(
+        "s2",
+        "φ → ( ( ψ ↔ χ ) ↔ ( ( φ ↔ ψ ) ↔ χ ) )",
+        s1,
+        ref="bibi1d",
+        note="bibi1d",
+    )
+
+    # pm5.501 with ψ ↦ (ψ↔χ): φ → ( ( ψ ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )
+    s3 = lb.ref(
+        "s3",
+        "φ → ( ( ψ ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )",
+        ref="pm5.501",
+        note="pm5.501",
+    )
+
+    # bitr3d(s2, s3): φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )
+    s4 = lb.ref(
+        "s4",
+        "φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )",
+        s2,
+        s3,
+        ref="bitr3d",
+        note="bitr3d",
+    )
+
+    # ---- case ¬φ ----
+    # nbn2: ¬ φ → ( ¬ ψ ↔ ( φ ↔ ψ ) )
+    s5 = lb.ref(
+        "s5",
+        "¬ φ → ( ¬ ψ ↔ ( φ ↔ ψ ) )",
+        ref="nbn2",
+        note="nbn2",
+    )
+
+    # bicomd(s5): ¬ φ → ( ( φ ↔ ψ ) ↔ ¬ ψ )
+    s6 = lb.ref(
+        "s6",
+        "¬ φ → ( ( φ ↔ ψ ) ↔ ¬ ψ )",
+        s5,
+        ref="bicomd",
+        note="bicomd",
+    )
+
+    # bibi1d(s6): ¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ¬ ψ ↔ χ ) )
+    s7 = lb.ref(
+        "s7",
+        "¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ¬ ψ ↔ χ ) )",
+        s6,
+        ref="bibi1d",
+        note="bibi1d",
+    )
+
+    # nbbn(φ↦ψ, ψ↦χ): ( ¬ ψ ↔ χ ) ↔ ¬ ( ψ ↔ χ )
+    s8 = lb.ref(
+        "s8",
+        "( ¬ ψ ↔ χ ) ↔ ¬ ( ψ ↔ χ )",
+        ref="nbbn",
+        note="nbbn",
+    )
+
+    # a1i(s8): ¬ φ → ( ( ¬ ψ ↔ χ ) ↔ ¬ ( ψ ↔ χ ) )
+    s9 = lb.ref(
+        "s9",
+        "¬ φ → ( ( ¬ ψ ↔ χ ) ↔ ¬ ( ψ ↔ χ ) )",
+        s8,
+        ref="a1i",
+        note="a1i",
+    )
+
+    # bitrd(s7, s9): ¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ¬ ( ψ ↔ χ ) )
+    s10 = lb.ref(
+        "s10",
+        "¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ¬ ( ψ ↔ χ ) )",
+        s7,
+        s9,
+        ref="bitrd",
+        note="bitrd",
+    )
+
+    # nbn2(ψ↦ψ↔χ): ¬ φ → ( ¬ ( ψ ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )
+    s11 = lb.ref(
+        "s11",
+        "¬ φ → ( ¬ ( ψ ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )",
+        ref="nbn2",
+        note="nbn2",
+    )
+
+    # bitrd(s10, s11): ¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )
+    s12 = lb.ref(
+        "s12",
+        "¬ φ → ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) ) )",
+        s10,
+        s11,
+        ref="bitrd",
+        note="bitrd",
+    )
+
+    # ---- combine cases ----
+    # pm2.61i(s4, s12): ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) )
+    res = lb.ref(
+        "res",
+        "( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) )",
+        s4,
+        s12,
+        ref="pm2.61i",
+        note="pm2.61i",
+    )
+
+    return lb.build(res)
+
+
+def prove_biluk(sys: System) -> Proof:
+    """biluk: ( φ ↔ ψ ) ↔ ( ( χ ↔ ψ ) ↔ ( φ ↔ χ ) ).
+
+    Lukasiewicz-style biconditional rotation identity.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "biluk")
+
+    # Step 1: bicom
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ↔ ψ ) ↔ ( ψ ↔ φ ) )",
+        ref="bicom",
+        note="bicom",
+    )
+
+    # Step 2: bibi1i from bicom with ch as new ch
+    s2 = lb.ref(
+        "s2",
+        "( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ( ψ ↔ φ ) ↔ χ ) )",
+        s1,
+        ref="bibi1i",
+        note="bibi1i",
+    )
+
+    # Step 3: biass with ph:=ψ, ps:=φ
+    s3 = lb.ref(
+        "s3",
+        "( ( ( ψ ↔ φ ) ↔ χ ) ↔ ( ψ ↔ ( φ ↔ χ ) ) )",
+        ref="biass",
+        note="biass",
+    )
+
+    # Step 4: bitri from s2 and s3
+    s4 = lb.ref(
+        "s4",
+        "( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ψ ↔ ( φ ↔ χ ) ) )",
+        s2,
+        s3,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # Step 5: biass with ph:=(φ↔ψ), ps:=χ, ch:=(ψ↔(φ↔χ))
+    s5 = lb.ref(
+        "s5",
+        "( ( ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ψ ↔ ( φ ↔ χ ) ) ) ↔ ( ( φ ↔ ψ ) ↔ ( χ ↔ ( ψ ↔ ( φ ↔ χ ) ) ) ) )",
+        ref="biass",
+        note="biass",
+    )
+
+    # Step 6: mpbi from s4 and s5
+    s6 = lb.ref(
+        "s6",
+        "( ( φ ↔ ψ ) ↔ ( χ ↔ ( ψ ↔ ( φ ↔ χ ) ) ) )",
+        s4,
+        s5,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    # Step 7: biass with ph:=χ, ps:=ψ, ch:=(φ↔χ)
+    s7 = lb.ref(
+        "s7",
+        "( ( ( χ ↔ ψ ) ↔ ( φ ↔ χ ) ) ↔ ( χ ↔ ( ψ ↔ ( φ ↔ χ ) ) ) )",
+        ref="biass",
+        note="biass",
+    )
+
+    # Step 8: bitr4i from s6 and s7
+    res = lb.ref(
+        "res",
+        "( ( φ ↔ ψ ) ↔ ( ( χ ↔ ψ ) ↔ ( φ ↔ χ ) ) )",
+        s6,
+        s7,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_pm5_18(sys: System) -> Proof:
+    """pm5.18: ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) ).
+
+    A biconditional is equivalent to the negation of the biconditional with
+    a negated consequent.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "pm5.18")
+
+    # pm5.501: ( φ → ( ψ ↔ ( φ ↔ ψ ) ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ → ( ψ ↔ ( φ ↔ ψ ) ) )",
+        ref="pm5.501",
+        note="pm5.501",
+    )
+
+    # pm5.501 with ¬ψ for ψ: ( φ → ( ¬ ψ ↔ ( φ ↔ ¬ ψ ) ) )
+    s2 = lb.ref(
+        "s2",
+        "( φ → ( ¬ ψ ↔ ( φ ↔ ¬ ψ ) ) )",
+        ref="pm5.501",
+        note="pm5.501",
+    )
+
+    # con1bid on s2: ( φ → ( ¬ ( φ ↔ ¬ ψ ) ↔ ψ ) )
+    s3 = lb.ref(
+        "s3",
+        "( φ → ( ¬ ( φ ↔ ¬ ψ ) ↔ ψ ) )",
+        s2,
+        ref="con1bid",
+        note="con1bid",
+    )
+
+    # bicomd on s3: ( φ → ( ψ ↔ ¬ ( φ ↔ ¬ ψ ) ) )
+    s4 = lb.ref(
+        "s4",
+        "( φ → ( ψ ↔ ¬ ( φ ↔ ¬ ψ ) ) )",
+        s3,
+        ref="bicomd",
+        note="bicomd",
+    )
+
+    # bitr3d on s1 and s4: ( φ → ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) ) )
+    s5 = lb.ref(
+        "s5",
+        "( φ → ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) ) )",
+        s1,
+        s4,
+        ref="bitr3d",
+        note="bitr3d",
+    )
+
+    # nbn2: ( ¬ φ → ( ¬ ψ ↔ ( φ ↔ ψ ) ) )
+    s6 = lb.ref(
+        "s6",
+        "( ¬ φ → ( ¬ ψ ↔ ( φ ↔ ψ ) ) )",
+        ref="nbn2",
+        note="nbn2",
+    )
+
+    # nbn2 with ¬ψ for ψ: ( ¬ φ → ( ¬ ¬ ψ ↔ ( φ ↔ ¬ ψ ) ) )
+    s7 = lb.ref(
+        "s7",
+        "( ¬ φ → ( ¬ ¬ ψ ↔ ( φ ↔ ¬ ψ ) ) )",
+        ref="nbn2",
+        note="nbn2",
+    )
+
+    # notnotb: ( ψ ↔ ¬ ¬ ψ )
+    s8 = lb.ref(
+        "s8",
+        "( ψ ↔ ¬ ¬ ψ )",
+        ref="notnotb",
+        note="notnotb",
+    )
+
+    # a1i on s8 with ¬φ: ( ¬ φ → ( ψ ↔ ¬ ¬ ψ ) )
+    s9 = lb.ref(
+        "s9",
+        "( ¬ φ → ( ψ ↔ ¬ ¬ ψ ) )",
+        s8,
+        ref="a1i",
+        note="a1i",
+    )
+
+    # bicomd on s9: ( ¬ φ → ( ¬ ¬ ψ ↔ ψ ) )
+    s10 = lb.ref(
+        "s10",
+        "( ¬ φ → ( ¬ ¬ ψ ↔ ψ ) )",
+        s9,
+        ref="bicomd",
+        note="bicomd",
+    )
+
+    # bitr3d on s7 and s10: ( ¬ φ → ( ( φ ↔ ¬ ψ ) ↔ ψ ) )
+    s11 = lb.ref(
+        "s11",
+        "( ¬ φ → ( ( φ ↔ ¬ ψ ) ↔ ψ ) )",
+        s7,
+        s10,
+        ref="bitr3d",
+        note="bitr3d",
+    )
+
+    # notbid on s11: ( ¬ φ → ( ¬ ( φ ↔ ¬ ψ ) ↔ ¬ ψ ) )
+    s12 = lb.ref(
+        "s12",
+        "( ¬ φ → ( ¬ ( φ ↔ ¬ ψ ) ↔ ¬ ψ ) )",
+        s11,
+        ref="notbid",
+        note="notbid",
+    )
+
+    # bicomd on s12: ( ¬ φ → ( ¬ ψ ↔ ¬ ( φ ↔ ¬ ψ ) ) )
+    s13 = lb.ref(
+        "s13",
+        "( ¬ φ → ( ¬ ψ ↔ ¬ ( φ ↔ ¬ ψ ) ) )",
+        s12,
+        ref="bicomd",
+        note="bicomd",
+    )
+
+    # bitr3d on s6 and s13: ( ¬ φ → ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) ) )
+    s14 = lb.ref(
+        "s14",
+        "( ¬ φ → ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) ) )",
+        s6,
+        s13,
+        ref="bitr3d",
+        note="bitr3d",
+    )
+
+    # pm2.61i on s5 and s14: ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )
+    res = lb.ref(
+        "res",
+        "( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )",
+        s5,
+        s14,
+        ref="pm2.61i",
+        note="pm2.61i",
+    )
+
+    return lb.build(res)
+
+
+def prove_pm5_19(sys: System) -> Proof:
+    """pm5.19: ¬ ( φ ↔ ¬ φ ).
+
+    A proposition cannot be equivalent to its own negation.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "pm5.19")
+
+    # biid: ( φ ↔ φ )
+    s1 = lb.ref("s1", "( φ ↔ φ )", ref="biid", note="biid")
+
+    # pm5.18 with ψ := φ: ( ( φ ↔ φ ) ↔ ¬ ( φ ↔ ¬ φ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ↔ φ ) ↔ ¬ ( φ ↔ ¬ φ ) )",
+        ref="pm5.18",
+        note="pm5.18",
+    )
+
+    # mpbi: from biid and pm5.18 instance, conclude ¬ ( φ ↔ ¬ φ )
+    res = lb.ref(
+        "res",
+        "¬ ( φ ↔ ¬ φ )",
+        s1,
+        s2,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    return lb.build(res)
+
+
+# New migrations register here beside their implementation.
+# The aggregate registry imports this mapping, avoiding another edit to global shim files.
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "biass": prove_biass,
+    "biluk": prove_biluk,
+    "mpbiran2d": prove_mpbiran2d,
+    "mpbirand": prove_mpbirand,
+    "nannot": prove_nannot,
+    "nbbn": prove_nbbn,
+    "pm5.18": prove_pm5_18,
+    "pm5.19": prove_pm5_19,
+}

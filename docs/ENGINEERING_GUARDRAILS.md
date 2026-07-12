@@ -32,7 +32,7 @@ module plans.
 - Proof constructors have one owning module. Propositional `lemmas.py`
   re-exports its category constructors; predicate constructors live directly
   in predicate `lemmas.py`.
-- The single authoritative registry for each package lives in `theorems.py`:
+- Each package exposes its single authoritative aggregate from `theorems.py`:
   - `SETMM_TO_HILBERT_LEMMAS`
   - `SETMM_TO_PREDICATE_THEOREMS`
 - Registry keys must be exact set.mm labels.
@@ -41,6 +41,9 @@ module plans.
 - Registered entries must be emitted and covered by verification.
 - Registry aggregation order must be deterministic. Prefer explicit module maps
   over `globals()` collection.
+- New predicate migrations are added to `MIGRATION_THEOREMS` beside their
+  implementations in predicate `lemmas.py`; predicate `theorems.py` keeps the
+  frozen legacy bucket and aggregates that local map with duplicate detection.
 
 ## Build and Emission Guardrails
 
@@ -98,7 +101,7 @@ release artifact. Before a release, regenerate it once with
 `uv run --no-sync python tools/generate_lemma_catalogue.py` and validate the
 checked-in result with the same command plus `--check`.
 
-The current gate is expected to report 1,684 declared, 3,610 emitted, and 0
+The current gate is expected to report 1,896 declared, 3,931 emitted, and 0
 declared-but-unemitted proofs.
 
 ## Counting and Roadmap Guardrails

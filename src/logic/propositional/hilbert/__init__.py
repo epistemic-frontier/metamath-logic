@@ -143,6 +143,7 @@ def _extend_names(names: NameResolver) -> NameResolver:
     lex.add(LexiconEntry(kind="Var", canonical="rh", aliases=("ρ",), display="ρ"))
     lex.add(LexiconEntry(kind="Var", canonical="mu", aliases=("μ",), display="μ"))
     lex.add(LexiconEntry(kind="Var", canonical="la", aliases=("λ",), display="λ"))
+    lex.add(LexiconEntry(kind="Var", canonical="ka", aliases=("κ",), display="κ"))
     return names
 
 

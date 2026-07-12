@@ -12,7 +12,6 @@ from skfd.core.symbols import SymbolId, SymbolInterner
 from skfd.proof import Proof
 
 from logic.predicate.hilbert import PredicateSystem
-from logic.predicate.hilbert import lemmas as predicate_lemmas
 from logic.predicate.hilbert._builtins import PredicateBuiltins
 from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
 from logic.propositional.hilbert import System, _extend_names
@@ -20,60 +19,6 @@ from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
 _log = logging.getLogger(__name__)
-
-_PREDICATE_SUPPORT_CTORS = (
-    predicate_lemmas.prove_alim,
-    predicate_lemmas.prove_alimi,
-    predicate_lemmas.prove_2alimi,
-    predicate_lemmas.prove_al2im,
-    predicate_lemmas.prove_al2imi,
-    predicate_lemmas.prove_alimdh,
-    predicate_lemmas.prove_alimdv,
-    predicate_lemmas.prove_2alimdv,
-    predicate_lemmas.prove_alrimdh,
-    predicate_lemmas.prove_alrimdv,
-    predicate_lemmas.prove_alrimih,
-    predicate_lemmas.prove_alrimiv,
-    predicate_lemmas.prove_alrimivv,
-    predicate_lemmas.prove_ax5d,
-    predicate_lemmas.prove_ax6v,
-    predicate_lemmas.prove_ax7v,
-    predicate_lemmas.prove_ax7v1,
-    predicate_lemmas.prove_ax7v2,
-    predicate_lemmas.prove_equid,
-    predicate_lemmas.prove_ax8v,
-    predicate_lemmas.prove_ax8v1,
-    predicate_lemmas.prove_ax8v2,
-    predicate_lemmas.prove_ax9v,
-    predicate_lemmas.prove_ax9v1,
-    predicate_lemmas.prove_ax9v2,
-    predicate_lemmas.prove_ax12v,
-    predicate_lemmas.prove_ax13w,
-    predicate_lemmas.prove_gen2,
-    predicate_lemmas.prove_sylg,
-    predicate_lemmas.prove_sylgt,
-    predicate_lemmas.prove_nfrd,
-    predicate_lemmas.prove_nfnbi,
-    predicate_lemmas.prove_nfnt,
-    predicate_lemmas.prove_nfbid,
-    predicate_lemmas.prove_nfa1,
-    predicate_lemmas.prove_mpgbi,
-    predicate_lemmas.prove_stdpc5v,
-    predicate_lemmas.prove_hbe1a,
-    predicate_lemmas.prove_alcom,
-    predicate_lemmas.prove_alcoms,
-    predicate_lemmas.prove_ala1,
-    predicate_lemmas.prove_hbth,
-    predicate_lemmas.prove_hbal,
-    predicate_lemmas.prove_hbald,
-    predicate_lemmas.prove_exsbim,
-    predicate_lemmas.prove_sbimi,
-    predicate_lemmas.prove_spvw,
-    predicate_lemmas.prove_19_37v,
-    predicate_lemmas.prove_calemos,
-    predicate_lemmas.prove_darapti,
-)
-
 
 @dataclass(frozen=True)
 class _PredicateEmissionProvider:
@@ -247,6 +192,11 @@ def build(ctx: BuildContextV2) -> None:
 
     weq_label = mm.sym.label("weq")
     mm.a(weq_label, tc=wff, expr=[vx_weq, builtins_pred.eq, vy_weq])
+
+    # wel: membership wff specialized from class membership to set variables.
+    wel_label = mm.sym.label("wel")
+    wel_statement = Wff("wff", (vx_weq, builtins_pred.elem, vy_weq))
+    mm.a(wel_label, tc=wff, expr=wel_statement.tokens)
 
     # wex: existential quantifier (wff)
     vx_wex = mm.interner.intern(
@@ -868,6 +818,7 @@ def build(ctx: BuildContextV2) -> None:
         prelude["rh"]: prelude["wrh"],
         prelude["mu"]: prelude["wmu"],
         prelude["la"]: prelude["wla"],
+        prelude["ka"]: prelude["wka"],
     }
 
     def _refs(p: Proof) -> set[str]:
@@ -976,6 +927,7 @@ def build(ctx: BuildContextV2) -> None:
     predicate_compiled_axioms = predicate_system.compile_axioms()
     predicate_foundations = {
         "ax-gen": Wff("wff", (builtins_pred.forall, vx_wal, ph)),
+        "wel": wel_statement,
         "df-sb": Wff("wff", df_sb_expr),
         "df-ex": Wff(
             "wff",
@@ -1060,10 +1012,9 @@ def build(ctx: BuildContextV2) -> None:
     }
     predicate_constructed: dict[str, Proof] = {}
     predicate_excluded: dict[str, str] = {}
-    for ctor in _PREDICATE_SUPPORT_CTORS:
-        proof = ctor(predicate_system)
-        predicate_constructed[proof.name] = proof
     for name, ctor in SETMM_TO_PREDICATE_THEOREMS.items():
+        if name == "wel":
+            continue
         try:
             predicate_constructed[name] = ctor(predicate_system)
         except Exception as exc:
@@ -1166,6 +1117,7 @@ def build(ctx: BuildContextV2) -> None:
         "df-an",
         "df-nan",
         "wcel",
+        "wel",
         "wceq",
         "wo",
         "whad",

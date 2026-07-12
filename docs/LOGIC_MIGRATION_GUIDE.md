@@ -203,6 +203,6 @@ For each chunk:
 - Keep all syntax/primitive tokens interned under a global stable module id (the prelude already does this for base tokens).
 - When lowering proofs, use dependency-provided label `SymbolId`s where applicable (to avoid accidental duplicate labels).
 
-The migration is now fully emitted: the latest verification reports 1,684
-declared proofs, 3,610 emitted proofs, and 0 declared-but-unemitted;
+The migration is now fully emitted: the latest verification reports 1,896
+declared proofs, 3,931 emitted proofs, and 0 declared-but-unemitted;
 `mmverify`, `metamath`, and `knife` all pass.

@@ -38,7 +38,6 @@ def _proof_constructors() -> dict[str, Path]:
 def render_catalogue() -> str:
     sys.path.insert(0, str(SRC))
 
-    from logic.build import _PREDICATE_SUPPORT_CTORS
     from logic.predicate.hilbert import SETMM_TO_PREDICATE_AXIOMS
     from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
     from logic.propositional.hilbert import SETMM_TO_HILBERT_AXIOMS, SETMM_TO_HILBERT_RULES
@@ -52,14 +51,12 @@ def render_catalogue() -> str:
         constructor.__name__ for _, registry in registries for constructor in registry.values()
     }
     source_constructors = _proof_constructors()
-    support_functions = {constructor.__name__ for constructor in _PREDICATE_SUPPORT_CTORS}
-    support_only = support_functions - registry_functions
-    uncovered = set(source_constructors) - registry_functions - support_functions
-    missing = (registry_functions | support_functions) - set(source_constructors)
+    uncovered = set(source_constructors) - registry_functions
+    missing = registry_functions - set(source_constructors)
 
     if missing:
         raise RuntimeError(
-            f"registered/support constructors missing from source audit: {sorted(missing)}"
+            f"registered constructors missing from source audit: {sorted(missing)}"
         )
     if uncovered:
         raise RuntimeError(
@@ -88,7 +85,13 @@ def render_catalogue() -> str:
     for category, registry in registries:
         for label, constructor in sorted(registry.items()):
             rows.append(
-                (label, constructor.__name__, category, _source_link(constructor), "emitted")
+                (
+                    label,
+                    constructor.__name__,
+                    category,
+                    _source_link(constructor),
+                    "emitted",
+                )
             )
 
     md = [
@@ -99,10 +102,10 @@ def render_catalogue() -> str:
         "The theorem rows come from both live Hilbert registries. Source links are resolved from the registered constructors, so predicate proofs point to `predicate/hilbert/lemmas.py`. All registry proofs are emitted and verifier-backed.",
         "",
         f"- Registry proofs: {sum(len(registry) for _, registry in registries)}",
-        f"- Support-only proofs: {len(support_only)}",
+        "- Support-only proofs: 0",
         f"- Source proof constructors: {len(source_constructors)}",
         f"- Uncovered source constructors: {len(uncovered)}",
-        "- Latest verified coverage: 1684 declared / 3610 emitted / 0 declared-but-unemitted",
+        "- Latest verified coverage: 1896 declared / 3931 emitted / 0 declared-but-unemitted",
         "- Verifiers: `mmverify`, `metamath`, and `knife` pass",
         "",
         "| set.mm label | Local name/function | Category | Source module | Build status |",

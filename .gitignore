@@ -208,5 +208,6 @@ __marimo__/
 
 .idea/
 .vscode/
+.venv/
 .skfd
 .DS_Store

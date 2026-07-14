@@ -7,9 +7,12 @@ for unfinished work.
 
 ## Current status
 
+<<<<<<< HEAD
 The implementation is split into `logic.propositional.hilbert` and
 `logic.predicate.hilbert`. Their registries contain 1,500 and 396 proofs,
 respectively (1,896 total), and the complete registry is emitted.
+
+## Module Hierarchy
 
 The source closure audit reports 1,896 unique `prove_*` identities, all in the
 registries, with 0 support-only and 0 uncovered. Latest verification reports

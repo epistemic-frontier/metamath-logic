@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import TypeAlias
 
+from skfd.authoring.parsing import wff
 from skfd.proof import Proof, ProofBuilder, SystemCore
 
 # Import predicate symbol builders so A. and other quantifier/equality symbols
@@ -14,6 +15,16 @@ from . import _structures  # noqa: F401
 # the generated constructors while enforcing that boundary.
 System: TypeAlias = SystemCore
 PredicateTheoremCtor = Callable[[SystemCore], Proof]
+
+
+def _var(sys: System, name: str) -> object:
+    """Resolve a bare variable name to this system's runtime SymbolId.
+
+    DV pairs must be recorded with SymbolIds from the same interner as
+    ``sys`` (they are not stable across processes), so this always
+    re-resolves at call time rather than caching a literal id.
+    """
+    return sys.compile(wff(name), ctx="dv-lookup").tokens[0]
 
 
 def prove_alim(sys: System) -> Proof:
@@ -533,6 +544,7 @@ def prove_ax6v(sys: System) -> Proof:
     of ax-6 (ax-6).
     """
     lb = ProofBuilder(sys, "ax6v")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
     res = lb.ref(
         "s1",
         "¬ ∀ x ¬ x = y",
@@ -550,6 +562,7 @@ def prove_ax6ev(sys: System) -> Proof:
     (Contributed by NM, 10-Jan-1993.)
     """
     lb = ProofBuilder(sys, "ax6ev")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
     # df-ex with ph := x = y: ( E. x x = y <-> ¬ A. x ¬ x = y )
     s1 = lb.ref(
         "s1",
@@ -601,6 +614,7 @@ def prove_ax7v(sys: System) -> Proof:
     of ax-7 (ax-7).
     """
     lb = ProofBuilder(sys, "ax7v")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
     res = lb.ref(
         "s1",
         "x = y → ( x = z → y = z )",
@@ -1119,6 +1133,7 @@ def prove_ax8v(sys: System) -> Proof:
     of ax-8 (ax-8).
     """
     lb = ProofBuilder(sys, "ax8v")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
     res = lb.ref(
         "s1",
         "x = y → ( x e. z → y e. z )",
@@ -1239,6 +1254,7 @@ def prove_ax9v(sys: System) -> Proof:
     The proof is a direct instantiation of ax-9 (ax-9).
     """
     lb = ProofBuilder(sys, "ax9v")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
     res = lb.ref(
         "s1",
         "x = y → ( z e. x → z e. y )",
@@ -1697,6 +1713,8 @@ def prove_ax12v(sys: System) -> Proof:
     set.mm proof: ax-5 ax-12 syl5.
     """
     lb = ProofBuilder(sys, "ax12v")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
+    lb.disjoint(_var(sys, "φ"), _var(sys, "y"))
     s1 = lb.ref("s1", "φ → A. y φ", ref="ax-5", note="ax-5")
     s2 = lb.ref(
         "s2",
@@ -1886,6 +1904,7 @@ def prove_ax5d(sys: System) -> Proof:
     set.mm proof: ax-5 a1i.
     """
     lb = ProofBuilder(sys, "ax5d")
+    lb.disjoint(_var(sys, "ψ"), _var(sys, "x"))
     s1 = lb.ref("s1", "ψ → A. x ψ", ref="ax-5", note="ax-5")
     res = lb.ref("res", "φ → ( ψ → A. x ψ )", s1, ref="a1i", note="a1i")
     return lb.build(res)
@@ -1899,6 +1918,8 @@ def prove_ax13w(sys: System) -> Proof:
     set.mm proof: weq wn ax5d.
     """
     lb = ProofBuilder(sys, "ax13w")
+    lb.disjoint(_var(sys, "x"), _var(sys, "y"))
+    lb.disjoint(_var(sys, "x"), _var(sys, "z"))
     res = lb.ref("res", "¬ ( x = y ) → ( y = z → ∀ x y = z )", ref="ax5d", note="ax5d")
     return lb.build(res)
 

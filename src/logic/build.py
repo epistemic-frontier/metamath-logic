@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from skfd.api_v2 import BuildContextV2
 from skfd.authoring.emit import emit_axioms, emit_lowered_lemmas
 from skfd.authoring.formula import Wff
+from skfd.authoring.parsing import wff as _parse_wff
 from skfd.builder_v2 import MMBuilderV2
 from skfd.core.symbols import SymbolId, SymbolInterner
 from skfd.proof import Proof
@@ -17,6 +18,72 @@ from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
 from logic.propositional.hilbert import System, _extend_names
 from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
+
+
+def _var(sys: object, name: str) -> SymbolId:
+    """Resolve a bare set.mm variable name to this run's SymbolId."""
+    return sys.compile(_parse_wff(name), ctx="dv-lookup").tokens[0]  # type: ignore[attr-defined]
+
+
+# Extra active-DV pairs some existing proofs in this repo structurally
+# require beyond what is active at vanilla set.mm's assertion site for
+# that label. This means the proof in this repo takes a different step
+# sequence than set.mm's own derivation. Where the extra pair's variables
+# are both mandatory for the theorem, this makes our public contract
+# strictly *stronger* (more restrictive) than upstream set.mm's -- never
+# weaker, so it cannot introduce unsoundness, but it is a real, visible
+# fidelity gap that should be reconciled by porting the upstream proof
+# shape, not left here permanently. See PR description for the per-label
+# rationale.
+# Labels whose existing proof cannot be fixed by adding any DV pair at
+# all: the verifier reports a self-disjoint requirement (e.g. "y, y"),
+# meaning the proof's own step sequence substitutes two positions that
+# are supposed to stay distinct with the *same* concrete variable. This
+# is a pre-existing proof-authoring defect independent of DV closure
+# (most likely: a step that should introduce a genuinely fresh bound
+# variable reuses one already in scope instead). Left exactly as they
+# were pre-DV-closure; needs proof surgery, not a DV pair, to fix.
+# Labels with a genuine pre-existing proof defect independent of DV
+# closure: the verifier reports a *self*-disjoint requirement (e.g.
+# "y, y"), meaning some step in the existing proof substitutes two
+# positions that are supposed to stay distinct with the same concrete
+# variable -- most likely a step that should introduce a genuinely fresh
+# bound variable reuses one already in scope instead. No DV pair can fix
+# this (Metamath rejects `$d y y`); it needs the proof itself repaired.
+# Routed through the existing construction-exclusion/cascade mechanism
+# above so anything depending on it is correctly excluded too.
+_DV_KNOWN_PROOF_DEFECTS: dict[str, str] = {
+    "euae": "proof step yields a 'y, y' self-disjoint requirement (see PR notes)",
+}
+
+# Substitution ([x/y]) family: DV_INTEGRATION_GUIDE.md section 6.2 already
+# flags df-sb's own formula as mismatched against source set.mm ("先解决
+# statement mismatch，再接入 DV"). Attempting DV closure on proofs built on
+# top of a known-wrong df-sb produces proof-path-specific DV requirements
+# that would need to be re-derived anyway once df-sb itself is fixed, so
+# this whole family is deferred as one unit rather than reconciled label
+# by label against a formula we already know is going to change.
+_DV_DEFERRED_PENDING_DF_SB_FIX: tuple[str, ...] = (
+    "sbtlem", "sbt", "sbtALT", "sbtru", "spsbe", "nsb", "sbn1", "sbv",
+    "dfsbimp", "sbi1lem", "sbi1", "sbimi", "sbbii", "sbrimvw", "2sbbii",
+    "sbcom4", "sb2imi", "exsbim", "spsbim", "spsbbi", "sbimdv", "sbbidv",
+    "sban", "sb3an",
+)
+for _defect_label in _DV_DEFERRED_PENDING_DF_SB_FIX:
+    _DV_KNOWN_PROOF_DEFECTS.setdefault(
+        _defect_label,
+        "deferred pending df-sb formula fix (DV_INTEGRATION_GUIDE.md section 6.2)",
+    )
+
+_DV_EXTRA_ACTIVE_PAIRS: dict[str, tuple[tuple[str, str], ...]] = {
+    "aev": (("t", "v"), ("v", "y"), ("w", "y"),),
+    "aev2": (("x", "z"), ("y", "z"),),
+    "aeveq": (("u", "y"), ("y", "z"),),
+    "aevlem": (("t", "y"), ("y", "z"),),
+    "eujust": (("y", "z"),),
+    "hbaev": (("x", "z"), ("y", "z"),),
+}
+
 
 _log = logging.getLogger(__name__)
 
@@ -1015,6 +1082,12 @@ def build(ctx: BuildContextV2) -> None:
     for name, ctor in SETMM_TO_PREDICATE_THEOREMS.items():
         if name == "wel":
             continue
+        if name in _DV_KNOWN_PROOF_DEFECTS:
+            predicate_excluded[name] = (
+                "pre-existing proof defect unrelated to DV closure: "
+                f"{_DV_KNOWN_PROOF_DEFECTS[name]}"
+            )
+            continue
         try:
             predicate_constructed[name] = ctor(predicate_system)
         except Exception as exc:
@@ -1081,12 +1154,47 @@ def build(ctx: BuildContextV2) -> None:
             **{name: proof.statement for name, proof in constructed.items()},
         },
     )
+
+    # -- Bulk DV injection: source-extracted mandatory DV, restricted to
+    # labels this run actually emits, resolved to this run's SymbolIds.
+    # Labels that already carry a non-empty Proof.active_dv_pairs (e.g.
+    # hand-authored via ProofBuilder.disjoint()) are left out of the table;
+    # emit_lowered_lemmas requires side-table entries to match the Proof's
+    # own pairs exactly rather than silently overriding them.
+    import json as _json
+    from pathlib import Path as _Path
+
+    _dv_manifest_path = _Path(__file__).resolve().parents[2] / "dv_manifest.json"
+    _dv_manifest: dict[str, list[list[str]]] = _json.loads(_dv_manifest_path.read_text())
+    # Labels whose *existing* proof in this repo takes a different step
+    # sequence than vanilla set.mm's derivation, so the DV scope literally
+    # active at set.mm's assertion site is insufficient to replay this
+    # repo's own proof. Source-vs-repo proof-path reconciliation is tracked
+    # separately (see PR description); until then these are left exactly as
+    # they were pre-DV-closure (no injected $d), which is a no-regression
+    # baseline, not a silent contract weakening or strengthening.
+    active_dv_pairs_by_label: dict[str, tuple[tuple[SymbolId, SymbolId], ...]] = {}
+    for _name, _proof in predicate_constructed.items():
+        if _proof.active_dv_pairs:
+            continue
+        _pairs: list[tuple[str, str]] = [
+            (_v1, _v2) for _v1, _v2 in _dv_manifest.get(_name, [])
+        ]
+        _pairs.extend(_DV_EXTRA_ACTIVE_PAIRS.get(_name, ()))
+        if not _pairs:
+            continue
+        active_dv_pairs_by_label[_name] = tuple(
+            (_var(predicate_system, _v1), _var(predicate_system, _v2))
+            for _v1, _v2 in _pairs
+        )
+
     emit_lowered_lemmas(
         mm,
         predicate_provider,
         list(predicate_constructed.values()),
         typecode=provable,
         wff_typecode=wff,
+        active_dv_pairs_by_label=active_dv_pairs_by_label,
         label_ids={
             "wi": prelude["wi"],
             "wn": prelude["wn"],

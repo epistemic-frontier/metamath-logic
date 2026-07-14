@@ -18,7 +18,20 @@ from logic.propositional.hilbert import System, _extend_names
 from logic.propositional.hilbert._structures import Imp, phi, psi
 from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
 
+from .dv_contracts import ACTIVE_DV_PAIRS
+
 _log = logging.getLogger(__name__)
+
+
+def _active_dv_pairs(
+    label: str, variables: Mapping[str, SymbolId]
+) -> tuple[tuple[SymbolId, SymbolId], ...]:
+    try:
+        return tuple(
+            (variables[left], variables[right]) for left, right in ACTIVE_DV_PAIRS.get(label, ())
+        )
+    except KeyError as exc:
+        raise ValueError(f"{label}: no runtime variable for source DV endpoint {exc.args[0]!r}") from exc
 
 @dataclass(frozen=True)
 class _PredicateEmissionProvider:
@@ -114,30 +127,6 @@ def build(ctx: BuildContextV2) -> None:
     mm.a(wxo_label, tc=wff, expr=[builtins.lp, ph, builtins.xor, ps, builtins.rp])
 
     whad_label = mm.sym.label("whad")
-
-    df_had_label = mm.sym.label("df-had")
-    mm.a(
-        df_had_label,
-        tc=provable,
-        expr=[
-            builtins.lp,
-            builtins.had,
-            ph,
-            ps,
-            ch,
-            builtins.iff,
-            builtins.lp,
-            builtins.lp,
-            ph,
-            builtins.xor,
-            ps,
-            builtins.rp,
-            builtins.xor,
-            ch,
-            builtins.rp,
-            builtins.rp,
-        ],
-    )
     mm.a(whad_label, tc=wff, expr=[builtins.had, ph, ps, ch])
 
     wif_label = mm.sym.label("wif")
@@ -171,14 +160,17 @@ def build(ctx: BuildContextV2) -> None:
     wceq = mm.sym.label("wceq")
     mm.a(wceq, tc=wff, expr=[cA_eq, builtins_pred.eq, cB_eq])
 
-    # cv: class from setvar
+    # cv: promote a setvar to a class.  Unlike the formula constructors above,
+    # this syntax axiom has distinct Metamath typecodes and no expression token.
+    setvar = mm.sym.const("setvar")
+    class_ = mm.sym.const("class")
     vx_cv = mm.interner.intern(
         origin_module_id=LOGIC_MODULE, local_name="vx.cv", kind="Var", origin_ref=0
     )
-    wvx_cv = mm.f(mm.sym.label("vx.cv"), tc=wff, var=vx_cv)
+    wvx_cv = mm.f(mm.sym.label("vx.cv"), tc=setvar, var=vx_cv)
 
     cv = mm.sym.label("cv")
-    mm.a(cv, tc=wff, expr=[builtins_pred.cv, vx_cv])
+    mm.a(cv, tc=class_, expr=[vx_cv])
 
     # weq: wff x = y
     vx_weq = mm.interner.intern(
@@ -303,19 +295,22 @@ def build(ctx: BuildContextV2) -> None:
     )
     # ax-5: φ → ∀ x φ
     ax_5_label = mm.sym.label("ax-5")
-    mm.a(
-        ax_5_label,
-        tc=provable,
-        expr=[
-            builtins.lp,
-            ph,
-            builtins.imp,
-            builtins_pred.forall,
-            vx_wal,
-            ph,
-            builtins.rp,
-        ],
-    )
+    with mm.block():
+        for left, right in _active_dv_pairs("ax-5", {"ph": ph, "x": vx_wal}):
+            mm.d(left, right)
+        mm.a(
+            ax_5_label,
+            tc=provable,
+            expr=[
+                builtins.lp,
+                ph,
+                builtins.imp,
+                builtins_pred.forall,
+                vx_wal,
+                ph,
+                builtins.rp,
+            ],
+        )
 
     # ax-6: ¬ ∀ x ¬ x = y
     vx_ax6 = mm.interner.intern(
@@ -638,31 +633,68 @@ def build(ctx: BuildContextV2) -> None:
         origin_module_id=LOGIC_MODULE, local_name="vy.dfmo", kind="Var", origin_ref=0
     )
     wvy_dfmo = mm.f(mm.sym.label("vy.dfmo"), tc=wff, var=vy_dfmo)
+    vz_dfmo = mm.interner.intern(
+        origin_module_id=LOGIC_MODULE, local_name="vz.dfmo", kind="Var", origin_ref=0
+    )
+    wvz_dfmo = mm.f(mm.sym.label("vz.dfmo"), tc=wff, var=vz_dfmo)
 
     df_mo_label = mm.sym.label("df-mo")
-    mm.a(
-        df_mo_label,
-        tc=provable,
-        expr=[
-            builtins.lp,
-            builtins_pred.moeu,
-            vx_dfmo,
-            ph,
-            builtins.iff,
-            builtins_pred.exist,
-            vy_dfmo,
-            builtins_pred.forall,
-            vx_dfmo,
-            builtins.lp,
-            ph,
-            builtins.imp,
-            vx_dfmo,
-            builtins_pred.eq,
-            vy_dfmo,
-            builtins.rp,
-            builtins.rp,
-        ],
+    df_mo_justification = (
+        builtins.lp,
+        builtins_pred.exist,
+        vy_dfmo,
+        builtins_pred.forall,
+        vx_dfmo,
+        builtins.lp,
+        ph,
+        builtins.imp,
+        vx_dfmo,
+        builtins_pred.eq,
+        vy_dfmo,
+        builtins.rp,
+        builtins.iff,
+        builtins_pred.exist,
+        vz_dfmo,
+        builtins_pred.forall,
+        vx_dfmo,
+        builtins.lp,
+        ph,
+        builtins.imp,
+        vx_dfmo,
+        builtins_pred.eq,
+        vz_dfmo,
+        builtins.rp,
+        builtins.rp,
     )
+    with mm.block():
+        for left, right in _active_dv_pairs(
+            "df-mo", {"ph": ph, "x": vx_dfmo, "y": vy_dfmo, "z": vz_dfmo}
+        ):
+            mm.d(left, right)
+        mm.e(mm.sym.label("mojust.1"), tc=provable, expr=df_mo_justification)
+        mm.a(
+            df_mo_label,
+            tc=provable,
+            expr=[
+                builtins.lp,
+                builtins_pred.moeu,
+                vx_dfmo,
+                ph,
+                builtins.iff,
+                builtins_pred.exist,
+                vy_dfmo,
+                builtins_pred.forall,
+                vx_dfmo,
+                builtins.lp,
+                ph,
+                builtins.imp,
+                vx_dfmo,
+                builtins_pred.eq,
+                vy_dfmo,
+                builtins.rp,
+                builtins.rp,
+            ],
+        )
 
     # df-eu: "there exists a unique" definition
     vx_dfeu = mm.interner.intern(
@@ -760,11 +792,17 @@ def build(ctx: BuildContextV2) -> None:
         builtins.rp,
         builtins.rp,
     )
-    mm.a(
-        df_sb_label,
-        tc=provable,
-        expr=df_sb_expr,
-    )
+    with mm.block():
+        for left, right in _active_dv_pairs(
+            "df-sb",
+            {"ph": ph, "t": vt_dfsb, "x": vx_dfsb, "y": vy_dfsb, "z": vz_dfsb},
+        ):
+            mm.d(left, right)
+        mm.a(
+            df_sb_label,
+            tc=provable,
+            expr=df_sb_expr,
+        )
 
     with mm.block():
         mm.e(mm.sym.label("idi.1"), tc=provable, expr=[ph])
@@ -790,6 +828,7 @@ def build(ctx: BuildContextV2) -> None:
         builtins.nor,
         builtins.xor,
         builtins.cadd,
+        builtins.had,
         builtins.if_,
         builtins.tru,
         builtins.fal,
@@ -1051,6 +1090,18 @@ def build(ctx: BuildContextV2) -> None:
     for proof in predicate_constructed.values():
         for step in proof.steps:
             predicate_vars.update(mm.auto.vars_in(step.wff.tokens))
+    predicate_dv_names = {
+        endpoint
+        for label in predicate_constructed
+        for pair in ACTIVE_DV_PAIRS.get(label, ())
+        for endpoint in pair
+    }
+    predicate_vars.update(
+        mm.interner.intern(
+            origin_module_id="predicate", local_name=name, kind="Var", origin_ref=0
+        )
+        for name in predicate_dv_names
+    )
     predicate_var_order = {
         name: index
         for index, name in enumerate(
@@ -1070,6 +1121,14 @@ def build(ctx: BuildContextV2) -> None:
             tc=wff,
             var=var,
         )
+    predicate_vars_by_name = {
+        mm.interner.symbol_table()[var].local_name: var for var in predicate_vars
+    }
+    predicate_active_dv = {
+        label: _active_dv_pairs(label, predicate_vars_by_name)
+        for label in predicate_constructed
+        if label in ACTIVE_DV_PAIRS
+    }
 
     predicate_provider = _PredicateEmissionProvider(
         interner=mm.interner,
@@ -1097,8 +1156,10 @@ def build(ctx: BuildContextV2) -> None:
             **{f"ax-{number}": mm.sym.label(f"ax-{number}") for number in range(4, 14)},
         },
         floating_by_var=predicate_floating_by_var,
+        active_dv_pairs_by_label=predicate_active_dv,
         hypotheses_by_label={
             "ax-gen": (Wff("wff", (ph,)),),
+            "df-mo": (Wff("wff", df_mo_justification),),
             **{
                 name: tuple(step.wff for step in proof.steps if step.op == "hyp")
                 for name, proof in constructed.items()
@@ -1180,6 +1241,7 @@ def build(ctx: BuildContextV2) -> None:
         wvx_dfmo,
         wvx_dfeu,
         wvy_dfmo,
+        wvz_dfmo,
         wvx_cv,
         wvx_weq,
         wvy_weq,

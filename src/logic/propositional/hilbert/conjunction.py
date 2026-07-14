@@ -28,6 +28,7 @@ from collections.abc import Callable, Mapping
 from skfd.proof import Proof, ProofBuilder
 
 from . import System
+from .axiomatizations.nicod import prove_nic_dfneg
 
 LemmaCtor = Callable[[System], Proof]
 
@@ -299,6 +300,93 @@ def prove_abai(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_abab(sys: System) -> Proof:
+    """abab: ( φ ∧ ψ ) ↔ ( φ ∧ ( φ ↔ ψ ) ).
+
+    Derive the equivalence between a conjunction and the same
+    conjunction with the right conjunct replaced by a biconditional.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "abab")
+
+    # Forward direction: ( φ ∧ ψ ) → ( φ ∧ ( φ ↔ ψ ) )
+
+    # simpl: ( φ ∧ ψ ) → φ )
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( φ ∧ ψ ) → φ",
+        ref="simpl",
+        note="simpl",
+    )
+
+    # pm5.1: ( φ ∧ ψ ) → ( φ ↔ ψ )
+    s_pm51 = lb.ref(
+        "s_pm51",
+        "( φ ∧ ψ ) → ( φ ↔ ψ )",
+        ref="pm5.1",
+        note="pm5.1",
+    )
+
+    # jca: from s_simpl and s_pm51, ( φ ∧ ψ ) → ( φ ∧ ( φ ↔ ψ ) )
+    s_forward = lb.ref(
+        "s_forward",
+        "( φ ∧ ψ ) → ( φ ∧ ( φ ↔ ψ ) )",
+        s_simpl,
+        s_pm51,
+        ref="jca",
+        note="jca",
+    )
+
+    # Reverse direction: ( φ ∧ ( φ ↔ ψ ) ) → ( φ ∧ ψ )
+
+    # biimp: ( φ ↔ ψ ) → ( φ → ψ )
+    s_biimp = lb.ref(
+        "s_biimp",
+        "( φ ↔ ψ ) → ( φ → ψ )",
+        ref="biimp",
+        note="biimp",
+    )
+
+    # anim2i: from s_biimp, ( φ ∧ ( φ ↔ ψ ) ) → ( φ ∧ ( φ → ψ ) )
+    s_anim2i = lb.ref(
+        "s_anim2i",
+        "( φ ∧ ( φ ↔ ψ ) ) → ( φ ∧ ( φ → ψ ) )",
+        s_biimp,
+        ref="anim2i",
+        note="anim2i",
+    )
+
+    # abai: ( φ ∧ ψ ) ↔ ( φ ∧ ( φ → ψ ) )
+    s_abai = lb.ref(
+        "s_abai",
+        "( φ ∧ ψ ) ↔ ( φ ∧ ( φ → ψ ) )",
+        ref="abai",
+        note="abai",
+    )
+
+    # sylibr: from s_anim2i and s_abai, ( φ ∧ ( φ ↔ ψ ) ) → ( φ ∧ ψ )
+    s_reverse = lb.ref(
+        "s_reverse",
+        "( φ ∧ ( φ ↔ ψ ) ) → ( φ ∧ ψ )",
+        s_anim2i,
+        s_abai,
+        ref="sylibr",
+        note="sylibr",
+    )
+
+    # impbii: from s_forward and s_reverse, ( φ ∧ ψ ) ↔ ( φ ∧ ( φ ↔ ψ ) )
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ) ↔ ( φ ∧ ( φ ↔ ψ ) )",
+        s_forward,
+        s_reverse,
+        ref="impbii",
+        note="impbii",
+    )
+
+    return lb.build(res)
+
+
 def prove_adantl(sys: System) -> Proof:
     """adantl: ( ( χ ∧ φ ) → ψ ).
 
@@ -487,6 +575,64 @@ def prove_3adant3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_3adant3l(sys: System) -> Proof:
+    """3adant3l: ( φ ∧ ψ ∧ ( τ ∧ χ ) ) → θ.
+
+    Deduction adding a conjunct to the left of the third conjunct.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ψ ∧ ( τ ∧ χ ) ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant3l")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s_simpr = lb.ref(
+        "s_simpr",
+        "( τ ∧ χ ) → χ",
+        ref="simpr",
+        note="simpr",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ∧ ( τ ∧ χ ) ) → θ",
+        s_simpr,
+        h1,
+        ref="syl3an3",
+        note="syl3an3",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adant3r(sys: System) -> Proof:
+    r"""3adant3r: ( φ ∧ ψ ∧ ( χ ∧ τ ) ) → θ.
+
+    Deduction adding a conjunct to the right of the third conjunct.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ψ ∧ ( χ ∧ τ ) ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant3r")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( χ ∧ τ ) → χ",
+        ref="simpl",
+        note="simpl",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ∧ ( χ ∧ τ ) ) → θ",
+        s_simpl,
+        h1,
+        ref="syl3an3",
+        note="syl3an3",
+    )
+
+    return lb.build(res)
+
+
 def prove_3adant3r3(sys: System) -> Proof:
     """3adant3r3: ( φ ∧ ( ψ ∧ χ ∧ τ ) ) → θ.
 
@@ -516,6 +662,93 @@ def prove_3adant3r3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_3adant3r1(sys: System) -> Proof:
+    """3adant3r1: ( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ.
+
+    Deduction adding a conjunct at the left of a nested antecedent.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant3r1")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( ψ ∧ χ ) ) → θ",
+        h1,
+        ref="3expb",
+        note="3expb ad4ant3.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ",
+        s1,
+        ref="3adantr1",
+        note="3adantr1 s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adant3r2(sys: System) -> Proof:
+    """3adant3r2: ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+
+    Deduction adding a conjunct in a nested antecedent.  From
+    ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant3r2")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( ψ ∧ χ ) ) → θ",
+        h1,
+        ref="3expb",
+        note="3expb ad4ant3.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ",
+        s1,
+        ref="3adantr2",
+        note="3adantr2 s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adantr1(sys: System) -> Proof:
+    """3adantr1: ( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ.
+
+    Deduction adding a conjunct to the nested antecedent.
+    From ( φ ∧ ( ψ ∧ χ ) ) → θ, derive ( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adantr1")
+    h1 = lb.hyp("3adantr.1", "( φ ∧ ( ψ ∧ χ ) ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( τ ∧ ψ ∧ χ ) → ( ψ ∧ χ )",
+        ref="3simpc",
+        note="3simpc",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( τ ∧ ψ ∧ χ ) ) → θ",
+        s1,
+        h1,
+        ref="sylan2",
+        note="sylan2",
+    )
+
+    return lb.build(res)
+
+
 def prove_3adantr3(sys: System) -> Proof:
     """3adantr3: ( φ ∧ ( ψ ∧ χ ∧ τ ) ) → θ.
 
@@ -536,6 +769,35 @@ def prove_3adantr3(sys: System) -> Proof:
     res = lb.ref(
         "res",
         "( φ ∧ ( ψ ∧ χ ∧ τ ) ) → θ",
+        s1,
+        h1,
+        ref="sylan2",
+        note="sylan2",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adantr2(sys: System) -> Proof:
+    """3adantr2: ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+
+    Deduction adding a conjunct to the right side of a nested antecedent.
+    From ( φ ∧ ( ψ ∧ χ ) ) → θ, derive ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "3adantr2")
+    h1 = lb.hyp("3adantr.1", "( φ ∧ ( ψ ∧ χ ) ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ τ ∧ χ ) → ( ψ ∧ χ )",
+        ref="3simpb",
+        note="3simpb",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ",
         s1,
         h1,
         ref="sylan2",
@@ -598,6 +860,93 @@ def prove_3ad2antr2(sys: System) -> Proof:
         s1,
         ref="3adantr3",
         note="3adantr3",
+    )
+
+    return lb.build(res)
+
+
+def prove_3ad2antr3(sys: System) -> Proof:
+    """3ad2antr3: ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+
+    Deduction adding conjuncts to the right side of a nested antecedent.
+    From ( φ ∧ χ ) → θ, derive ( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3ad2antr3")
+    h1 = lb.hyp("3ad2antl.1", "( φ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( τ ∧ χ ) ) → θ",
+        h1,
+        ref="adantrl",
+        note="adantrl",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ τ ∧ χ ) ) → θ",
+        s1,
+        ref="3adantr1",
+        note="3adantr1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3ad2antl2(sys: System) -> Proof:
+    """3ad2antl2: (( ψ ∧ φ ∧ τ ) ∧ χ) → θ.
+
+    Inference adding two conjuncts to the left side of the antecedent.
+    From ( φ ∧ χ ) → θ, derive (( ψ ∧ φ ∧ τ ) ∧ χ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3ad2antl2")
+    h1 = lb.hyp("3ad2antl.1", "( φ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ τ ) ∧ χ ) → θ",
+        h1,
+        ref="adantlr",
+        note="adantlr",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ψ ∧ φ ∧ τ ) ∧ χ ) → θ",
+        s1,
+        ref="3adantl1",
+        note="3adantl1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3ad2antl3(sys: System) -> Proof:
+    """3ad2antl3: (( ψ ∧ τ ∧ φ ) ∧ χ) → θ.
+
+    Inference adding two conjuncts to the left side of the antecedent.
+    From ( φ ∧ χ ) → θ, derive (( ψ ∧ τ ∧ φ ) ∧ χ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3ad2antl3")
+    h1 = lb.hyp("3ad2antl.1", "( φ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( τ ∧ φ ) ∧ χ ) → θ",
+        h1,
+        ref="adantll",
+        note="adantll",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ψ ∧ τ ∧ φ ) ∧ χ ) → θ",
+        s1,
+        ref="3adantl1",
+        note="3adantl1",
     )
 
     return lb.build(res)
@@ -682,7 +1031,7 @@ def prove_ad2antrl(sys: System) -> Proof:
 
 
 def prove_simpl(sys: System) -> Proof:
-    """simpl: ( φ ∧ ψ ) → φ.
+    """simpl: ( φ ∧ ψ ) → φ ).
 
     Simplify a conjunction to the left conjunct.
     (Contributed by NM, 5-Jan-1993.)
@@ -889,6 +1238,29 @@ def prove_simprl(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simprl2(sys: System) -> Proof:
+    """simprl2: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → ψ.
+
+    Simplify a triple conjunction nested in a conjunction: from τ and
+    (( φ ∧ ψ ∧ χ ) ∧ θ ) deduce ψ.
+    """
+    lb = ProofBuilder(sys, "simprl2")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ψ ∧ χ ) → ψ",
+        ref="simp2",
+        note="simp2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → ψ",
+        s1,
+        ref="ad2antrl",
+        note="ad2antrl",
+    )
+    return lb.build(res)
+
+
 def prove_simprr(sys: System) -> Proof:
     """simprr: ( φ ∧ ( ψ ∧ χ ) ) → χ.
 
@@ -937,7 +1309,7 @@ def prove_simpr1(sys: System) -> Proof:
 
 
 def prove_simpr1l(sys: System) -> Proof:
-    """simpr1l: ( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → φ.
+    """simpr1l: ( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → φ ).
 
     Simplify a ternary conjunction: from τ and a nested conjunction
     ( ( φ ∧ ψ ) ∧ χ ∧ θ ), derive φ.
@@ -1009,7 +1381,7 @@ def prove_simpr2(sys: System) -> Proof:
 
 
 def prove_simpr2l(sys: System) -> Proof:
-    """simpr2l: ( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → φ.
+    """simpr2l: ( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → φ ).
 
     Simplify a nested conjunction: from τ and (χ ∧ (φ ∧ ψ) ∧ θ) deduce φ.
     (Contributed by NM, 3-Jan-1993.)
@@ -1055,7 +1427,7 @@ def prove_simpr2r(sys: System) -> Proof:
 
 
 def prove_simpr11(sys: System) -> Proof:
-    """simpr11: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → φ.
+    """simpr11: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → φ ).
 
     Simplify a nested triple conjunction: from η and ((φ ∧ ψ ∧ χ) ∧ θ ∧ τ)
     deduce the first conjunct φ.
@@ -1102,8 +1474,32 @@ def prove_simpr12(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simpr13(sys: System) -> Proof:
+    """simpr13: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → χ.
+
+    Simplify a nested triple conjunction: from η and ((φ ∧ ψ ∧ χ) ∧ θ ∧ τ)
+    deduce the third conjunct χ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr13")
+    s1 = lb.ref(
+        "s1",
+        "( η ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → χ",
+        s1,
+        ref="3ad2antr1",
+        note="3ad2antr1",
+    )
+    return lb.build(res)
+
+
 def prove_simpr21(sys: System) -> Proof:
-    """simpr21: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → φ.
+    """simpr21: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → φ ).
 
     Simplify a nested triple conjunction: from η and (θ ∧ (φ ∧ ψ ∧ χ) ∧ τ)
     deduce the first conjunct φ.
@@ -1146,6 +1542,173 @@ def prove_simpr22(sys: System) -> Proof:
         s1,
         ref="3ad2antr2",
         note="3ad2antr2",
+    )
+    return lb.build(res)
+
+
+def prove_simpr23(sys: System) -> Proof:
+    """simpr23: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → χ.
+
+    Simplify a nested triple conjunction: from η and (θ ∧ (φ ∧ ψ ∧ χ) ∧ τ)
+    deduce the third conjunct χ of the inner triple.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr23")
+    s1 = lb.ref(
+        "s1",
+        "( η ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → χ",
+        s1,
+        ref="3ad2antr2",
+        note="3ad2antr2",
+    )
+    return lb.build(res)
+
+
+def prove_simpr3(sys: System) -> Proof:
+    """simpr3: ( φ ∧ ( ψ ∧ χ ∧ θ ) ) → θ.
+
+    Simplify a triple conjunction: from φ and (ψ ∧ χ ∧ θ) deduce the
+    third conjunct θ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr3")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ θ ) → θ",
+        ref="simpr",
+        note="simpr",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → θ",
+        s1,
+        ref="3ad2antr3",
+        note="3ad2antr3",
+    )
+    return lb.build(res)
+
+
+def prove_simpr31(sys: System) -> Proof:
+    """simpr31: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ ).
+
+    Simplify a nested triple conjunction: from η and (θ ∧ τ ∧ (φ ∧ ψ ∧ χ))
+    deduce the first conjunct φ of the innermost triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr31")
+    s1 = lb.ref(
+        "s1",
+        "( η ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simpr1",
+        note="simpr1",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ",
+        s1,
+        ref="3ad2antr3",
+        note="3ad2antr3",
+    )
+    return lb.build(res)
+
+
+def prove_simpr32(sys: System) -> Proof:
+    """simpr32: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ.
+
+    Simplify a nested triple conjunction: from η and (θ ∧ τ ∧ (φ ∧ ψ ∧ χ))
+    deduce the second conjunct ψ of the innermost triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr32")
+    s1 = lb.ref(
+        "s1",
+        "( η ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simpr2",
+        note="simpr2",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ",
+        s1,
+        ref="3ad2antr3",
+        note="3ad2antr3",
+    )
+    return lb.build(res)
+
+
+def prove_simpr33(sys: System) -> Proof:
+    """simpr33: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ.
+
+    Simplify a nested triple conjunction: from η and (θ ∧ τ ∧ (φ ∧ ψ ∧ χ))
+    deduce the third conjunct χ of the innermost triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr33")
+    s1 = lb.ref(
+        "s1",
+        "( η ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ",
+        s1,
+        ref="3ad2antr3",
+        note="3ad2antr3",
+    )
+
+    return lb.build(res)
+
+
+def prove_simpr3l(sys: System) -> Proof:
+    """simpr3l: ( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → φ ).
+
+    Simplify a nested conjunction: from τ ∧ (χ ∧ θ ∧ (φ ∧ ψ)) deduce φ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr3l")
+    s_simprl = lb.ref(
+        "s_simprl",
+        "( τ ∧ ( φ ∧ ψ ) ) → φ",
+        ref="simprl",
+        note="simprl",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → φ",
+        s_simprl,
+        ref="3ad2antr3",
+        note="3ad2antr3",
+    )
+    return lb.build(res)
+
+
+def prove_simpr3r(sys: System) -> Proof:
+    """simpr3r: ( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → ψ.
+
+    Simplify a nested conjunction: from τ ∧ (χ ∧ θ ∧ (φ ∧ ψ)) deduce ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpr3r")
+    s_simprr = lb.ref(
+        "s_simprr",
+        "( τ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simprr",
+        note="simprr",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → ψ",
+        s_simprr,
+        ref="3ad2antr3",
+        note="3ad2antr3",
     )
     return lb.build(res)
 
@@ -1251,9 +1814,9 @@ def prove_bilani(sys: System) -> Proof:
 
 
 def prove_biranri(sys: System) -> Proof:
-    """biranri: ( ψ ∧ χ ) → φ.
+    """biranri: ( ψ ∧ χ ) → φ ).
 
-    From a biconditional φ ↔ ψ, deduce ( ψ ∧ χ ) → φ.
+    From a biconditional φ ↔ ψ, deduce ( ψ ∧ χ ) → φ ).
     (Contributed by NM, 3-Jan-1993.)
     """
     lb = ProofBuilder(sys, "biranri")
@@ -1276,9 +1839,9 @@ def prove_biranri(sys: System) -> Proof:
 
 
 def prove_bilanri(sys: System) -> Proof:
-    """bilanri: ( χ ∧ ψ ) → φ.
+    """bilanri: ( χ ∧ ψ ) → φ ).
 
-    From a biconditional φ ↔ ψ, deduce ( χ ∧ ψ ) → φ.
+    From a biconditional φ ↔ ψ, deduce ( χ ∧ ψ ) → φ ).
     (Contributed by NM, 3-Jan-1993.)
     """
     lb = ProofBuilder(sys, "bilanri")
@@ -1578,7 +2141,7 @@ def prove_bimsc1(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "bimsc1")
 
-    # simpr: ( ψ ∧ φ ) → φ
+    # simpr: ( ψ ∧ φ ) → φ )
     s_simpr = lb.ref(
         "s_simpr",
         "( ψ ∧ φ ) → φ",
@@ -3033,6 +3596,37 @@ def prove_3imp2(sys: System) -> Proof:
         ref="imp",
         note="imp",
     )
+    return lb.build(res)
+
+
+def prove_3imp3i2an(sys: System) -> Proof:
+    """3imp3i2an: ( φ ∧ ψ ∧ χ ) → η.
+
+    Inference from a triple implication with two antecedents.
+    """
+    lb = ProofBuilder(sys, "3imp3i2an")
+    h1 = lb.hyp("3imp3i2an.1", "( φ ∧ ψ ∧ χ ) → θ")
+    h2 = lb.hyp("3imp3i2an.2", "( φ ∧ χ ) → τ")
+    h3 = lb.hyp("3imp3i2an.3", "( θ ∧ τ ) → η")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ψ ∧ χ ) → τ",
+        h2,
+        ref="3adant2",
+        note="3adant2",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ∧ χ ) → η",
+        h1,
+        s1,
+        h3,
+        ref="syl2anc",
+        note="syl2anc",
+    )
+
     return lb.build(res)
 
 
@@ -4810,10 +5404,74 @@ def prove_mp3an3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_mp3an3an(sys: System) -> Proof:
+    """mp3an3an: ( ψ ∧ θ ) → η.
+
+    From φ, ψ → χ, θ → τ, and ( φ ∧ χ ∧ τ ) → η, deduce ( ψ ∧ θ ) → η.
+    (Contributed by NM, 14-May-1993.)
+    set.mm proof: mp3an1 syl2an.
+    """
+    lb = ProofBuilder(sys, "mp3an3an")
+    h1 = lb.hyp("mp3an3an.1", "φ")
+    h2 = lb.hyp("mp3an3an.2", "ψ → χ")
+    h3 = lb.hyp("mp3an3an.3", "θ → τ")
+    h4 = lb.hyp("mp3an3an.4", "( φ ∧ χ ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ τ ) → η",
+        h1,
+        h4,
+        ref="mp3an1",
+        note="mp3an1",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ θ ) → η",
+        h2,
+        h3,
+        s1,
+        ref="syl2an",
+        note="syl2an",
+    )
+    return lb.build(res)
+
+
+def prove_mp3an2ani(sys: System) -> Proof:
+    """mp3an2ani: ( ψ ∧ θ ) → η.
+
+    From φ, ψ → χ, ( ψ ∧ θ ) → τ, and ( φ ∧ χ ∧ τ ) → η, deduce ( ψ ∧ θ ) → η.
+    (Contributed by NM, 14-May-1993.)
+    """
+    lb = ProofBuilder(sys, "mp3an2ani")
+    h1 = lb.hyp("mp3an2ani.1", "φ")
+    h2 = lb.hyp("mp3an2ani.2", "ψ → χ")
+    h3 = lb.hyp("mp3an2ani.3", "( ψ ∧ θ ) → τ")
+    h4 = lb.hyp("mp3an2ani.4", "( φ ∧ χ ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ ( ψ ∧ θ ) ) → η",
+        h1,
+        h2,
+        h3,
+        h4,
+        ref="mp3an3an",
+        note="mp3an3an",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ θ ) → η",
+        s1,
+        ref="anabss5",
+        note="anabss5",
+    )
+    return lb.build(res)
+
+
 def prove_mpanr2(sys: System) -> Proof:
     """mpanr2: (φ ∧ ψ) → θ.
 
     Inference form of mpanr: given the second antecedent ch and a proof
+
     that ( φ ∧ ( ψ ∧ χ ) ) → θ, conclude ( φ ∧ ψ ) → θ.
     (Contributed by NM, 5-Aug-1993.)
     """
@@ -4919,6 +5577,45 @@ def prove_mp3anl1(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_mp3anl2(sys: System) -> Proof:
+    """mp3anl2: ( ( φ ∧ χ ) ∧ θ ) → τ.
+
+    Hyp 1: ψ
+    Hyp 2: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) → τ )
+    Concl: ( ( ( φ ∧ χ ) ∧ θ ) → τ )
+
+    An inference form of modus ponens with a triple conjunction antecedent,
+    middle conjunct eliminated.  (Contributed by NM, 3-Jan-1993.)
+    set.mm proof: ex mp3an2 imp.
+    """
+    lb = ProofBuilder(sys, "mp3anl2")
+    h1 = lb.hyp("mp3anl2.1", "ψ")
+    h2 = lb.hyp("mp3anl2.2", "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ψ ∧ χ ) → ( θ → τ )",
+        h2,
+        ref="ex",
+        note="ex mp3anl2.2",
+    )
+    s2 = lb.ref(
+        "s2",
+        "( φ ∧ χ ) → ( θ → τ )",
+        h1,
+        s1,
+        ref="mp3an2",
+        note="mp3an2 mp3anl2.1, s1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ χ ) ∧ θ ) → τ",
+        s2,
+        ref="imp",
+        note="imp s2",
+    )
+    return lb.build(res)
+
+
 def prove_mp3anr3(sys: System) -> Proof:
     r"""mp3anr3: ( ( φ ∧ ( ψ ∧ χ ) ) → τ ).
 
@@ -4990,6 +5687,45 @@ def prove_mp3anr1(sys: System) -> Proof:
     res = lb.ref(
         "res",
         r"( ( φ ∧ ( χ ∧ θ ) ) → τ )",
+        s2,
+        ref="ancoms",
+        note="ancoms s2",
+    )
+    return lb.build(res)
+
+
+def prove_mp3anr2(sys: System) -> Proof:
+    r"""mp3anr2: ( ( φ ∧ ( ψ ∧ θ ) ) → τ ).
+
+    Hyp 1: χ
+    Hyp 2: ( ( φ ∧ ( ψ ∧ χ ∧ θ ) ) → τ )
+    Concl: ( ( φ ∧ ( ψ ∧ θ ) ) → τ )
+
+    An inference form of modus ponens with a triple conjunction antecedent,
+    right-hand middle conjunct eliminated.  (Contributed by NM, 14-May-1993.)
+    set.mm proof: ancoms mp3anl2.
+    """
+    lb = ProofBuilder(sys, "mp3anr2")
+    h1 = lb.hyp("mp3anr2.1", r"χ")
+    h2 = lb.hyp("mp3anr2.2", r"( ( φ ∧ ( ψ ∧ χ ∧ θ ) ) → τ )")
+    s1 = lb.ref(
+        "s1",
+        r"( ( ( ψ ∧ χ ∧ θ ) ∧ φ ) → τ )",
+        h2,
+        ref="ancoms",
+        note="ancoms mp3anr2.2",
+    )
+    s2 = lb.ref(
+        "s2",
+        r"( ( ( ψ ∧ θ ) ∧ φ ) → τ )",
+        h1,
+        s1,
+        ref="mp3anl2",
+        note="mp3anl2 mp3anr2.1, s1",
+    )
+    res = lb.ref(
+        "res",
+        r"( ( φ ∧ ( ψ ∧ θ ) ) → τ )",
         s2,
         ref="ancoms",
         note="ancoms s2",
@@ -7213,7 +7949,7 @@ def prove_pm5_3(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm5.3")
 
-    # simpl: ( φ ∧ ψ ) → φ
+    # simpl: ( φ ∧ ψ ) → φ )
     s_simpl = lb.ref(
         "s_simpl",
         "( φ ∧ ψ ) → φ",
@@ -7268,6 +8004,42 @@ def prove_pm5_35(sys: System) -> Proof:
         note="pm5.74rd",
     )
 
+    return lb.build(res)
+
+
+def prove_intn3an1d(sys: System) -> Proof:
+    """intn3an1d: φ → ¬ ( ψ ∧ χ ∧ θ ).
+
+    Introduce a negated triple conjunction from a negated first conjunct.
+    """
+    lb = ProofBuilder(sys, "intn3an1d")
+    h1 = lb.hyp("intn3and.1", "φ → ¬ ψ")
+    s1 = lb.ref("s1", "( ψ ∧ χ ∧ θ ) → ψ", ref="simp1", note="simp1")
+    res = lb.ref("res", "φ → ¬ ( ψ ∧ χ ∧ θ )", h1, s1, ref="nsyl", note="nsyl")
+    return lb.build(res)
+
+
+def prove_intn3an2d(sys: System) -> Proof:
+    """intn3an2d: φ → ¬ ( χ ∧ ψ ∧ θ ).
+
+    Introduce a negated triple conjunction from a negated second conjunct.
+    """
+    lb = ProofBuilder(sys, "intn3an2d")
+    h1 = lb.hyp("intn3and.1", "φ → ¬ ψ")
+    s1 = lb.ref("s1", "( χ ∧ ψ ∧ θ ) → ψ", ref="simp2", note="simp2")
+    res = lb.ref("res", "φ → ¬ ( χ ∧ ψ ∧ θ )", h1, s1, ref="nsyl", note="nsyl")
+    return lb.build(res)
+
+
+def prove_intn3an3d(sys: System) -> Proof:
+    """intn3an3d: φ → ¬ ( χ ∧ θ ∧ ψ ).
+
+    Introduce a negated triple conjunction from a negated third conjunct.
+    """
+    lb = ProofBuilder(sys, "intn3an3d")
+    h1 = lb.hyp("intn3and.1", "φ → ¬ ψ")
+    s1 = lb.ref("s1", "( χ ∧ θ ∧ ψ ) → ψ", ref="simp3", note="simp3")
+    res = lb.ref("res", "φ → ¬ ( χ ∧ θ ∧ ψ )", h1, s1, ref="nsyl", note="nsyl")
     return lb.build(res)
 
 
@@ -8101,7 +8873,7 @@ def prove_pm4_71(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "pm4.71")
 
-    # simpl: ( φ ∧ ψ ) → φ
+    # simpl: ( φ ∧ ψ ) → φ )
     s_simpl = lb.ref("simpl", "( φ ∧ ψ ) → φ", ref="simpl", note="simpl")
 
     # biantru with hypothesis simpl
@@ -9828,6 +10600,114 @@ def prove_nic_bi2(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_nic_dfim(sys: System) -> Proof:
+    """nic-dfim: ((φ ⊼ (ψ ⊼ ψ)) ⊼ (φ → ψ)) ⊼ (((φ ⊼ (ψ ⊼ ψ)) ⊼ (φ ⊼ (ψ ⊼ ψ))) ⊼ ((φ → ψ) ⊼ (φ → ψ))).
+
+    Express implication in terms of NAND using nanim and nanbi.
+    (Contributed by Jeff Hoffman, 18-Nov-2007.)
+    (Proof modification is discouraged.)  (New usage is discouraged.)
+    """
+    lb = ProofBuilder(sys, "nic-dfim")
+
+    # nanim: ( φ → ψ ) ↔ ( φ ⊼ ( ψ ⊼ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ → ψ ) ↔ ( φ ⊼ ( ψ ⊼ ψ ) )",
+        ref="nanim",
+        note="nanim",
+    )
+
+    # bicomi: ( φ ⊼ ( ψ ⊼ ψ ) ) ↔ ( φ → ψ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ⊼ ( ψ ⊼ ψ ) ) ↔ ( φ → ψ )",
+        s1,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # nanbi: ( ( φ ⊼ ( ψ ⊼ ψ ) ) ↔ ( φ → ψ ) ) ↔
+    #         ( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ → ψ ) ) ⊼
+    #           ( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) ) ⊼
+    #             ( ( φ → ψ ) ⊼ ( φ → ψ ) ) ) )
+    s3 = lb.ref(
+        "s3",
+        "( ( φ ⊼ ( ψ ⊼ ψ ) ) ↔ ( φ → ψ ) ) ↔ "
+        "( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ → ψ ) ) ⊼ "
+        "( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) ) ⊼ "
+        "( ( φ → ψ ) ⊼ ( φ → ψ ) ) ) )",
+        ref="nanbi",
+        note="nanbi",
+    )
+
+    # mpbi: ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ → ψ ) ) ⊼
+    #        ( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) ) ⊼
+    #          ( ( φ → ψ ) ⊼ ( φ → ψ ) ) )
+    res = lb.ref(
+        "res",
+        "( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ → ψ ) ) ⊼ "
+        "( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) ) ⊼ "
+        "( ( φ → ψ ) ⊼ ( φ → ψ ) ) )",
+        s2,
+        s3,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    return lb.build(res)
+
+
+def prove_nic_stdmp(sys: System) -> Proof:
+    """nic-stdmp: ψ.
+
+    Derive the standard modus ponens from nic-mp.
+    (Contributed by Jeff Hoffman, 18-Nov-2007.)
+    (Proof modification is discouraged.)  (New usage is discouraged.)
+    """
+    lb = ProofBuilder(sys, "nic-stdmp")
+    h_smin = lb.hyp("nic-stdmp.nic-smin", "φ")
+    h_smaj = lb.hyp("nic-stdmp.nic-smaj", "φ → ψ")
+
+    # nic-dfim: ((φ ⊼ (ψ ⊼ ψ)) ⊼ (φ → ψ)) ⊼ (...)
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ → ψ ) ) ⊼ ( ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) ) ⊼ ( ( φ → ψ ) ⊼ ( φ → ψ ) ) )",
+        ref="nic-dfim",
+        note="nic-dfim",
+    )
+
+    # nic-bi2: from nic-dfim, derive (φ → ψ) ⊼ ((φ ⊼ (ψ ⊼ ψ)) ⊼ (φ ⊼ (ψ ⊼ ψ)))
+    s2 = lb.ref(
+        "s2",
+        "( φ → ψ ) ⊼ ( ( φ ⊼ ( ψ ⊼ ψ ) ) ⊼ ( φ ⊼ ( ψ ⊼ ψ ) ) )",
+        s1,
+        ref="nic-bi2",
+        note="nic-bi2",
+    )
+
+    # nic-mp: from nic-smaj (φ → ψ) and s2, derive φ ⊼ (ψ ⊼ ψ)
+    s3 = lb.ref(
+        "s3",
+        "φ ⊼ ( ψ ⊼ ψ )",
+        h_smaj,
+        s2,
+        ref="nic-mp",
+        note="nic-mp",
+    )
+
+    # nic-mp: from nic-smin (φ) and s3, derive ψ
+    res = lb.ref(
+        "res",
+        "ψ",
+        h_smin,
+        s3,
+        ref="nic-mp",
+        note="nic-mp",
+    )
+
+    return lb.build(res)
+
+
 THEOREMS: Mapping[str, LemmaCtor] = {
     "pm4.83": prove_pm4_83,
     "pm5.1": prove_pm5_1,
@@ -9860,6 +10740,10 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     "3simpa": prove_3simpa,
     "mpd3an3": prove_mpd3an3,
     "mp3an3": prove_mp3an3,
+    "mp3an3an": prove_mp3an3an,
+    "mp3an2ani": prove_mp3an2ani,
+    "mp3anl2": prove_mp3anl2,
+    "mp3anr2": prove_mp3anr2,
     "biimp3a": prove_biimp3a,
     "expr": prove_expr,
     "expdimp": prove_expdimp,
@@ -9869,6 +10753,8 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     "ad5ant125OLD": prove_ad5ant125OLD,
     "impexp": prove_impexp,
     "imp": prove_imp,
+    "intn3an2d": prove_intn3an2d,
+    "intn3an3d": prove_intn3an3d,
     "intnan": prove_intnan,
     "intnanr": prove_intnanr,
     "intnanrd": prove_intnanrd,
@@ -9880,6 +10766,7 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     "simpld": prove_simpld,
     "simpr": prove_simpr,
     "simprl": prove_simprl,
+    "simprl2": prove_simprl2,
     "simpr1l": prove_simpr1l,
     "simpr1r": prove_simpr1r,
     "sylancom": prove_sylancom,
@@ -9921,6 +10808,7 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     "3imp231": prove_3imp231,
     "3imp21": prove_3imp21,
     "3imp31": prove_3imp31,
+    "3imp3i2an": prove_3imp3i2an,
     "3com12": prove_3com12,
     "3pm3.2i": prove_3pm3_2i,
     "ancl": prove_ancl,
@@ -9991,6 +10879,9 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     "nic-isw1": prove_nic_isw1,
     "nic-ich": prove_nic_ich,
     "nic-idel": prove_nic_idel,
+    "nic-dfim": prove_nic_dfim,
+    "nic-stdmp": prove_nic_stdmp,
+    "nic-dfneg": prove_nic_dfneg,
     "lukshef-ax1": prove_lukshef_ax1,
     "lukshefth1": prove_lukshefth1,
     "lukshefth2": prove_lukshefth2,
@@ -10027,6 +10918,7 @@ __all__ = [
     "prove_simpr1r",
     "prove_simpr21",
     "prove_simpr22",
+    "prove_simpr31",
     "prove_birani",
     "prove_bilani",
     "prove_simprrr",
@@ -10245,7 +11137,7 @@ def prove_anabs1(sys: System) -> Proof:
     """
     lb = ProofBuilder(sys, "anabs1")
 
-    # simpl: ( φ ∧ ψ ) → φ
+    # simpl: ( φ ∧ ψ ) → φ )
     s_simpl = lb.ref("s_simpl", "( φ ∧ ψ ) → φ", ref="simpl", note="simpl")
 
     # pm4.71i s_simpl: ( φ ∧ ψ ) ↔ ( ( φ ∧ ψ ) ∧ φ )
@@ -11630,6 +12522,169 @@ def prove_pm4_71r(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_biadan(sys: System) -> Proof:
+    """biadan: ( φ → ψ ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) ).
+
+    An implication is equivalent to a biconditional rotation relating
+    conjunction and biconditional.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "biadan")
+
+    # pm4.71r: ( φ → ψ ) ↔ ( φ ↔ ( ψ ∧ φ ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ → ψ ) ↔ ( φ ↔ ( ψ ∧ φ ) )",
+        ref="pm4.71r",
+        note="pm4.71r",
+    )
+
+    # biluk with [ φ := φ , ψ := ( ψ ∧ φ ) , χ := ( ψ ∧ χ ) ]:
+    # ( φ ↔ ( ψ ∧ φ ) ) ↔ ( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )
+    s2 = lb.ref(
+        "s2",
+        "( φ ↔ ( ψ ∧ φ ) ) ↔ ( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )",
+        ref="biluk",
+        note="biluk",
+    )
+
+    # pm5.32: ( ψ → ( φ ↔ χ ) ) ↔ ( ( ψ ∧ φ ) ↔ ( ψ ∧ χ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ψ → ( φ ↔ χ ) ) ↔ ( ( ψ ∧ φ ) ↔ ( ψ ∧ χ ) )",
+        ref="pm5.32",
+        note="pm5.32",
+    )
+
+    # bicom with [ φ := ( ψ ∧ φ ) , ψ := ( ψ ∧ χ ) ]:
+    # ( ( ψ ∧ φ ) ↔ ( ψ ∧ χ ) ) ↔ ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) )
+    s4 = lb.ref(
+        "s4",
+        "( ( ψ ∧ φ ) ↔ ( ψ ∧ χ ) ) ↔ ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) )",
+        ref="bicom",
+        note="bicom",
+    )
+
+    # bitri from s3 and s4:
+    # ( ψ → ( φ ↔ χ ) ) ↔ ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) )
+    s5 = lb.ref(
+        "s5",
+        "( ψ → ( φ ↔ χ ) ) ↔ ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) )",
+        s3,
+        s4,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # biid: ( φ ↔ ( ψ ∧ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) )
+    s6 = lb.ref(
+        "s6",
+        "( φ ↔ ( ψ ∧ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) )",
+        ref="biid",
+        note="biid",
+    )
+
+    # bibi12i from s5 and s6:
+    # ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) ) ↔
+    #   ( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )
+    s7 = lb.ref(
+        "s7",
+        "( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) ) ↔ ( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )",
+        s5,
+        s6,
+        ref="bibi12i",
+        note="bibi12i",
+    )
+
+    # bicomi from s7 — swap the two sides:
+    # ( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) ) ↔
+    #   ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )
+    s8 = lb.ref(
+        "s8",
+        "( ( ( ψ ∧ χ ) ↔ ( ψ ∧ φ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )",
+        s7,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # 3bitri from s1, s2, s8:
+    # ( φ → ψ ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )
+    res = lb.ref(
+        "res",
+        "( φ → ψ ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )",
+        s1,
+        s2,
+        s8,
+        ref="3bitri",
+        note="3bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_biadani(sys: System) -> Proof:
+    """biadani: ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ).
+
+    Inference form of biadan — equivalence between implication of a
+    biconditional and a biconditional with a conjunction.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "biadani")
+    h1 = lb.hyp("biadani.1", "φ → ψ")
+
+    # biadan: ( φ → ψ ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ → ψ ) ↔ ( ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) ) )",
+        ref="biadan",
+        note="biadan",
+    )
+
+    # mpbi with biadani.1 and biadan
+    res = lb.ref(
+        "res",
+        "( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) )",
+        h1,
+        s1,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    return lb.build(res)
+
+
+def prove_biadanii(sys: System) -> Proof:
+    """biadanii: φ ↔ ( ψ ∧ χ ).
+
+    Inference form of biadan — derive a biconditional with a conjunction
+    from an implication and a biconditional implication.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "biadanii")
+    h1 = lb.hyp("biadanii.1", "φ → ψ")
+    h2 = lb.hyp("biadanii.2", "ψ → ( φ ↔ χ )")
+
+    # biadani: ( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ψ → ( φ ↔ χ ) ) ↔ ( φ ↔ ( ψ ∧ χ ) )",
+        h1,
+        ref="biadani",
+        note="biadani",
+    )
+
+    # mpbi with biadanii.2 and s1
+    res = lb.ref(
+        "res",
+        "φ ↔ ( ψ ∧ χ )",
+        h2,
+        s1,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    return lb.build(res)
+
+
 def prove_imnan(sys: System) -> Proof:
     """imnan: ( φ → ¬ ψ ) ↔ ¬ ( φ ∧ ψ ).
 
@@ -11883,7 +12938,7 @@ def prove_dedlem0b(sys: System) -> Proof:
         note="pm2.21",
     )
 
-    # simpr: ( χ ∧ φ ) → φ
+    # simpr: ( χ ∧ φ ) → φ )
     s5 = lb.ref(
         "s5",
         "( χ ∧ φ ) → φ",
@@ -12892,7 +13947,7 @@ def prove_axia3(sys: System) -> Proof:
 
 
 def prove_axia1(sys: System) -> Proof:
-    """axia1: ( φ ∧ ψ ) → φ.
+    """axia1: ( φ ∧ ψ ) → φ ).
 
     Simplification — the left conjunct follows from a conjunction.
     (Contributed by NM, 5-Jan-1993.)
@@ -13205,6 +14260,35 @@ def prove_adantlrl(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_adantlrr(sys: System) -> Proof:
+    """adantlrr: ( ( φ ∧ ( ψ ∧ τ ) ) ∧ χ ) → θ.
+
+    Syllogism inference with a nested conjunction antecedent.
+    Add a conjunct to the inner right conjunct in the antecedent.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "adantlrr")
+    h1 = lb.hyp("adantl2.1", "( ( φ ∧ ψ ) ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ τ ) → ψ",
+        ref="simpl",
+        note="simpl",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ( ψ ∧ τ ) ) ∧ χ ) → θ",
+        s1,
+        h1,
+        ref="sylanl2",
+        note="sylanl2",
+    )
+
+    return lb.build(res)
+
+
 def prove_adantlll(sys: System) -> Proof:
     """adantlll: ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ.
 
@@ -13432,6 +14516,58 @@ def prove_3adantl3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_3adantl1(sys: System) -> Proof:
+    """3adantl1: (( τ ∧ φ ∧ ψ ) ∧ χ) → θ.
+
+    Inference adding a conjunct to the first position of the antecedent.
+    From (( φ ∧ ψ ) ∧ χ) → θ, derive (( τ ∧ φ ∧ ψ ) ∧ χ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adantl1")
+    h1 = lb.hyp("3adantl.1", "( ( φ ∧ ψ ) ∧ χ ) → θ")
+    s_3simpc = lb.ref(
+        "s_3simpc",
+        "( τ ∧ φ ∧ ψ ) → ( φ ∧ ψ )",
+        ref="3simpc",
+        note="3simpc",
+    )
+    res = lb.ref(
+        "res",
+        "( ( τ ∧ φ ∧ ψ ) ∧ χ ) → θ",
+        s_3simpc,
+        h1,
+        ref="sylan",
+        note="sylan",
+    )
+    return lb.build(res)
+
+
+def prove_3adantl2(sys: System) -> Proof:
+    """3adantl2: (( φ ∧ τ ∧ ψ ) ∧ χ) → θ.
+
+    Inference adding a conjunct to the second position of the antecedent.
+    From (( φ ∧ ψ ) ∧ χ) → θ, derive (( φ ∧ τ ∧ ψ ) ∧ χ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adantl2")
+    h1 = lb.hyp("3adantl.1", "( ( φ ∧ ψ ) ∧ χ ) → θ")
+    s_3simpb = lb.ref(
+        "s_3simpb",
+        "( φ ∧ τ ∧ ψ ) → ( φ ∧ ψ )",
+        ref="3simpb",
+        note="3simpb",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ τ ∧ ψ ) ∧ χ ) → θ",
+        s_3simpb,
+        h1,
+        ref="sylan",
+        note="sylan",
+    )
+    return lb.build(res)
+
+
 def prove_3adant2(sys: System) -> Proof:
     """3adant2: ( φ ∧ θ ∧ ψ ) → χ.
 
@@ -13455,6 +14591,63 @@ def prove_3adant2(sys: System) -> Proof:
         s1,
         ref="3impa",
         note="3impa",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adant2r(sys: System) -> Proof:
+    """3adant2r: ( φ ∧ ( ψ ∧ τ ) ∧ χ ) → θ.
+
+    Deduction adding a conjunct to the right of the second conjunct.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ( ψ ∧ τ ) ∧ χ ) → θ.
+    """
+    lb = ProofBuilder(sys, "3adant2r")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( ψ ∧ τ ) → ψ",
+        ref="simpl",
+        note="simpl",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ τ ) ∧ χ ) → θ",
+        s_simpl,
+        h1,
+        ref="syl3an2",
+        note="syl3an2",
+    )
+
+    return lb.build(res)
+
+
+def prove_3adant2l(sys: System) -> Proof:
+    """3adant2l: ( φ ∧ ( τ ∧ ψ ) ∧ χ ) → θ.
+
+    Deduction adding a conjunct to the left of the second conjunct.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( φ ∧ ( τ ∧ ψ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant2l")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s_simpr = lb.ref(
+        "s_simpr",
+        "( τ ∧ ψ ) → ψ",
+        ref="simpr",
+        note="simpr",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( τ ∧ ψ ) ∧ χ ) → θ",
+        s_simpr,
+        h1,
+        ref="syl3an2",
+        note="syl3an2",
     )
 
     return lb.build(res)
@@ -13540,6 +14733,35 @@ def prove_3ad2ant3(sys: System) -> Proof:
         s1,
         ref="3adant1",
         note="3adant1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3ad2antl1(sys: System) -> Proof:
+    """3ad2antl1: (( φ ∧ ψ ∧ τ ) ∧ χ) → θ.
+
+    Inference adding two conjuncts to the left side of the antecedent.
+    From ( φ ∧ χ ) → θ, derive (( φ ∧ ψ ∧ τ ) ∧ χ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3ad2antl1")
+    h1 = lb.hyp("3ad2antl.1", "( φ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ τ ) ∧ χ ) → θ",
+        h1,
+        ref="adantlr",
+        note="adantlr",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ∧ τ ) ∧ χ ) → θ",
+        s1,
+        ref="3adantl2",
+        note="3adantl2",
     )
 
     return lb.build(res)
@@ -13649,6 +14871,238 @@ def prove_ad2antlr(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_ad2antrr(sys: System) -> Proof:
+    """ad2antrr: ( ( φ ∧ χ ) ∧ θ ) → ψ.
+
+    Add two conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( φ ∧ χ ) ∧ θ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad2antrr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ) → ψ",
+        h1,
+        ref="adantr",
+        note="adantr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ χ ) ∧ θ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad3antlr(sys: System) -> Proof:
+    """ad3antlr: ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) → ψ.
+
+    Add three conjuncts (one left, two right) to an antecedent.
+    If φ → ψ, then ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad3antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) → ψ",
+        s1,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+    return lb.build(res)
+
+
+def prove_ad3antrrr(sys: System) -> Proof:
+    """ad3antrrr: ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) → ψ.
+
+    Add three conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad3antrrr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ) → ψ",
+        h1,
+        ref="adantr",
+        note="adantr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) → ψ",
+        s1,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+    return lb.build(res)
+
+
+def prove_ad4antlr(sys: System) -> Proof:
+    """ad4antlr: ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ.
+
+    Add four conjuncts (one left, three right) to an antecedent.
+    If φ → ψ, then ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad4antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ",
+        s1,
+        ref="ad3antrrr",
+        note="ad3antrrr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_4r(sys: System) -> Proof:
+    """simp-4r: ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) → ψ.
+
+    Simplify a deeply nested conjunction: the right conjunct of the
+    innermost ∧ survives.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-4r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) → ψ",
+        s_id,
+        ref="ad4antlr",
+        note="ad4antlr",
+    )
+    return lb.build(res)
+
+
+def prove_ad4antr(sys: System) -> Proof:
+    """ad4antr: ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ.
+
+    Add four conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad4antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ) → ψ",
+        h1,
+        ref="adantr",
+        note="adantr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ",
+        s1,
+        ref="ad3antrrr",
+        note="ad3antrrr",
+    )
+    return lb.build(res)
+
+
+def prove_ad5antr(sys: System) -> Proof:
+    """ad5antr: ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ.
+
+    Add five conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ",
+        h1,
+        ref="ad4antr",
+        note="ad4antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad6antr(sys: System) -> Proof:
+    """ad6antr: ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ.
+
+    Add six conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad6antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ",
+        h1,
+        ref="ad5antr",
+        note="ad5antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad7antr(sys: System) -> Proof:
+    """ad7antr: ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ.
+
+    Add seven conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad7antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ",
+        h1,
+        ref="ad6antr",
+        note="ad6antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
 def prove_ad2ant2r(sys: System) -> Proof:
     """ad2ant2r: ( ( φ ∧ θ ) ∧ ( ψ ∧ τ ) ) → χ.
 
@@ -13670,6 +15124,110 @@ def prove_ad2ant2r(sys: System) -> Proof:
         s1,
         ref="adantlr",
         note="adantlr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad8antr(sys: System) -> Proof:
+    """ad8antr: ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ.
+
+    Add eight conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad8antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ",
+        h1,
+        ref="ad7antr",
+        note="ad7antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad9antr(sys: System) -> Proof:
+    """ad9antr: ( ( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ.
+
+    Add nine conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad9antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ",
+        h1,
+        ref="ad8antr",
+        note="ad8antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad10antr(sys: System) -> Proof:
+    """ad10antr: ( ( ( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ.
+
+    Add ten conjuncts to the right of an antecedent.  If φ → ψ, then
+    ( ( ( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad10antr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ",
+        h1,
+        ref="ad9antr",
+        note="ad9antr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( φ ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ",
+        s1,
+        ref="adantr",
+        note="adantr",
+    )
+    return lb.build(res)
+
+
+def prove_ad10antlr(sys: System) -> Proof:
+    """ad10antlr: ( ( ( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ.
+
+    Add one conjunct to the left and nine conjuncts to the right of an antecedent.
+    If φ → ψ, then ( ( ( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad10antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ",
+        s1,
+        ref="ad9antr",
+        note="ad9antr",
     )
     return lb.build(res)
 
@@ -13752,6 +15310,144 @@ def prove_ad2ant2lr(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simpll(sys: System) -> Proof:
+    """simpll: ( ( φ ∧ ψ ) ∧ χ ) → φ ).
+
+    Simplify a nested conjunction to the left innermost conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpll")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ) ∧ χ ) → φ",
+        s_id,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+
+    return lb.build(res)
+
+
+def prove_simplll(sys: System) -> Proof:
+    """simplll: ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) → φ ).
+
+    Simplify a doubly-nested conjunction to the left innermost conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simplll")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) → φ",
+        s_id,
+        ref="ad3antrrr",
+        note="ad3antrrr",
+    )
+
+    return lb.build(res)
+
+
+def prove_simpllr(sys: System) -> Proof:
+    """simpllr: ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) → ψ.
+
+    Simplify a doubly-nested conjunction to the right innermost conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpllr")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) → ψ",
+        s_id,
+        ref="ad3antlr",
+        note="ad3antlr",
+    )
+
+    return lb.build(res)
+
+
+def prove_simpll1(sys: System) -> Proof:
+    """simpll1: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → φ ).
+
+    Simplify a doubly-nested triple conjunction to the first conjunct.
+    """
+    lb = ProofBuilder(sys, "simpll1")
+    s_simp1 = lb.ref(
+        "s_simp1",
+        "( φ ∧ ψ ∧ χ ) → φ",
+        ref="simp1",
+        note="simp1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → φ",
+        s_simp1,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+    return lb.build(res)
+
+
+def prove_simpll2(sys: System) -> Proof:
+    """simpll2: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → ψ.
+
+    Simplify a doubly-nested triple conjunction to the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simpll2")
+    s_simp2 = lb.ref(
+        "s_simp2",
+        "( φ ∧ ψ ∧ χ ) → ψ",
+        ref="simp2",
+        note="simp2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → ψ",
+        s_simp2,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+    return lb.build(res)
+
+
+def prove_simpll3(sys: System) -> Proof:
+    """simpll3: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → χ.
+
+    Simplify a doubly-nested triple conjunction to the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simpll3")
+    s_simp3 = lb.ref(
+        "s_simp3",
+        "( φ ∧ ψ ∧ χ ) → χ",
+        ref="simp3",
+        note="simp3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ) → χ",
+        s_simp3,
+        ref="ad2antrr",
+        note="ad2antrr",
+    )
+    return lb.build(res)
+
+
 def prove_simplr(sys: System) -> Proof:
     """simplr: ( ( φ ∧ ψ ) ∧ χ ) → ψ.
 
@@ -13774,6 +15470,29 @@ def prove_simplr(sys: System) -> Proof:
         note="ad2antlr",
     )
 
+    return lb.build(res)
+
+
+def prove_simplr1(sys: System) -> Proof:
+    """simplr1: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ) → φ ).
+
+    Simplify a nested triple conjunction — the first conjunct, with two
+    added antecedents.
+    """
+    lb = ProofBuilder(sys, "simplr1")
+    s_simp1 = lb.ref(
+        "s_simp1",
+        "( φ ∧ ψ ∧ χ ) → φ",
+        ref="simp1",
+        note="simp1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ) → φ",
+        s_simp1,
+        ref="ad2antlr",
+        note="ad2antlr",
+    )
     return lb.build(res)
 
 
@@ -13800,6 +15519,53 @@ def prove_simplr2(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simplr3(sys: System) -> Proof:
+    """simplr3: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ) → χ.
+
+    Simplify a nested triple conjunction — the third conjunct, with two
+    added antecedents.
+    """
+    lb = ProofBuilder(sys, "simplr3")
+    s_simp3 = lb.ref(
+        "s_simp3",
+        "( φ ∧ ψ ∧ χ ) → χ",
+        ref="simp3",
+        note="simp3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ) → χ",
+        s_simp3,
+        ref="ad2antlr",
+        note="ad2antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simplrl(sys: System) -> Proof:
+    """simplrl: ( ( φ ∧ ( ψ ∧ χ ) ) ∧ θ ) → ψ.
+
+    Simplify a nested conjunction to the left conjunct of the inner
+    conjunction.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simplrl")
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( ψ ∧ χ ) → ψ",
+        ref="simpl",
+        note="simpl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ( ψ ∧ χ ) ) ∧ θ ) → ψ",
+        s_simpl,
+        ref="ad2antlr",
+        note="ad2antlr",
+    )
+    return lb.build(res)
+
+
 def prove_simplrr(sys: System) -> Proof:
     """simplrr: ( ( φ ∧ ( ψ ∧ χ ) ) ∧ θ ) → χ.
 
@@ -13820,6 +15586,436 @@ def prove_simplrr(sys: System) -> Proof:
         s_simpr,
         ref="ad2antlr",
         note="ad2antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simpl1(sys: System) -> Proof:
+    """simpl1: ( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    first conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl1")
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( φ ∧ θ ) → φ",
+        ref="simpl",
+        note="simpl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ",
+        s_simpl,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl2(sys: System) -> Proof:
+    """simpl2: ( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the middle
+    conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl2")
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( ψ ∧ θ ) → ψ",
+        ref="simpl",
+        note="simpl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ",
+        s_simpl,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl12(sys: System) -> Proof:
+    """simpl12: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → ψ.
+
+    Simplify a nested triple conjunction to the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl12")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → ψ",
+        s_simpl2,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl1r(sys: System) -> Proof:
+    """simpl1r: ( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    right conjunct of the first conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl1r")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ τ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ) → ψ",
+        s_simplr,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl11(sys: System) -> Proof:
+    """simpl11: ( ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → φ ).
+
+    Simplify a triple conjunction with two extra outer conjuncts to the
+    first conjunct of the inner triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl11")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → φ",
+        s_simpl1,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl1l(sys: System) -> Proof:
+    """simpl1l: ( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    left conjunct of the first conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl1l")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ τ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ) → φ",
+        s_simpll,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl2l(sys: System) -> Proof:
+    """simpl2l: ( ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ τ ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    left conjunct of the middle conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl2l")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ τ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ τ ) → φ",
+        s_simpll,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl2r(sys: System) -> Proof:
+    """simpl2r: ( ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ τ ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    right conjunct of the middle conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl2r")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ τ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ τ ) → ψ",
+        s_simplr,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl21(sys: System) -> Proof:
+    """simpl21: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the first
+    conjunct of the middle triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl21")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → φ",
+        s_simpl1,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl22(sys: System) -> Proof:
+    """simpl22: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the middle
+    conjunct of the middle triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl22")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → ψ",
+        s_simpl2,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl31(sys: System) -> Proof:
+    """simpl31: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → φ ).
+
+    Simplify a nested triple conjunction with extra outer conjuncts to the
+    first conjunct of the inner triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl31")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → φ",
+        s_simpl1,
+        ref="3ad2antl3",
+        note="3ad2antl3",
+    )
+    return lb.build(res)
+
+
+def prove_simpl32(sys: System) -> Proof:
+    """simpl32: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → ψ.
+
+    Simplify a nested triple conjunction with extra outer conjuncts to the
+    middle conjunct of the inner triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl32")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → ψ",
+        s_simpl2,
+        ref="3ad2antl3",
+        note="3ad2antl3",
+    )
+    return lb.build(res)
+
+
+def prove_simpl3(sys: System) -> Proof:
+    """simpl3: ( ( φ ∧ ψ ∧ χ ) ∧ τ ) → χ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the rightmost
+    conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl3")
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( χ ∧ τ ) → χ",
+        ref="simpl",
+        note="simpl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ∧ χ ) ∧ τ ) → χ",
+        s_simpl,
+        ref="3ad2antl3",
+        note="3ad2antl3",
+    )
+    return lb.build(res)
+
+
+def prove_simpl13(sys: System) -> Proof:
+    """simpl13: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → χ.
+
+    Simplify a nested triple conjunction to the third conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl13")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ) → χ",
+        s_simpl3,
+        ref="3ad2antl1",
+        note="3ad2antl1",
+    )
+    return lb.build(res)
+
+
+def prove_simpl3l(sys: System) -> Proof:
+    """simpl3l: ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    left conjunct of the rightmost conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl3l")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ τ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ) → φ",
+        s_simpll,
+        ref="3ad2antl3",
+        note="3ad2antl3",
+    )
+    return lb.build(res)
+
+
+def prove_simpl3r(sys: System) -> Proof:
+    """simpl3r: ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the
+    right conjunct of the rightmost conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl3r")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ τ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ) → ψ",
+        s_simplr,
+        ref="3ad2antl3",
+        note="3ad2antl3",
+    )
+    return lb.build(res)
+
+
+def prove_simpl23(sys: System) -> Proof:
+    """simpl23: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → χ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the rightmost
+    conjunct of the middle triple.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl23")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ) → χ",
+        s_simpl3,
+        ref="3ad2antl2",
+        note="3ad2antl2",
+    )
+    return lb.build(res)
+
+
+def prove_simpl33(sys: System) -> Proof:
+    """simpl33: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → χ.
+
+    Simplify a triple conjunction with three inner conjuncts and an
+    extra outer conjunct to the rightmost inner conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simpl33")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ η ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → χ",
+        s_simpl3,
+        ref="3ad2antl3",
+        note="3ad2antl3",
     )
     return lb.build(res)
 
@@ -14280,6 +16476,133 @@ def prove_syl2anb(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_syl2anbr(sys: System) -> Proof:
+    """syl2anbr: ( φ ∧ τ ) → θ.
+
+    Inference joining two biconditionals with a conjunction:
+    from ψ ↔ φ, χ ↔ τ, and ( ψ ∧ χ ) → θ, deduce ( φ ∧ τ ) → θ.
+    (Contributed by NM, 21-Feb-1996.)
+    """
+    lb = ProofBuilder(sys, "syl2anbr")
+    h1 = lb.hyp("syl2anbr.1", "( ψ ↔ φ )")
+    h2 = lb.hyp("syl2anbr.2", "( χ ↔ τ )")
+    h3 = lb.hyp("syl2anbr.3", "( ψ ∧ χ ) → θ")
+
+    # sylanbr uses syl2anbr.1 and syl2anbr.3: ( φ ∧ χ ) → θ
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ) → θ",
+        h1,
+        h3,
+        ref="sylanbr",
+        note="sylanbr syl2anbr.1 syl2anbr.3",
+    )
+
+    # sylan2br uses syl2anbr.2 and s1: ( φ ∧ τ ) → θ
+    res = lb.ref(
+        "res",
+        "( φ ∧ τ ) → θ",
+        h2,
+        s1,
+        ref="sylan2br",
+        note="sylan2br syl2anbr.2",
+    )
+
+    return lb.build(res)
+
+
+def prove_simprl1(sys: System) -> Proof:
+    """simprl1: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → φ ).
+
+    Simplify a nested triple conjunction — the first conjunct of the left
+    conjunct of the right conjunct.
+    """
+    lb = ProofBuilder(sys, "simprl1")
+    s_simp1 = lb.ref(
+        "s_simp1",
+        "( φ ∧ ψ ∧ χ ) → φ",
+        ref="simp1",
+        note="simp1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → φ",
+        s_simp1,
+        ref="ad2antrl",
+        note="ad2antrl",
+    )
+    return lb.build(res)
+
+
+def prove_simprl3(sys: System) -> Proof:
+    """simprl3: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → χ.
+
+    Simplify a nested triple conjunction — the third conjunct of the left
+    conjunct of the right conjunct.
+    """
+    lb = ProofBuilder(sys, "simprl3")
+    s_simp3 = lb.ref(
+        "s_simp3",
+        "( φ ∧ ψ ∧ χ ) → χ",
+        ref="simp3",
+        note="simp3",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → χ",
+        s_simp3,
+        ref="ad2antrl",
+        note="ad2antrl",
+    )
+    return lb.build(res)
+
+
+def prove_simprr1(sys: System) -> Proof:
+    """simprr1: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ ).
+
+    Simplify a nested conjunction: from τ and θ and a triple conjunction
+    deduce its first conjunct.
+    """
+    lb = ProofBuilder(sys, "simprr1")
+    s_simp1 = lb.ref(
+        "s_simp1",
+        "( φ ∧ ψ ∧ χ ) → φ",
+        ref="simp1",
+        note="simp1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ",
+        s_simp1,
+        ref="ad2antll",
+        note="ad2antll",
+    )
+    return lb.build(res)
+
+
+def prove_simprr2(sys: System) -> Proof:
+    """simprr2: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ.
+
+    Simplify a nested conjunction: from τ and θ and a triple conjunction
+    deduce its second conjunct.
+    """
+    lb = ProofBuilder(sys, "simprr2")
+    s_simp2 = lb.ref(
+        "s_simp2",
+        "( φ ∧ ψ ∧ χ ) → ψ",
+        ref="simp2",
+        note="simp2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ",
+        s_simp2,
+        ref="ad2antll",
+        note="ad2antll",
+    )
+    return lb.build(res)
+
+
 def prove_simprr3(sys: System) -> Proof:
     """simprr3: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ.
 
@@ -14446,6 +16769,108 @@ def prove_3anim123i(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_3anim1i(sys: System) -> Proof:
+    """3anim1i: ( φ ∧ χ ∧ θ ) → ( ψ ∧ χ ∧ θ ).
+
+    Inference adding a conjunct to the left of a triple conjunction.
+    From φ → ψ, deduce ( φ ∧ χ ∧ θ ) → ( ψ ∧ χ ∧ θ ).
+    """
+    lb = ProofBuilder(sys, "3anim1i")
+    h = lb.hyp("3animi.1", "φ → ψ")
+
+    id_ch = lb.ref(
+        "id_ch",
+        "χ → χ",
+        ref="id",
+        note="id",
+    )
+    id_th = lb.ref(
+        "id_th",
+        "θ → θ",
+        ref="id",
+        note="id",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → ( ψ ∧ χ ∧ θ )",
+        h,
+        id_ch,
+        id_th,
+        ref="3anim123i",
+    )
+
+    return lb.build(res)
+
+
+def prove_3anim3i(sys: System) -> Proof:
+    """3anim3i: ( χ ∧ θ ∧ φ ) → ( χ ∧ θ ∧ ψ ).
+
+    Inference adding two conjuncts to the right in a triple conjunction.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3anim3i")
+    h = lb.hyp("3animi.1", "φ → ψ")
+
+    id_ch = lb.ref(
+        "id_ch",
+        "χ → χ",
+        ref="id",
+        note="id",
+    )
+    id_th = lb.ref(
+        "id_th",
+        "θ → θ",
+        ref="id",
+        note="id",
+    )
+
+    res = lb.ref(
+        "res",
+        "( χ ∧ θ ∧ φ ) → ( χ ∧ θ ∧ ψ )",
+        id_ch,
+        id_th,
+        h,
+        ref="3anim123i",
+    )
+
+    return lb.build(res)
+
+
+def prove_3anim2i(sys: System) -> Proof:
+    """3anim2i: ( χ ∧ φ ∧ θ ) → ( χ ∧ ψ ∧ θ ).
+
+    Inference adding two conjuncts to the middle in a triple conjunction.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3anim2i")
+    h = lb.hyp("3animi.1", "φ → ψ")
+
+    id_ch = lb.ref(
+        "id_ch",
+        "χ → χ",
+        ref="id",
+        note="id",
+    )
+    id_th = lb.ref(
+        "id_th",
+        "θ → θ",
+        ref="id",
+        note="id",
+    )
+
+    res = lb.ref(
+        "res",
+        "( χ ∧ φ ∧ θ ) → ( χ ∧ ψ ∧ θ )",
+        id_ch,
+        h,
+        id_th,
+        ref="3anim123i",
+    )
+
+    return lb.build(res)
+
+
 def prove_bi2anan9(sys: System) -> Proof:
     """bi2anan9: ( φ ∧ θ ) → ( ( ψ ∧ τ ) ↔ ( χ ∧ η ) ).
 
@@ -14529,8 +16954,157 @@ def prove_ad4ant14(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_ad5ant13(sys: System) -> Proof:
+    """ad5ant13: ( ( ( ( ( φ ∧ θ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ ).
+
+    Deduction adding conjuncts at positions 1 and 3.
+    Given ( φ ∧ ψ ) → χ, derive ( ( ( ( ( φ ∧ θ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant13")
+    h1 = lb.hyp("ad5ant2.1", "( φ ∧ ψ ) → χ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ θ ) ∧ ψ ) → χ",
+        h1,
+        ref="adantlr",
+        note="adantlr ad5ant2.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ θ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ",
+        s1,
+        ref="ad2antrr",
+        note="ad2antrr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant134(sys: System) -> Proof:
+    """ad5ant134: ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ.
+
+    Deduction adding a conjunct to the left of the second antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive
+    ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant134")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ η ) → θ )",
+        h1,
+        ref="ad4ant123",
+        note="ad4ant123 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ )",
+        s1,
+        ref="adantl3r",
+        note="adantl3r s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_ad5ant134OLD(sys: System) -> Proof:
+    """ad5ant134OLD: ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ.
+
+    Obsolete version of ad5ant134.
+    Deduction adding conjuncts at positions 1, 3, and 4 using ad4ant134
+    and adantr.
+    (Contributed by NM, 3-Jan-1993.)  (Proof modification is discouraged.)
+    (New usage is discouraged.)
+    """
+    lb = ProofBuilder(sys, "ad5ant134OLD")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant134",
+        note="ad4ant134 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ",
+        s1,
+        ref="adantr",
+        note="adantr s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_ad5ant135(sys: System) -> Proof:
+    """ad5ant135: ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ ).
+
+    Deduction adding conjuncts at positions 1, 3, and 5.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive
+    ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant135")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ ψ ) ∧ η ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant124",
+        note="ad4ant124 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ )",
+        s1,
+        ref="adantl3r",
+        note="adantl3r s1",
+    )
+
+    return lb.build(res)
+
+
+def prove_ad5ant135OLD(sys: System) -> Proof:
+    """ad5ant135OLD: ( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ ).
+
+    Obsolete version of ad5ant135.
+    Deduction adding conjuncts at positions 1, 3, and 5 using ad4ant134
+    and adantlr.
+    (Contributed by NM, 3-Jan-1993.)  (Proof modification is discouraged.)
+    (New usage is discouraged.)
+    """
+    lb = ProofBuilder(sys, "ad5ant135OLD")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant134",
+        note="ad4ant134 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ )",
+        s1,
+        ref="adantlr",
+        note="adantlr s1",
+    )
+
+    return lb.build(res)
+
+
 def prove_ad5ant14(sys: System) -> Proof:
     """ad5ant14: ( ( ( ( ( φ ∧ θ ) ∧ τ ) ∧ ψ ) ∧ η ) → χ.
+
 
     Deduction adding three conjuncts.
     Given ( φ ∧ ψ ) → χ, derive ( ( ( ( ( φ ∧ θ ) ∧ τ ) ∧ ψ ) ∧ η ) → χ.
@@ -14552,6 +17126,36 @@ def prove_ad5ant14(sys: System) -> Proof:
         ref="ad4ant13",
         note="ad4ant13 s1",
     )
+    return lb.build(res)
+
+
+def prove_ad5ant145(sys: System) -> Proof:
+    """ad5ant145: ( ( ( ( ( φ ∧ τ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ.
+
+    Deduction adding conjuncts at positions 1 and 5.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive
+    ( ( ( ( ( φ ∧ τ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant145")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant134",
+        note="ad4ant134 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ τ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ",
+        s1,
+        ref="adantllr",
+        note="adantllr s1",
+    )
+
     return lb.build(res)
 
 
@@ -14578,6 +17182,62 @@ def prove_ad5ant15(sys: System) -> Proof:
         ref="adantlr",
         note="adantlr s1",
     )
+    return lb.build(res)
+
+
+def prove_ad5ant23(sys: System) -> Proof:
+    """ad5ant23: ( ( ( ( ( θ ∧ φ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ.
+
+    Deduction adding three conjuncts to the right.
+    Given ( φ ∧ ψ ) → χ, derive ( ( ( ( ( θ ∧ φ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant23")
+    h1 = lb.hyp("ad5ant2.1", "( φ ∧ ψ ) → χ")
+    s1 = lb.ref(
+        "s1",
+        "( ( θ ∧ φ ) ∧ ψ ) → χ",
+        h1,
+        ref="adantll",
+        note="adantll ad5ant2.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( θ ∧ φ ) ∧ ψ ) ∧ τ ) ∧ η ) → χ",
+        s1,
+        ref="ad2antrr",
+        note="ad2antrr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant235(sys: System) -> Proof:
+    """ad5ant235: ( ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ.
+
+    Deduction adding two conjuncts to the antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive
+    ( ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant235")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant234",
+        note="ad4ant234 ad5ant.1",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ η ) ∧ χ ) → θ",
+        s1,
+        ref="adantlr",
+        note="adantlr s1",
+    )
+
     return lb.build(res)
 
 
@@ -14630,6 +17290,165 @@ def prove_ad5ant24(sys: System) -> Proof:
         s1,
         ref="ad4ant13",
         note="ad4ant13 s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant245(sys: System) -> Proof:
+    """ad5ant245: ( ( ( ( ( τ ∧ φ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ.
+
+    Deduction adding two conjuncts to the antecedent, one before φ and one
+    after.  Given ( φ ∧ ψ ∧ χ ) → θ, derive
+    ( ( ( ( ( τ ∧ φ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant245")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( τ ∧ φ ) ∧ ψ ∧ χ ) → θ",
+        h1,
+        ref="3adant1l",
+        note="3adant1l ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( τ ∧ φ ) ∧ η ) ∧ ψ ) ∧ χ ) → θ )",
+        s1,
+        ref="ad4ant134",
+        note="ad4ant134 s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5antlr(sys: System) -> Proof:
+    """ad5antlr: ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ.
+
+    Add five conjuncts to the left of an antecedent, with the rightmost
+    conjunct on the right.  If φ → ψ, then
+    ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ",
+        s1,
+        ref="ad4antr",
+        note="ad4antr",
+    )
+    return lb.build(res)
+
+
+def prove_ad6antlr(sys: System) -> Proof:
+    """ad6antlr: ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ.
+
+    Add six conjuncts to the left of an antecedent, with the rightmost
+    conjunct on the right.  If φ → ψ, then
+    ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad6antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ",
+        s1,
+        ref="ad5antr",
+        note="ad5antr",
+    )
+    return lb.build(res)
+
+
+def prove_ad7antlr(sys: System) -> Proof:
+    """ad7antlr: ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ.
+
+    Add one conjunct to the left and six conjuncts to the right of an antecedent.
+    If φ → ψ, then ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad7antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ",
+        s1,
+        ref="ad6antr",
+        note="ad6antr",
+    )
+    return lb.build(res)
+
+
+def prove_ad8antlr(sys: System) -> Proof:
+    """ad8antlr: ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ.
+
+    Add one conjunct to the left and seven conjuncts to the right of an antecedent.
+    If φ → ψ, then ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad8antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ",
+        s1,
+        ref="ad7antr",
+        note="ad7antr",
+    )
+    return lb.build(res)
+
+
+def prove_ad9antlr(sys: System) -> Proof:
+    """ad9antlr: ( ( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ.
+
+    Add one conjunct to the left and eight conjuncts to the right of an antecedent.
+    If φ → ψ, then ( ( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad9antlr")
+    h1 = lb.hyp("ad2ant.1", "φ → ψ")
+    s1 = lb.ref(
+        "s1",
+        "( χ ∧ φ ) → ψ",
+        h1,
+        ref="adantl",
+        note="adantl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( χ ∧ φ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ",
+        s1,
+        ref="ad8antr",
+        note="ad8antr",
     )
     return lb.build(res)
 
@@ -15189,7 +18008,7 @@ def prove_sylanl1(sys: System) -> Proof:
 
 
 def prove_simp1(sys: System) -> Proof:
-    """simp1: ( φ ∧ ψ ∧ χ ) → φ.
+    """simp1: ( φ ∧ ψ ∧ χ ) → φ ).
 
     Simplification of a triple conjunction.
     """
@@ -15207,6 +18026,18 @@ def prove_simp1(sys: System) -> Proof:
         ref="3ad2ant1",
         note="3ad2ant1",
     )
+    return lb.build(res)
+
+
+def prove_simp1i(sys: System) -> Proof:
+    """simp1i: φ.
+
+    Inference form of simp1: from a triple conjunction, deduce the first conjunct.
+    """
+    lb = ProofBuilder(sys, "simp1i")
+    h1 = lb.hyp("3simp1i.1", "φ ∧ ψ ∧ χ")
+    s1 = lb.ref("s1", "( φ ∧ ψ ∧ χ ) → φ", ref="simp1", note="simp1")
+    res = lb.mp("res", h1, s1, "MP 3simp1i.1, simp1")
     return lb.build(res)
 
 
@@ -15280,6 +18111,18 @@ def prove_simp2(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp2i(sys: System) -> Proof:
+    """simp2i: ψ.
+
+    Inference form of simp2: from a triple conjunction, deduce the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp2i")
+    h1 = lb.hyp("3simp1i.1", "φ ∧ ψ ∧ χ")
+    s1 = lb.ref("s1", "( φ ∧ ψ ∧ χ ) → ψ", ref="simp2", note="simp2")
+    res = lb.mp("res", h1, s1, "MP 3simp1i.1, simp2")
+    return lb.build(res)
+
+
 def prove_simp2d(sys: System) -> Proof:
     """simp2d: φ → χ.
 
@@ -15329,7 +18172,7 @@ def prove_simp2bi(sys: System) -> Proof:
 
 
 def prove_simp11(sys: System) -> Proof:
-    """simp11: ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → φ.
+    """simp11: ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → φ ).
 
     Simplification of a triple conjunction with two additional
     antecedents — from a nested triple conjunction to the first
@@ -15376,8 +18219,32 @@ def prove_simp12(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp112(sys: System) -> Proof:
+    """simp112: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → ψ.
+
+    Simplification of a triple conjunction with four additional
+    antecedents — from a doubly-nested triple conjunction to the
+    second conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp112")
+    s_simp12 = lb.ref(
+        "s_simp12",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → ψ",
+        ref="simp12",
+        note="simp12",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → ψ",
+        s_simp12,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
 def prove_simp1l(sys: System) -> Proof:
-    """simp1l: ( ( φ ∧ ψ ) ∧ χ ∧ θ ) → φ.
+    """simp1l: ( ( φ ∧ ψ ) ∧ χ ∧ θ ) → φ ).
 
     Simplification from a triple conjunction — the left conjunct of the
     first conjunct.
@@ -15393,6 +18260,78 @@ def prove_simp1l(sys: System) -> Proof:
         "res",
         "( ( φ ∧ ψ ) ∧ χ ∧ θ ) → φ",
         s_simpl,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1l1(sys: System) -> Proof:
+    """simp1l1: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → φ ).
+
+    Simplify from a nested conjunction — the first conjunct of the
+    innermost triple, through an outer conjunction and two additional
+    antecedents.
+    """
+    lb = ProofBuilder(sys, "simp1l1")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → φ",
+        s_simpl1,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1l2(sys: System) -> Proof:
+    """simp1l2: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → ψ.
+
+    Simplify from a nested conjunction — the second conjunct of the
+    innermost triple, through an outer conjunction and two additional
+    antecedents.
+    """
+    lb = ProofBuilder(sys, "simp1l2")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → ψ",
+        s_simpl2,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1l3(sys: System) -> Proof:
+    """simp1l3: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → χ.
+
+    Simplify from a nested conjunction — the third conjunct of the
+    innermost triple, through an outer conjunction and two additional
+    antecedents.
+    """
+    lb = ProofBuilder(sys, "simp1l3")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ τ ∧ η ) → χ",
+        s_simpl3,
         ref="3ad2ant1",
         note="3ad2ant1",
     )
@@ -15422,6 +18361,123 @@ def prove_simp1r(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp1r1(sys: System) -> Proof:
+    """simp1r1: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → φ ).
+
+    Simplify a nested triple conjunction: from the first conjunct of the
+    first antecedent's second conjunct, deduce φ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp1r1")
+    s_simpr1 = lb.ref(
+        "s_simpr1",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simpr1",
+        note="simpr1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → φ",
+        s_simpr1,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1r2(sys: System) -> Proof:
+    """simp1r2: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → ψ.
+
+    Simplify a nested triple conjunction: from the right conjunct of the
+    first antecedent's second conjunct, deduce ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp1r2")
+    s_simpr2 = lb.ref(
+        "s_simpr2",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simpr2",
+        note="simpr2",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → ψ",
+        s_simpr2,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1r3(sys: System) -> Proof:
+    """simp1r3: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → χ.
+
+    Simplify a nested triple conjunction: from the right conjunct of the
+    first antecedent's second conjunct, deduce χ.
+    """
+    lb = ProofBuilder(sys, "simp1r3")
+    s_simpr3 = lb.ref(
+        "s_simpr3",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ τ ∧ η ) → χ",
+        s_simpr3,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1lr(sys: System) -> Proof:
+    """simp1lr: ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ∧ τ ) → ψ.
+
+    Simplify a nested double conjunction to the second inner conjunct.
+    """
+    lb = ProofBuilder(sys, "simp1lr")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ χ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ∧ τ ) → ψ",
+        s_simplr,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1rl(sys: System) -> Proof:
+    """simp1rl: ( ( χ ∧ ( φ ∧ ψ ) ) ∧ θ ∧ τ ) → φ ).
+
+    Simplify a triple conjunction — the left conjunct of the right conjunct
+    of the first conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp1rl")
+    s_simprl = lb.ref(
+        "s_simprl",
+        "( χ ∧ ( φ ∧ ψ ) ) → φ",
+        ref="simprl",
+        note="simprl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ ( φ ∧ ψ ) ) ∧ θ ∧ τ ) → φ",
+        s_simprl,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
 def prove_simp2l(sys: System) -> Proof:
     """simp2l: ( φ ∧ ( ψ ∧ χ ) ∧ θ ) → ψ.
 
@@ -15439,6 +18495,148 @@ def prove_simp2l(sys: System) -> Proof:
         "res",
         "( φ ∧ ( ψ ∧ χ ) ∧ θ ) → ψ",
         s_simpl,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2l1(sys: System) -> Proof:
+    """simp2l1: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → φ ).
+
+    Simplify a triple conjunction with an extra outer conjunct to the first
+    conjunct of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2l1")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → φ",
+        s_simpl1,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2l2(sys: System) -> Proof:
+    """simp2l2: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → ψ.
+
+    Simplify a triple conjunction with an extra outer conjunct to the middle
+    conjunct of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2l2")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → ψ",
+        s_simpl2,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2l3(sys: System) -> Proof:
+    """simp2l3: ( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → χ.
+
+    Simplify a triple conjunction — the third conjunct of the left part of the
+    second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2l3")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ∧ η ) → χ",
+        s_simpl3,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp1rr(sys: System) -> Proof:
+    """simp1rr: ( ( χ ∧ ( φ ∧ ψ ) ) ∧ θ ∧ τ ) → ψ.
+
+    Simplify a triple conjunction — the right conjunct of the right conjunct
+    of the first conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp1rr")
+    s_simprr = lb.ref(
+        "s_simprr",
+        "( χ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simprr",
+        note="simprr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( χ ∧ ( φ ∧ ψ ) ) ∧ θ ∧ τ ) → ψ",
+        s_simprr,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp2ll(sys: System) -> Proof:
+    """simp2ll: ( θ ∧ ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) → φ ).
+
+    Simplify a triple conjunction — the left conjunct of the left conjunct
+    of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp2ll")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ χ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) → φ",
+        s_simpll,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2lr(sys: System) -> Proof:
+    """simp2lr: ( θ ∧ ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) → ψ.
+
+    Simplify a nested conjunction — the right conjunct of the inner
+    conjunction, with two outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp2lr")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ χ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) → ψ",
+        s_simplr,
         ref="3ad2ant2",
         note="3ad2ant2",
     )
@@ -15468,8 +18666,80 @@ def prove_simp2r(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp2r1(sys: System) -> Proof:
+    """simp2r1: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → φ ).
+
+    Simplify a triple conjunction — the first conjunct of the right conjunct
+    of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2r1")
+    s_simpr1 = lb.ref(
+        "s_simpr1",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simpr1",
+        note="simpr1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → φ",
+        s_simpr1,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2r2(sys: System) -> Proof:
+    """simp2r2: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → ψ.
+
+    Simplify a triple conjunction — the second conjunct of the right conjunct
+    of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2r2")
+    s_simpr2 = lb.ref(
+        "s_simpr2",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simpr2",
+        note="simpr2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → ψ",
+        s_simpr2,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2r3(sys: System) -> Proof:
+    """simp2r3: ( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → χ.
+
+    Simplify a triple conjunction — the third conjunct of the right conjunct
+    of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2r3")
+    s_simpr3 = lb.ref(
+        "s_simpr3",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ) → χ",
+        s_simpr3,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
 def prove_simp2rl(sys: System) -> Proof:
-    """simp2rl: ( θ ∧ ( χ ∧ ( φ ∧ ψ ) ) ∧ τ ) → φ.
+    """simp2rl: ( θ ∧ ( χ ∧ ( φ ∧ ψ ) ) ∧ τ ) → φ ).
 
     Simplify a triple conjunction — the left conjunct of the right conjunct
     of the second conjunct.  From the second conjunct (χ ∧ (φ ∧ ψ)), using
@@ -15487,6 +18757,31 @@ def prove_simp2rl(sys: System) -> Proof:
         "res",
         "( θ ∧ ( χ ∧ ( φ ∧ ψ ) ) ∧ τ ) → φ",
         s_simprl,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp2rr(sys: System) -> Proof:
+    """simp2rr: ( θ ∧ ( χ ∧ ( φ ∧ ψ ) ) ∧ τ ) → ψ.
+
+    Simplify a triple conjunction — the right conjunct of the right conjunct
+    of the second conjunct.  From the second conjunct (χ ∧ (φ ∧ ψ)), using
+    simprr, deduce ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp2rr")
+    s_simprr = lb.ref(
+        "s_simprr",
+        "( χ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simprr",
+        note="simprr",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ ( χ ∧ ( φ ∧ ψ ) ) ∧ τ ) → ψ",
+        s_simprr,
         ref="3ad2ant2",
         note="3ad2ant2",
     )
@@ -15512,6 +18807,18 @@ def prove_simp3(sys: System) -> Proof:
         ref="3ad2ant3",
         note="3ad2ant3",
     )
+    return lb.build(res)
+
+
+def prove_simp3i(sys: System) -> Proof:
+    """simp3i: χ.
+
+    Inference form of simp3: from a triple conjunction, deduce the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp3i")
+    h1 = lb.hyp("simp3i.1", "φ ∧ ψ ∧ χ")
+    s1 = lb.ref("s1", "( φ ∧ ψ ∧ χ ) → χ", ref="simp3", note="simp3")
+    res = lb.mp("res", h1, s1, "MP simp3i.1, simp3")
     return lb.build(res)
 
 
@@ -15587,6 +18894,124 @@ def prove_simp3l(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp3l1(sys: System) -> Proof:
+    """simp3l1: ( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → φ ).
+
+    Simplify a triple conjunction — the first conjunct of the first
+    inner conjunct of the third conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3l1")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → φ",
+        s_simpl1,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3l2(sys: System) -> Proof:
+    """simp3l2: ( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → ψ.
+
+    Simplify a triple conjunction — the second conjunct of the first
+    inner conjunct of the third conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3l2")
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → ψ",
+        s_simpl2,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3l3(sys: System) -> Proof:
+    """simp3l3: ( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → χ.
+
+    Simplify a triple conjunction — the third conjunct of the first
+    inner conjunct of the third conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3l3")
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ) ) → χ",
+        s_simpl3,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3ll(sys: System) -> Proof:
+    """simp3ll: ( θ ∧ τ ∧ ( ( φ ∧ ψ ) ∧ χ ) ) → φ ).
+
+    Simplify a nested conjunction from a triple conjunction — the
+    left inner conjunct from the left of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp3ll")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ χ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ τ ∧ ( ( φ ∧ ψ ) ∧ χ ) ) → φ",
+        s_simpll,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3lr(sys: System) -> Proof:
+    """simp3lr: ( θ ∧ τ ∧ ( ( φ ∧ ψ ) ∧ χ ) ) → ψ.
+
+    Simplify a nested conjunction from a triple conjunction — the
+    right inner conjunct from the left of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp3lr")
+    s_simplr = lb.ref(
+        "s_simplr",
+        "( ( φ ∧ ψ ) ∧ χ ) → ψ",
+        ref="simplr",
+        note="simplr",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ τ ∧ ( ( φ ∧ ψ ) ∧ χ ) ) → ψ",
+        s_simplr,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
 def prove_simp3r(sys: System) -> Proof:
     """simp3r: ( φ ∧ ψ ∧ ( χ ∧ θ ) ) → θ.
 
@@ -15611,8 +19036,80 @@ def prove_simp3r(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp3r1(sys: System) -> Proof:
+    """simp3r1: ( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ ).
+
+    Simplify a triple conjunction — the first conjunct of the triple
+    conjunction in the third component.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3r1")
+    s_simpr1 = lb.ref(
+        "s_simpr1",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simpr1",
+        note="simpr1",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ",
+        s_simpr1,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3r2(sys: System) -> Proof:
+    """simp3r2: ( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ.
+
+    Simplify a triple conjunction — the second conjunct of the triple
+    conjunction in the third component.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3r2")
+    s_simpr2 = lb.ref(
+        "s_simpr2",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simpr2",
+        note="simpr2",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ",
+        s_simpr2,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3r3(sys: System) -> Proof:
+    """simp3r3: ( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ.
+
+    Simplify a triple conjunction — the third conjunct of the triple
+    conjunction in the third component.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3r3")
+    s_simpr3 = lb.ref(
+        "s_simpr3",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ",
+        s_simpr3,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
 def prove_simp3rl(sys: System) -> Proof:
-    """simp3rl: ( θ ∧ τ ∧ ( χ ∧ ( φ ∧ ψ ) ) ) → φ.
+    """simp3rl: ( θ ∧ τ ∧ ( χ ∧ ( φ ∧ ψ ) ) ) → φ ).
 
     Simplify a triple conjunction — the left conjunct of the right conjunct
     of the third conjunct.  From the third conjunct (χ ∧ (φ ∧ ψ)), using
@@ -15630,6 +19127,31 @@ def prove_simp3rl(sys: System) -> Proof:
         "res",
         "( θ ∧ τ ∧ ( χ ∧ ( φ ∧ ψ ) ) ) → φ",
         s_simprl,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp3rr(sys: System) -> Proof:
+    """simp3rr: ( θ ∧ τ ∧ ( χ ∧ ( φ ∧ ψ ) ) ) → ψ.
+
+    Simplify a triple conjunction — the right conjunct of the right conjunct
+    of the third conjunct.  From the third conjunct (χ ∧ (φ ∧ ψ)), using
+    simprr, deduce ψ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp3rr")
+    s_simprr = lb.ref(
+        "s_simprr",
+        "( χ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simprr",
+        note="simprr",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ τ ∧ ( χ ∧ ( φ ∧ ψ ) ) ) → ψ",
+        s_simprr,
         ref="3ad2ant3",
         note="3ad2ant3",
     )
@@ -15660,7 +19182,7 @@ def prove_simp21(sys: System) -> Proof:
 
 
 def prove_simp21l(sys: System) -> Proof:
-    """simp21l: ( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ η ) → φ.
+    """simp21l: ( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ η ) → φ ).
 
     Simplification of a triple conjunction — the left conjunct of the first
     conjunct of the second conjunct.
@@ -15676,6 +19198,29 @@ def prove_simp21l(sys: System) -> Proof:
         "res",
         "( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ η ) → φ",
         s_simp1l,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp21r(sys: System) -> Proof:
+    """simp21r: ( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ η ) → ψ.
+
+    Simplification of a triple conjunction — the right conjunct of the first
+    conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp21r")
+    s_simp1r = lb.ref(
+        "s_simp1r",
+        "( ( φ ∧ ψ ) ∧ χ ∧ θ ) → ψ",
+        ref="simp1r",
+        note="simp1r",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ η ) → ψ",
+        s_simp1r,
         ref="3ad2ant2",
         note="3ad2ant2",
     )
@@ -15728,6 +19273,30 @@ def prove_simp23(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp23l(sys: System) -> Proof:
+    """simp23l: ( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ η ) → φ ).
+
+    Simplification of a triple conjunction — the left conjunct of the
+    third conjunct of the second conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp23l")
+    s_simp3l = lb.ref(
+        "s_simp3l",
+        "( χ ∧ θ ∧ ( φ ∧ ψ ) ) → φ",
+        ref="simp3l",
+        note="simp3l",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ η ) → φ",
+        s_simp3l,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
 def prove_simp23r(sys: System) -> Proof:
     """simp23r: ( τ ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ η ) → ψ.
 
@@ -15752,8 +19321,284 @@ def prove_simp23r(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp231(sys: System) -> Proof:
+    """simp231: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → φ ).
+
+    Simplification of a triply-nested triple conjunction — the first
+    conjunct of the third conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp231")
+    s_simp31 = lb.ref(
+        "s_simp31",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simp31",
+        note="simp31",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → φ",
+        s_simp31,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp232(sys: System) -> Proof:
+    """simp232: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → ψ.
+
+    Simplification of a triply-nested triple conjunction — the second
+    conjunct of the third conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp232")
+    s_simp32 = lb.ref(
+        "s_simp32",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simp32",
+        note="simp32",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → ψ",
+        s_simp32,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp233(sys: System) -> Proof:
+    """simp233: ( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → χ.
+
+    Simplification of a triply-nested triple conjunction — the third
+    conjunct of the third conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp233")
+    s_simp33 = lb.ref(
+        "s_simp33",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simp33",
+        note="simp33",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ ζ ) → χ",
+        s_simp33,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp111(sys: System) -> Proof:
+    """simp111: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → φ ).
+
+    Simplification of a triply-nested triple conjunction — the first
+    conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp111")
+    s_simp11 = lb.ref(
+        "s_simp11",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → φ",
+        ref="simp11",
+        note="simp11",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → φ",
+        s_simp11,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp121(sys: System) -> Proof:
+    """simp121: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → φ ).
+
+    Simplification of a triple conjunction — the first conjunct of the
+    second conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp121")
+    s_simp21 = lb.ref(
+        "s_simp21",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → φ",
+        ref="simp21",
+        note="simp21",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → φ",
+        s_simp21,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp122(sys: System) -> Proof:
+    """simp122: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → ψ.
+
+    Simplification of a triple conjunction — the second conjunct of the
+    second conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp122")
+    s_simp22 = lb.ref(
+        "s_simp22",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → ψ",
+        ref="simp22",
+        note="simp22",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → ψ",
+        s_simp22,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp123(sys: System) -> Proof:
+    """simp123: ( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    second conjunct's second conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp123")
+    s_simp23 = lb.ref(
+        "s_simp23",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → χ",
+        ref="simp23",
+        note="simp23",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ η ∧ ζ ) → χ",
+        s_simp23,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp211(sys: System) -> Proof:
+    """simp211: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → φ ).
+
+    Simplification of a triple conjunction — the first conjunct of the
+    first conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp211")
+    s_simp11 = lb.ref(
+        "s_simp11",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → φ",
+        ref="simp11",
+        note="simp11",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → φ",
+        s_simp11,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp212(sys: System) -> Proof:
+    """simp212: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → ψ.
+
+    Simplification of a triple conjunction — the second conjunct of the
+    first conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp212")
+    s_simp12 = lb.ref(
+        "s_simp12",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → ψ",
+        ref="simp12",
+        note="simp12",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → ψ",
+        s_simp12,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp213(sys: System) -> Proof:
+    """simp213: ( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    first conjunct, with two additional outer conjuncts.
+    """
+    lb = ProofBuilder(sys, "simp213")
+    s_simp13 = lb.ref(
+        "s_simp13",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → χ",
+        ref="simp13",
+        note="simp13",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ ζ ) → χ",
+        s_simp13,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp221(sys: System) -> Proof:
+    """simp221: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → φ ).
+
+    Simplification of a triple conjunction — the first conjunct of the first
+    conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp221")
+    s_simp21 = lb.ref(
+        "s_simp21",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → φ",
+        ref="simp21",
+        note="simp21",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → φ",
+        s_simp21,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp223(sys: System) -> Proof:
+    """simp223: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    second conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp223")
+    s_simp23 = lb.ref(
+        "s_simp23",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → χ",
+        ref="simp23",
+        note="simp23",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → χ",
+        s_simp23,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
 def prove_simp22l(sys: System) -> Proof:
-    """simp22l: ( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ η ) → φ.
+    """simp22l: ( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ η ) → φ ).
 
     Simplification of a triple conjunction — the left conjunct of the
     second conjunct of the second conjunct.
@@ -15769,6 +19614,29 @@ def prove_simp22l(sys: System) -> Proof:
         "res",
         "( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ η ) → φ",
         s_simp2l,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_simp22r(sys: System) -> Proof:
+    """simp22r: ( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ η ) → ψ.
+
+    Simplification of a triple conjunction — the right conjunct of the
+    second conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp22r")
+    s_simp2r = lb.ref(
+        "s_simp2r",
+        "( χ ∧ ( φ ∧ ψ ) ∧ θ ) → ψ",
+        ref="simp2r",
+        note="simp2r",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ∧ η ) → ψ",
+        s_simp2r,
         ref="3ad2ant2",
         note="3ad2ant2",
     )
@@ -15798,6 +19666,125 @@ def prove_simp31(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp311(sys: System) -> Proof:
+    """simp311: ( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → φ ).
+
+    Simplification of a triple conjunction with two additional
+    antecedents — from a nested triple conjunction to the first
+    conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp311")
+    s_simp11 = lb.ref(
+        "s_simp11",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → φ",
+        ref="simp11",
+        note="simp11",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → φ",
+        s_simp11,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp31l(sys: System) -> Proof:
+    """simp31l: ( τ ∧ η ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → φ ).
+
+    Simplify a triple conjunction — the left conjunct of the first
+    conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp31l")
+    s_simp1l = lb.ref(
+        "s_simp1l",
+        "( ( φ ∧ ψ ) ∧ χ ∧ θ ) → φ",
+        ref="simp1l",
+        note="simp1l",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → φ",
+        s_simp1l,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp31r(sys: System) -> Proof:
+    """simp31r: ( τ ∧ η ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → ψ.
+
+    Simplification from a triple conjunction — the right conjunct of the
+    first conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp31r")
+    s_simp1r = lb.ref(
+        "s_simp1r",
+        "( ( φ ∧ ψ ) ∧ χ ∧ θ ) → ψ",
+        ref="simp1r",
+        note="simp1r",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ) → ψ",
+        s_simp1r,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+
+    return lb.build(res)
+
+
+def prove_simp312(sys: System) -> Proof:
+    """simp312: ( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → ψ.
+
+    Simplification of a triple conjunction with two additional
+    antecedents — from a nested triple conjunction to the second
+    conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp312")
+    s_simp12 = lb.ref(
+        "s_simp12",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → ψ",
+        ref="simp12",
+        note="simp12",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → ψ",
+        s_simp12,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp313(sys: System) -> Proof:
+    """simp313: ( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → χ.
+
+    Simplification of a triple conjunction with two additional
+    antecedents — from a nested triple conjunction to the third
+    conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp313")
+    s_simp13 = lb.ref(
+        "s_simp13",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → χ",
+        ref="simp13",
+        note="simp13",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ) → χ",
+        s_simp13,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
 def prove_simp32(sys: System) -> Proof:
     """simp32: ( φ ∧ ψ ∧ ( χ ∧ θ ∧ τ ) ) → θ.
 
@@ -15815,6 +19802,54 @@ def prove_simp32(sys: System) -> Proof:
         "res",
         "( φ ∧ ψ ∧ ( χ ∧ θ ∧ τ ) ) → θ",
         s_simp2,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp32l(sys: System) -> Proof:
+    """simp32l: ( τ ∧ η ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → φ ).
+
+    Simplify a triple conjunction — the left conjunct of the second
+    conjunct of the third conjunct.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp32l")
+    s_simp2l = lb.ref(
+        "s_simp2l",
+        "( χ ∧ ( φ ∧ ψ ) ∧ θ ) → φ",
+        ref="simp2l",
+        note="simp2l",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → φ",
+        s_simp2l,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp32r(sys: System) -> Proof:
+    """simp32r: ( τ ∧ η ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → ψ.
+
+    Simplify a triple conjunction — the right conjunct of the second
+    conjunct of the third conjunct.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp32r")
+    s_simp2r = lb.ref(
+        "s_simp2r",
+        "( χ ∧ ( φ ∧ ψ ) ∧ θ ) → ψ",
+        ref="simp2r",
+        note="simp2r",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( χ ∧ ( φ ∧ ψ ) ∧ θ ) ) → ψ",
+        s_simp2r,
         ref="3ad2ant3",
         note="3ad2ant3",
     )
@@ -15844,8 +19879,192 @@ def prove_simp33(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp33l(sys: System) -> Proof:
+    """simp33l: ( τ ∧ η ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → φ ).
+
+    Simplification of a triple conjunction — the left conjunct of the
+    third conjunct within the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp33l")
+    s_simp3l = lb.ref(
+        "s_simp3l",
+        "( χ ∧ θ ∧ ( φ ∧ ψ ) ) → φ",
+        ref="simp3l",
+        note="simp3l",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → φ",
+        s_simp3l,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp33r(sys: System) -> Proof:
+    """simp33r: ( τ ∧ η ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → ψ.
+
+    Simplification of a triple conjunction — the right conjunct of the
+    third conjunct within the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp33r")
+    s_simp3r = lb.ref(
+        "s_simp3r",
+        "( χ ∧ θ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simp3r",
+        note="simp3r",
+    )
+    res = lb.ref(
+        "res",
+        "( τ ∧ η ∧ ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ) → ψ",
+        s_simp3r,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp331(sys: System) -> Proof:
+    """simp331: ( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ ).
+
+    Simplification of a triple conjunction — the first conjunct of the
+    third conjunct's third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp331")
+    s_simp31 = lb.ref(
+        "s_simp31",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simp31",
+        note="simp31",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → φ",
+        s_simp31,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp332(sys: System) -> Proof:
+    """simp332: ( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ.
+
+    Simplification of a triple conjunction — the second conjunct of the
+    third conjunct's third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp332")
+    s_simp32 = lb.ref(
+        "s_simp32",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simp32",
+        note="simp32",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → ψ",
+        s_simp32,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp333(sys: System) -> Proof:
+    """simp333: ( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    third conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp333")
+    s_simp33 = lb.ref(
+        "s_simp33",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simp33",
+        note="simp33",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ) → χ",
+        s_simp33,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp321(sys: System) -> Proof:
+    """simp321: ( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → φ ).
+
+    Simplification of a triple conjunction — the first conjunct of the
+    second conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp321")
+    s_simp21 = lb.ref(
+        "s_simp21",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → φ",
+        ref="simp21",
+        note="simp21",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → φ",
+        s_simp21,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp322(sys: System) -> Proof:
+    """simp322: ( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → ψ.
+
+    Simplification of a triple conjunction — the second conjunct of the
+    second conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp322")
+    s_simp22 = lb.ref(
+        "s_simp22",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → ψ",
+        ref="simp22",
+        note="simp22",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → ψ",
+        s_simp22,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
+def prove_simp323(sys: System) -> Proof:
+    """simp323: ( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    second conjunct of the third conjunct.
+    """
+    lb = ProofBuilder(sys, "simp323")
+    s_simp23 = lb.ref(
+        "s_simp23",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → χ",
+        ref="simp23",
+        note="simp23",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ζ ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ) → χ",
+        s_simp23,
+        ref="3ad2ant3",
+        note="3ad2ant3",
+    )
+    return lb.build(res)
+
+
 def prove_simp11l(sys: System) -> Proof:
-    """simp11l: ( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ∧ η ) → φ.
+    """simp11l: ( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ∧ η ) → φ ).
 
     Simplification from a triple conjunction with two additional
     antecedents — the left conjunct of the first conjunct.
@@ -15884,6 +20103,29 @@ def prove_simp11r(sys: System) -> Proof:
         "res",
         "( ( ( φ ∧ ψ ) ∧ χ ∧ θ ) ∧ τ ∧ η ) → ψ",
         s_simp1r,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp1ll(sys: System) -> Proof:
+    """simp1ll: ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ∧ τ ) → φ ).
+
+    Simplify a nested double conjunction from a triple conjunction — the
+    left inner conjunct of the first conjunct.
+    """
+    lb = ProofBuilder(sys, "simp1ll")
+    s_simpll = lb.ref(
+        "s_simpll",
+        "( ( φ ∧ ψ ) ∧ χ ) → φ",
+        ref="simpll",
+        note="simpll",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ∧ τ ) → φ",
+        s_simpll,
         ref="3ad2ant1",
         note="3ad2ant1",
     )
@@ -15960,6 +20202,101 @@ def prove_simp13(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_simp113(sys: System) -> Proof:
+    """simp113: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → χ.
+
+    Simplification of a triple conjunction with four additional
+    antecedents — from a doubly-nested triple conjunction to the
+    third conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp113")
+    s_simp13 = lb.ref(
+        "s_simp13",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) → χ",
+        ref="simp13",
+        note="simp13",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ∧ χ ) ∧ θ ∧ τ ) ∧ η ∧ ζ ) → χ",
+        s_simp13,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp131(sys: System) -> Proof:
+    """simp131: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → φ ).
+
+    Simplification of a triple conjunction with two additional
+    antecedents — the first conjunct of the third conjunct of the
+    innermost group.
+    """
+    lb = ProofBuilder(sys, "simp131")
+    s_simp31 = lb.ref(
+        "s_simp31",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → φ",
+        ref="simp31",
+        note="simp31",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → φ",
+        s_simp31,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp132(sys: System) -> Proof:
+    """simp132: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → ψ.
+
+    Simplification of a triple conjunction with two additional
+    antecedents — the second conjunct of the third conjunct of the
+    innermost group.
+    """
+    lb = ProofBuilder(sys, "simp132")
+    s_simp32 = lb.ref(
+        "s_simp32",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → ψ",
+        ref="simp32",
+        note="simp32",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → ψ",
+        s_simp32,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp133(sys: System) -> Proof:
+    """simp133: ( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → χ.
+
+    Simplification of a triple conjunction — the third conjunct of the
+    third conjunct of the innermost group.
+    """
+    lb = ProofBuilder(sys, "simp133")
+    s_simp33 = lb.ref(
+        "s_simp33",
+        "( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) → χ",
+        ref="simp33",
+        note="simp33",
+    )
+    res = lb.ref(
+        "res",
+        "( ( θ ∧ τ ∧ ( φ ∧ ψ ∧ χ ) ) ∧ η ∧ ζ ) → χ",
+        s_simp33,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
 def prove_simp13l(sys: System) -> Proof:
     """simp13l: ( ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ∧ η ) → φ ).
 
@@ -15977,6 +20314,29 @@ def prove_simp13l(sys: System) -> Proof:
         "res",
         "( ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ∧ η ) → φ )",
         s_simp3l,
+        ref="3ad2ant1",
+        note="3ad2ant1",
+    )
+    return lb.build(res)
+
+
+def prove_simp13r(sys: System) -> Proof:
+    """simp13r: ( ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ∧ η ) → ψ ).
+
+    Simplification from a nested triple conjunction — the right conjunct of
+    the third conjunct of the innermost triple.
+    """
+    lb = ProofBuilder(sys, "simp13r")
+    s_simp3r = lb.ref(
+        "s_simp3r",
+        "( χ ∧ θ ∧ ( φ ∧ ψ ) ) → ψ",
+        ref="simp3r",
+        note="simp3r",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( χ ∧ θ ∧ ( φ ∧ ψ ) ) ∧ τ ∧ η ) → ψ )",
+        s_simp3r,
         ref="3ad2ant1",
         note="3ad2ant1",
     )
@@ -16061,6 +20421,31 @@ def prove_anabss3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_syld3an1(sys: System) -> Proof:
+    """syld3an1: ( χ ∧ ψ ∧ θ ) → τ.
+
+    Syllogism inference combined with alteration of the first conjunct
+    in a triple conjunction.
+    (Contributed by NM, 1-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syld3an1")
+    h1 = lb.hyp("syld3an1.1", "( χ ∧ ψ ∧ θ ) → φ")
+    h2 = lb.hyp("syld3an1.2", "( φ ∧ ψ ∧ θ ) → τ")
+    s1 = lb.ref("s1", "( χ ∧ ψ ∧ θ ) → ψ", ref="simp2", note="simp2")
+    s2 = lb.ref("s2", "( χ ∧ ψ ∧ θ ) → θ", ref="simp3", note="simp3")
+    res = lb.ref(
+        "res",
+        "( χ ∧ ψ ∧ θ ) → τ",
+        h1,
+        s1,
+        s2,
+        h2,
+        ref="syl3anc",
+        note="syl3anc syld3an1.1, s1, s2, syld3an1.2",
+    )
+    return lb.build(res)
+
+
 def prove_syld3an3(sys: System) -> Proof:
     """syld3an3: ( φ ∧ ψ ∧ χ ) → τ.
 
@@ -16082,6 +20467,38 @@ def prove_syld3an3(sys: System) -> Proof:
         h2,
         ref="syl3anc",
         note="syl3anc s1, s2, syld3an3.1, syld3an3.2",
+    )
+    return lb.build(res)
+
+
+def prove_syld3an2(sys: System) -> Proof:
+    """syld3an2: ( φ ∧ χ ∧ θ ) → τ.
+
+    Syllogism inference combined with alteration of the second conjunct
+    in a triple conjunction.
+    (Contributed by NM, 1-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syld3an2")
+    h1 = lb.hyp("syld3an2.1", "( φ ∧ χ ∧ θ ) → ψ")
+    h2 = lb.hyp("syld3an2.2", "( φ ∧ ψ ∧ θ ) → τ")
+    s1 = lb.ref("s1", "( φ ∧ χ ∧ θ ) → φ", ref="simp1", note="simp1")
+    s2 = lb.ref("s2", "( φ ∧ χ ∧ θ ) → θ", ref="simp3", note="simp3")
+    s3 = lb.ref(
+        "s3",
+        "( φ ∧ χ ∧ θ ) → ( φ ∧ ψ ∧ θ )",
+        s1,
+        h1,
+        s2,
+        ref="3jca",
+        note="3jca s1, syld3an2.1, s2",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → τ",
+        s3,
+        h2,
+        ref="syl",
+        note="syl s3, syld3an2.2",
     )
     return lb.build(res)
 
@@ -16219,19 +20636,1433 @@ def prove_syl2an3an(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_syl3an3(sys: System) -> Proof:
+    """syl3an3: ( ψ ∧ χ ∧ φ ) → τ.
+
+    Syllogism inference altering the third conjunct in a triple conjunction.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an3")
+    h1 = lb.hyp("syl3an3.1", "φ → θ")
+    h2 = lb.hyp("syl3an3.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ χ ∧ φ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim3i",
+        note="3anim3i",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ χ ∧ φ ) → τ",
+        s1,
+        h2,
+        ref="syl",
+        note="syl",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an3b(sys: System) -> Proof:
+    """syl3an3b: ( ψ ∧ χ ∧ φ ) → τ.
+
+    A syllogism inference from a biconditional and an implication,
+    replacing the third conjunct.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an3b")
+    h1 = lb.hyp("syl3an3b.1", "φ ↔ θ")
+    h2 = lb.hyp("syl3an3b.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "φ → θ",
+        h1,
+        ref="biimpi",
+        note="biimpi",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ χ ∧ φ ) → τ",
+        s1,
+        h2,
+        ref="syl3an3",
+        note="syl3an3",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an3br(sys: System) -> Proof:
+    """syl3an3br: ( ψ ∧ χ ∧ φ ) → τ.
+
+    A syllogism inference from a biconditional and an implication,
+    replacing the third conjunct (reverse biconditional).
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an3br")
+    h1 = lb.hyp("syl3an3br.1", "θ ↔ φ")
+    h2 = lb.hyp("syl3an3br.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "φ → θ",
+        h1,
+        ref="biimpri",
+        note="biimpri",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ χ ∧ φ ) → τ",
+        s1,
+        h2,
+        ref="syl3an3",
+        note="syl3an3",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anr3(sys: System) -> Proof:
+    """syl3anr3: ( χ ∧ ( ψ ∧ θ ∧ φ ) ) → η.
+
+    Syllogism inference with the third conjunct rotated to the right.
+    From φ → τ and ( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η,
+    derive ( χ ∧ ( ψ ∧ θ ∧ φ ) ) → η.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anr3")
+    h1 = lb.hyp("syl3anr3.1", "φ → τ")
+    h2 = lb.hyp("syl3anr3.2", "( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ θ ∧ φ ) → ( ψ ∧ θ ∧ τ )",
+        h1,
+        ref="3anim3i",
+        note="3anim3i",
+    )
+    res = lb.ref(
+        "res",
+        "( χ ∧ ( ψ ∧ θ ∧ φ ) ) → η",
+        s1,
+        h2,
+        ref="sylan2",
+        note="sylan2",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an1(sys: System) -> Proof:
+    """syl3an1: ( φ ∧ χ ∧ θ ) → τ.
+
+    Syllogism inference altering the first conjunct in a triple conjunction.
+    From φ → ψ and ( ψ ∧ χ ∧ θ ) → τ, derive ( φ ∧ χ ∧ θ ) → τ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an1")
+    h1 = lb.hyp("syl3an1.1", "φ → ψ")
+    h2 = lb.hyp("syl3an1.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ∧ θ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim1i",
+        note="3anim1i",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl",
+        note="syl",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an1b(sys: System) -> Proof:
+    """syl3an1b: ( φ ∧ χ ∧ θ ) → τ.
+
+    Biconditional form of syl3an1, replacing the first conjunct with an
+    equivalent formula using φ ↔ ψ instead of φ → ψ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an1b")
+    h1 = lb.hyp("syl3an1b.1", "( φ ↔ ψ )")
+    h2 = lb.hyp("syl3an1b.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( φ → ψ )",
+        h1,
+        ref="biimpi",
+        note="biimpi",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl3an1",
+        note="syl3an1",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an1br(sys: System) -> Proof:
+    """syl3an1br: ( φ ∧ χ ∧ θ ) → τ.
+
+    Biconditional form of syl3an1, replacing the first conjunct with an
+    equivalent formula using ψ ↔ φ instead of φ → ψ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an1br")
+    h1 = lb.hyp("syl3an1br.1", "( ψ ↔ φ )")
+    h2 = lb.hyp("syl3an1br.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( φ → ψ )",
+        h1,
+        ref="biimpri",
+        note="biimpri",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl3an1",
+        note="syl3an1",
+    )
+    return lb.build(res)
+
+
+def prove_pm5_16(sys: System) -> Proof:
+    """pm5.16: ¬ ( ( φ ↔ ψ ) ∧ ( φ ↔ ¬ ψ ) ).
+
+    A biconditional and its negation cannot both be true.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "pm5.16")
+
+    # pm5.18: ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )",
+        ref="pm5.18",
+        note="pm5.18",
+    )
+
+    # biimpi on s1: ( φ ↔ ψ ) → ¬ ( φ ↔ ¬ ψ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ↔ ψ ) → ¬ ( φ ↔ ¬ ψ )",
+        s1,
+        ref="biimpi",
+        note="biimpi",
+    )
+
+    # imnan: ( ( φ ↔ ψ ) → ¬ ( φ ↔ ¬ ψ ) ) ↔ ¬ ( ( φ ↔ ψ ) ∧ ( φ ↔ ¬ ψ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ( φ ↔ ψ ) → ¬ ( φ ↔ ¬ ψ ) ) ↔ ¬ ( ( φ ↔ ψ ) ∧ ( φ ↔ ¬ ψ ) )",
+        ref="imnan",
+        note="imnan",
+    )
+
+    # mpbi from s2 and s3
+    res = lb.ref(
+        "res",
+        "¬ ( ( φ ↔ ψ ) ∧ ( φ ↔ ¬ ψ ) )",
+        s2,
+        s3,
+        ref="mpbi",
+        note="mpbi",
+    )
+
+    return lb.build(res)
+
+
+def prove_ad4ant124(sys: System) -> Proof:
+    """ad4ant124: ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) → θ.
+
+    Deduction adding two conjuncts to the antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad4ant124")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="3expa",
+        note="3expa ad4ant3.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) → θ",
+        s1,
+        ref="adantlr",
+        note="adantlr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant124OLD(sys: System) -> Proof:
+    """ad5ant124OLD: ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ.
+
+    Deduction adding two conjuncts to the antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant124OLD")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant124",
+        note="ad4ant124 ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ",
+        s1,
+        ref="adantr",
+        note="adantr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant124(sys: System) -> Proof:
+    """ad5ant124: ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ ).
+
+    Deduction adding conjuncts at positions 1, 2, and 4.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant124")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( φ ∧ ψ ) ∧ χ ) → θ )",
+        h1,
+        ref="3expa",
+        note="3expa ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ χ ) ∧ η ) → θ )",
+        s1,
+        ref="ad4ant13",
+        note="ad4ant13 s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant125(sys: System) -> Proof:
+    """ad5ant125: ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ η ) ∧ χ ) → θ.
+
+    Deduction adding conjuncts at positions 1, 2, and 5.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ η ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant125")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="3expa",
+        note="3expa ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ ψ ) ∧ τ ) ∧ η ) ∧ χ ) → θ",
+        s1,
+        ref="ad4ant14",
+        note="ad4ant14 s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad4ant134(sys: System) -> Proof:
+    """ad4ant134: ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ.
+
+    Deduction adding a conjunct at position 3 (between φ and ψ).
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad4ant134")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="3expa",
+        note="3expa ad4ant3.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( φ ∧ τ ) ∧ ψ ) ∧ χ ) → θ",
+        s1,
+        ref="adantllr",
+        note="adantllr s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad4ant234(sys: System) -> Proof:
+    """ad4ant234: ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ.
+
+    Deduction adding a conjunct to the antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad4ant234")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="3expa",
+        note="3expa ad4ant3.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ",
+        s1,
+        ref="adantlll",
+        note="adantlll s1",
+    )
+    return lb.build(res)
+
+
+def prove_ad5ant234(sys: System) -> Proof:
+    """ad5ant234: ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ.
+
+    Deduction adding a conjunct to the antecedent.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant234")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="ad4ant234",
+        note="ad4ant234 ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( τ ∧ φ ) ∧ ψ ) ∧ χ ) ∧ η ) → θ",
+        s1,
+        ref="adantr",
+        note="adantr s1",
+    )
+    return lb.build(res)
+
+
+def prove_simp_4l(sys: System) -> Proof:
+    """simp-4l: ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-4l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) → φ",
+        s_id,
+        ref="ad4antr",
+        note="ad4antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_5l(sys: System) -> Proof:
+    """simp-5l: ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-5l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → φ",
+        s_id,
+        ref="ad5antr",
+        note="ad5antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_5r(sys: System) -> Proof:
+    """simp-5r: ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ.
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-5r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) → ψ",
+        s_id,
+        ref="ad5antlr",
+        note="ad5antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_6r(sys: System) -> Proof:
+    """simp-6r: ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ.
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-6r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → ψ",
+        s_id,
+        ref="ad6antlr",
+        note="ad6antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_6l(sys: System) -> Proof:
+    """simp-6l: ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-6l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) → φ",
+        s_id,
+        ref="ad6antr",
+        note="ad6antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_7l(sys: System) -> Proof:
+    """simp-7l: ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-7l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → φ",
+        s_id,
+        ref="ad7antr",
+        note="ad7antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_7r(sys: System) -> Proof:
+    """simp-7r: ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ.
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-7r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) → ψ",
+        s_id,
+        ref="ad7antlr",
+        note="ad7antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_8l(sys: System) -> Proof:
+    """simp-8l: ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-8l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → φ )",
+        s_id,
+        ref="ad8antr",
+        note="ad8antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_8r(sys: System) -> Proof:
+    """simp-8r: ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ ).
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-8r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) → ψ )",
+        s_id,
+        ref="ad8antlr",
+        note="ad8antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_9r(sys: System) -> Proof:
+    """simp-9r: ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ ).
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-9r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → ψ )",
+        s_id,
+        ref="ad9antlr",
+        note="ad9antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_9l(sys: System) -> Proof:
+    """simp-9l: ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-9l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) → φ )",
+        s_id,
+        ref="ad9antr",
+        note="ad9antr",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an132(sys: System) -> Proof:
+    """syl3an132: ( φ ∧ χ ∧ θ ) → η.
+
+    Syllogism inference: from φ → ψ, ( χ ∧ θ ) → τ, and ( ψ ∧ τ ) → η,
+    derive ( φ ∧ χ ∧ θ ) → η.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an132")
+    h1 = lb.hyp("syl3an132.1", "φ → ψ")
+    h2 = lb.hyp("syl3an132.2", "( χ ∧ θ ) → τ")
+    h3 = lb.hyp("syl3an132.3", "( ψ ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( χ ∧ θ ) ) → η",
+        h1,
+        h2,
+        h3,
+        ref="syl2an",
+        note="syl2an",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ θ ) → η",
+        s1,
+        ref="3impb",
+        note="3impb",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anl(sys: System) -> Proof:
+    """syl3anl: ( ( φ ∧ χ ∧ τ ) ∧ ζ ) → σ.
+
+    Syllogism inference combining 3anim123i and sylan.
+    From φ → ψ, χ → θ, τ → η, and ( ( ψ ∧ θ ∧ η ) ∧ ζ ) → σ,
+    deduce ( ( φ ∧ χ ∧ τ ) ∧ ζ ) → σ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anl")
+    h1 = lb.hyp("syl3anl.1", "φ → ψ")
+    h2 = lb.hyp("syl3anl.2", "χ → θ")
+    h3 = lb.hyp("syl3anl.3", "τ → η")
+    h4 = lb.hyp("syl3anl.4", "( ( ψ ∧ θ ∧ η ) ∧ ζ ) → σ")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ∧ τ ) → ( ψ ∧ θ ∧ η )",
+        h1,
+        h2,
+        h3,
+        ref="3anim123i",
+        note="3anim123i",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ χ ∧ τ ) ∧ ζ ) → σ",
+        s1,
+        h4,
+        ref="sylan",
+        note="sylan",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anl1(sys: System) -> Proof:
+    """syl3anl1: ( ( φ ∧ χ ∧ θ ) ∧ τ ) → η.
+
+    Inference form combining 3anim1i and sylan.
+    From φ → ψ and ( ( ψ ∧ χ ∧ θ ) ∧ τ ) → η,
+    deduce ( ( φ ∧ χ ∧ θ ) ∧ τ ) → η.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anl1")
+    h1 = lb.hyp("syl3anl1.1", "φ → ψ")
+    h2 = lb.hyp("syl3anl1.2", "( ( ψ ∧ χ ∧ θ ) ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ χ ∧ θ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim1i",
+        note="3anim1i syl3anl1.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ χ ∧ θ ) ∧ τ ) → η",
+        s1,
+        h2,
+        ref="sylan",
+        note="sylan s1, syl3anl1.2",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an2(sys: System) -> Proof:
+    """syl3an2: ( ψ ∧ φ ∧ θ ) → τ.
+
+    Syllogism inference altering the second conjunct in a triple conjunction.
+    From φ → χ and ( ψ ∧ χ ∧ θ ) → τ, derive ( ψ ∧ φ ∧ θ ) → τ.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an2")
+    h1 = lb.hyp("syl3an2.1", "φ → χ")
+    h2 = lb.hyp("syl3an2.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ φ ∧ θ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim2i",
+        note="3anim2i",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ φ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl",
+        note="syl",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an2b(sys: System) -> Proof:
+    """syl3an2b: ( ψ ∧ φ ∧ θ ) → τ.
+
+    A syllogism inference from a biconditional and an implication,
+    replacing the second conjunct.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an2b")
+    h1 = lb.hyp("syl3an2b.1", "φ ↔ χ")
+    h2 = lb.hyp("syl3an2b.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "φ → χ",
+        h1,
+        ref="biimpi",
+        note="biimpi",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ φ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl3an2",
+        note="syl3an2",
+    )
+    return lb.build(res)
+
+
+def prove_syl3an2br(sys: System) -> Proof:
+    """syl3an2br: ( ψ ∧ φ ∧ θ ) → τ.
+
+    A syllogism inference from a biconditional (reverse direction) and an
+    implication, replacing the second conjunct.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3an2br")
+    h1 = lb.hyp("syl3an2br.1", "χ ↔ φ")
+    h2 = lb.hyp("syl3an2br.2", "( ψ ∧ χ ∧ θ ) → τ")
+    s1 = lb.ref(
+        "s1",
+        "φ → χ",
+        h1,
+        ref="biimpri",
+        note="biimpri",
+    )
+    res = lb.ref(
+        "res",
+        "( ψ ∧ φ ∧ θ ) → τ",
+        s1,
+        h2,
+        ref="syl3an2",
+        note="syl3an2",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anl2(sys: System) -> Proof:
+    """syl3anl2: ( ( ψ ∧ φ ∧ θ ) ∧ τ ) → η.
+
+    A syllogism inference using 3anim2i and sylan to substitute the second
+    conjunct of a triple conjunction nested inside a conjunction antecedent.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anl2")
+    h1 = lb.hyp("syl3anl2.1", "φ → χ")
+    h2 = lb.hyp("syl3anl2.2", "( ( ψ ∧ χ ∧ θ ) ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ φ ∧ θ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim2i",
+        note="3anim2i",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ψ ∧ φ ∧ θ ) ∧ τ ) → η",
+        s1,
+        h2,
+        ref="sylan",
+        note="sylan",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anl3(sys: System) -> Proof:
+    """syl3anl3: ( ( ψ ∧ χ ∧ φ ) ∧ τ ) → η.
+
+    A syllogism inference using 3anim3i and sylan to substitute the third
+    conjunct of a triple conjunction nested inside a conjunction antecedent.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anl3")
+    h1 = lb.hyp("syl3anl3.1", "φ → θ")
+    h2 = lb.hyp("syl3anl3.2", "( ( ψ ∧ χ ∧ θ ) ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ χ ∧ φ ) → ( ψ ∧ χ ∧ θ )",
+        h1,
+        ref="3anim3i",
+        note="3anim3i",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ψ ∧ χ ∧ φ ) ∧ τ ) → η",
+        s1,
+        h2,
+        ref="sylan",
+        note="sylan",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anr1(sys: System) -> Proof:
+    """syl3anr1: ( χ ∧ ( φ ∧ θ ∧ τ ) ) → η.
+
+    Syllogism inference with different antecedents in a triple conjunction.
+    If φ → ψ and ( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η, then ( χ ∧ ( φ ∧ θ ∧ τ ) ) → η.
+    (Contributed by NM, 1-Apr-1997.)
+    """
+    lb = ProofBuilder(sys, "syl3anr1")
+    h1 = lb.hyp("syl3anr1.1", "φ → ψ")
+    h2 = lb.hyp("syl3anr1.2", "( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ θ ∧ τ ) → ( ψ ∧ θ ∧ τ )",
+        h1,
+        ref="3anim1i",
+        note="3anim1i",
+    )
+
+    res = lb.ref(
+        "res",
+        "( χ ∧ ( φ ∧ θ ∧ τ ) ) → η",
+        s1,
+        h2,
+        ref="sylan2",
+        note="sylan2",
+    )
+    return lb.build(res)
+
+
+def prove_syl3anr2(sys: System) -> Proof:
+    """syl3anr2: ( χ ∧ ( ψ ∧ φ ∧ τ ) ) → η.
+
+    Syllogism inference with the second conjunct rotated to the right.
+    From φ → θ and ( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η,
+    derive ( χ ∧ ( ψ ∧ φ ∧ τ ) ) → η.
+    (Contributed by NM, 5-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl3anr2")
+    h1 = lb.hyp("syl3anr2.1", "φ → θ")
+    h2 = lb.hyp("syl3anr2.2", "( χ ∧ ( ψ ∧ θ ∧ τ ) ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( ψ ∧ φ ∧ τ ) → ( ψ ∧ θ ∧ τ )",
+        h1,
+        ref="3anim2i",
+        note="3anim2i",
+    )
+    res = lb.ref(
+        "res",
+        "( χ ∧ ( ψ ∧ φ ∧ τ ) ) → η",
+        s1,
+        h2,
+        ref="sylan2",
+        note="sylan2",
+    )
+    return lb.build(res)
+
+
+def prove_simp_10r(sys: System) -> Proof:
+    """simp-10r: ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ ).
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-10r")
+    s_id = lb.ref(
+        "s_id",
+        "ψ → ψ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → ψ )",
+        s_id,
+        ref="ad10antlr",
+        note="ad10antlr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_10l(sys: System) -> Proof:
+    """simp-10l: ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-10l")
+    s_id = lb.ref(
+        "s_id",
+        "φ → φ",
+        ref="id",
+        note="id",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) → φ )",
+        s_id,
+        ref="ad10antr",
+        note="ad10antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_11l(sys: System) -> Proof:
+    """simp-11l: ( ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → φ ).
+
+    Simplify a deeply nested conjunction to the left conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-11l")
+    s_id = lb.ref(
+        "s_id",
+        "( φ ∧ ψ ) → φ",
+        ref="simpl",
+        note="simpl",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → φ )",
+        s_id,
+        ref="ad10antr",
+        note="ad10antr",
+    )
+    return lb.build(res)
+
+
+def prove_simp_11r(sys: System) -> Proof:
+    """simp-11r: ( ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ.
+
+    Simplify a deeply nested conjunction to the right conjunct.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "simp-11r")
+    s_id = lb.ref(
+        "s_id",
+        "( φ ∧ ψ ) → ψ",
+        ref="simpr",
+        note="simpr",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( ( ( ( ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ θ ) ∧ τ ) ∧ η ) ∧ ζ ) ∧ σ ) ∧ ρ ) ∧ μ ) ∧ λ ) ∧ κ ) → ψ )",
+        s_id,
+        ref="ad10antr",
+        note="ad10antr",
+    )
+    return lb.build(res)
+
+
+def prove_3adant1l(sys: System) -> Proof:
+    """3adant1l: ( ( τ ∧ φ ) ∧ ψ ∧ χ ) → θ.
+
+    Deduction adding a conjunct to the left of the first antecedent.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( ( τ ∧ φ ) ∧ ψ ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant1l")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s_simpr = lb.ref(
+        "s_simpr",
+        "( τ ∧ φ ) → φ",
+        ref="simpr",
+        note="simpr",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( τ ∧ φ ) ∧ ψ ∧ χ ) → θ",
+        s_simpr,
+        h1,
+        ref="syl3an1",
+        note="syl3an1",
+    )
+
+    return lb.build(res)
+
+
 # New migrations register here beside their implementation.
+
+
+def prove_3adant1r(sys: System) -> Proof:
+    """3adant1r: ( ( φ ∧ τ ) ∧ ψ ∧ χ ) → θ.
+
+    Deduction adding a conjunct to the right of the first antecedent.
+    From ( φ ∧ ψ ∧ χ ) → θ, derive ( ( φ ∧ τ ) ∧ ψ ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3adant1r")
+    h1 = lb.hyp("ad4ant3.1", "( φ ∧ ψ ∧ χ ) → θ")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ τ ) → φ",
+        ref="simpl",
+        note="simpl",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ τ ) ∧ ψ ∧ χ ) → θ",
+        s1,
+        h1,
+        ref="syl3an1",
+        note="syl3an1",
+    )
+
+    return lb.build(res)
+
+
+def prove_3impdi(sys: System) -> Proof:
+    """3impdi: ( φ ∧ ψ ∧ χ ) → θ.
+
+    From ( ( φ ∧ ψ ) ∧ ( φ ∧ χ ) ) → θ, deduce ( φ ∧ ψ ∧ χ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3impdi")
+    h1 = lb.hyp("3impdi.1", "( ( ( φ ∧ ψ ) ∧ ( φ ∧ χ ) ) → θ )")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( ψ ∧ χ ) ) → θ",
+        h1,
+        ref="anandis",
+        note="anandis",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ∧ χ ) → θ",
+        s1,
+        ref="3impb",
+        note="3impb",
+    )
+    return lb.build(res)
+
+
 # The aggregate registry imports this mapping, avoiding another edit to global shim files.
+
+
+def prove_3impdir(sys: System) -> Proof:
+    """3impdir: ( φ ∧ χ ∧ ψ ) → θ.
+
+    From ( ( φ ∧ ψ ) ∧ ( χ ∧ ψ ) ) → θ, deduce ( φ ∧ χ ∧ ψ ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3impdir")
+    h1 = lb.hyp("3impdir.1", "( ( φ ∧ ψ ) ∧ ( χ ∧ ψ ) ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ χ ) ∧ ψ ) → θ",
+        h1,
+        ref="anandirs",
+        note="anandirs",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ χ ∧ ψ ) → θ",
+        s1,
+        ref="3impa",
+        note="3impa",
+    )
+    return lb.build(res)
+
+
+def prove_syl2an23an(sys: System) -> Proof:
+    """syl2an23an: ( θ ∧ φ ) → η.
+
+    Syllogism inference: from φ → ψ, φ → χ, ( θ ∧ φ ) → τ, and
+    ( ψ ∧ χ ∧ τ ) → η, derive ( θ ∧ φ ) → η.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "syl2an23an")
+    h1 = lb.hyp("syl2an23an.1", "φ → ψ")
+    h2 = lb.hyp("syl2an23an.2", "φ → χ")
+    h3 = lb.hyp("syl2an23an.3", "( θ ∧ φ ) → τ")
+    h4 = lb.hyp("syl2an23an.4", "( ψ ∧ χ ∧ τ ) → η")
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ ( θ ∧ φ ) ) → η",
+        h1,
+        h2,
+        h3,
+        h4,
+        ref="syl2an3an",
+        note="syl2an3an",
+    )
+    res = lb.ref(
+        "res",
+        "( θ ∧ φ ) → η",
+        s1,
+        ref="anabss7",
+        note="anabss7",
+    )
+    return lb.build(res)
+
+
+def prove_3anibar(sys: System) -> Proof:
+    """3anibar: ( φ ∧ ψ ∧ χ ) → ( θ ↔ τ ).
+
+    From a triple conjunction implying θ ↔ ( χ ∧ τ ), use simp3
+    (which gives χ) and mpbirand to simplify to θ ↔ τ.
+    """
+    lb = ProofBuilder(sys, "3anibar")
+    h1 = lb.hyp("3anibar.1", "( ( φ ∧ ψ ∧ χ ) → ( θ ↔ ( χ ∧ τ ) ) )")
+
+    s_simp3 = lb.ref(
+        "s_simp3",
+        "( φ ∧ ψ ∧ χ ) → χ",
+        ref="simp3",
+        note="simp3",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ∧ ψ ∧ χ ) → ( θ ↔ τ )",
+        s_simp3,
+        h1,
+        ref="mpbirand",
+        note="mpbirand",
+    )
+
+    return lb.build(res)
+
+
+def prove_ad5ant123(sys: System) -> Proof:
+    """ad5ant123: ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) ∧ η ) → θ.
+
+    Deduction adding conjunctions at positions 1, 2, and 3.
+    Given ( φ ∧ ψ ∧ χ ) → θ, derive ( ( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) ∧ η ) → θ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "ad5ant123")
+    h1 = lb.hyp("ad5ant.1", "( φ ∧ ψ ∧ χ ) → θ")
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∧ ψ ) ∧ χ ) → θ",
+        h1,
+        ref="3expa",
+        note="3expa ad5ant.1",
+    )
+    res = lb.ref(
+        "res",
+        "( ( ( ( φ ∧ ψ ) ∧ χ ) ∧ τ ) ∧ η ) → θ",
+        s1,
+        ref="ad2antrr",
+        note="ad2antrr s1",
+    )
+    return lb.build(res)
+
+
+def prove_simp222(sys: System) -> Proof:
+    """simp222: ( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → ψ.
+
+    Simplification of a triple conjunction — the second conjunct of the
+    second conjunct of the second conjunct.
+    """
+    lb = ProofBuilder(sys, "simp222")
+    s_simp22 = lb.ref(
+        "s_simp22",
+        "( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) → ψ",
+        ref="simp22",
+        note="simp22",
+    )
+    res = lb.ref(
+        "res",
+        "( η ∧ ( θ ∧ ( φ ∧ ψ ∧ χ ) ∧ τ ) ∧ ζ ) → ψ",
+        s_simp22,
+        ref="3ad2ant2",
+        note="3ad2ant2",
+    )
+    return lb.build(res)
+
+
+def prove_3anandirs(sys: System) -> Proof:
+    """3anandirs: ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) → τ.
+
+    Inference distributing a conjunction over a triple conjunction.  Given
+    a hypothesis ( ( ( φ ∧ θ ) ∧ ( ψ ∧ θ ) ∧ ( χ ∧ θ ) ) → τ ), derive
+    ( ( ( φ ∧ ψ ∧ χ ) ∧ θ ) → τ ).
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3anandirs")
+    h1 = lb.hyp("3anandirs.1", "( ( ( φ ∧ θ ) ∧ ( ψ ∧ θ ) ∧ ( χ ∧ θ ) ) → τ )")
+    s_simpl1 = lb.ref(
+        "s_simpl1",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → φ",
+        ref="simpl1",
+        note="simpl1",
+    )
+    s_simpr = lb.ref(
+        "s_simpr",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → θ",
+        ref="simpr",
+        note="simpr",
+    )
+    s_simpl2 = lb.ref(
+        "s_simpl2",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → ψ",
+        ref="simpl2",
+        note="simpl2",
+    )
+    s_simpl3 = lb.ref(
+        "s_simpl3",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → χ",
+        ref="simpl3",
+        note="simpl3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ∧ χ ) ∧ θ ) → τ",
+        s_simpl1,
+        s_simpr,
+        s_simpl2,
+        s_simpr,
+        s_simpl3,
+        s_simpr,
+        h1,
+        ref="syl222anc",
+        note="syl222anc",
+    )
+    return lb.build(res)
+
+
+def prove_3anandis(sys: System) -> Proof:
+    """3anandis: ( φ ∧ ( ψ ∧ χ ∧ θ ) ) → τ.
+
+    Inference combining a triple conjunction with a conjunction: from a
+    hypothesis ( ( ( φ ∧ ψ ) ∧ ( φ ∧ χ ) ∧ ( φ ∧ θ ) ) → τ ), derive
+    ( φ ∧ ( ψ ∧ χ ∧ θ ) ) → τ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "3anandis")
+    h1 = lb.hyp("3anandis.1", "( ( ( φ ∧ ψ ) ∧ ( φ ∧ χ ) ∧ ( φ ∧ θ ) ) → τ )")
+    s_simpl = lb.ref(
+        "s_simpl",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → φ",
+        ref="simpl",
+        note="simpl",
+    )
+    s_simpr1 = lb.ref(
+        "s_simpr1",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → ψ",
+        ref="simpr1",
+        note="simpr1",
+    )
+    s_simpr2 = lb.ref(
+        "s_simpr2",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → χ",
+        ref="simpr2",
+        note="simpr2",
+    )
+    s_simpr3 = lb.ref(
+        "s_simpr3",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → θ",
+        ref="simpr3",
+        note="simpr3",
+    )
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∧ χ ∧ θ ) ) → τ",
+        s_simpl,
+        s_simpr1,
+        s_simpl,
+        s_simpr2,
+        s_simpl,
+        s_simpr3,
+        h1,
+        ref="syl222anc",
+        note="syl222anc",
+    )
+    return lb.build(res)
+
+
 MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "3imp3i2an": prove_3imp3i2an,
+    "intn3an2d": prove_intn3an2d,
+    "intn3an3d": prove_intn3an3d,
+    "mp3an2ani": prove_mp3an2ani,
+    "mp3an3an": prove_mp3an3an,
+    "mp3anl2": prove_mp3anl2,
+    "mp3anr2": prove_mp3anr2,
+    "simprl2": prove_simprl2,
     "13an22anass": prove_13an22anass,
+    "abab": prove_abab,
+    "3anandirs": prove_3anandirs,
+    "3anandis": prove_3anandis,
     "3ad2ant1": prove_3ad2ant1,
     "3ad2ant2": prove_3ad2ant2,
     "3ad2ant3": prove_3ad2ant3,
+    "3ad2antl1": prove_3ad2antl1,
+    "3ad2antl2": prove_3ad2antl2,
+    "3ad2antl3": prove_3ad2antl3,
+    "3ad2antr3": prove_3ad2antr3,
     "3adant1": prove_3adant1,
+    "3adant1l": prove_3adant1l,
+    "3adant1r": prove_3adant1r,
     "3adant2": prove_3adant2,
+    "3adant2l": prove_3adant2l,
+    "3adant2r": prove_3adant2r,
+    "3adant3l": prove_3adant3l,
+    "3adant3r": prove_3adant3r,
+    "3adant3r1": prove_3adant3r1,
+    "3adant3r2": prove_3adant3r2,
+    "3adantr1": prove_3adantr1,
+    "3adantr2": prove_3adantr2,
     "3adantl3": prove_3adantl3,
+    "3adantl1": prove_3adantl1,
+    "3adantl2": prove_3adantl2,
+    "3impdi": prove_3impdi,
+    "3impdir": prove_3impdir,
     "3anasss": prove_3anasss,
+    "3anibar": prove_3anibar,
     "3anidm23": prove_3anidm23,
+    "3anim1i": prove_3anim1i,
     "3anim123i": prove_3anim123i,
+    "3anim2i": prove_3anim2i,
+    "3anim3i": prove_3anim3i,
     "3simpb": prove_3simpb,
     "3simpc": prove_3simpc,
     "a2and": prove_a2and,
@@ -16240,14 +22071,47 @@ MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "ad2ant2r": prove_ad2ant2r,
     "ad2ant2rl": prove_ad2ant2rl,
     "ad2antlr": prove_ad2antlr,
+    "ad2antrr": prove_ad2antrr,
+    "ad3antlr": prove_ad3antlr,
+    "ad3antrrr": prove_ad3antrrr,
+    "ad4antr": prove_ad4antr,
+    "ad5antr": prove_ad5antr,
+    "ad6antr": prove_ad6antr,
+    "ad7antr": prove_ad7antr,
+    "ad8antr": prove_ad8antr,
+    "ad9antr": prove_ad9antr,
+    "ad9antlr": prove_ad9antlr,
+    "ad10antr": prove_ad10antr,
+    "ad10antlr": prove_ad10antlr,
+    "ad6antlr": prove_ad6antlr,
     "ad4ant13": prove_ad4ant13,
+    "ad4ant124": prove_ad4ant124,
+    "ad4ant134": prove_ad4ant134,
     "ad4ant14": prove_ad4ant14,
     "ad4ant23": prove_ad4ant23,
     "ad4ant24": prove_ad4ant24,
+    "ad4ant234": prove_ad4ant234,
+    "ad5ant234": prove_ad5ant234,
+    "ad4antlr": prove_ad4antlr,
+    "simp-4r": prove_simp_4r,
+    "ad5ant123": prove_ad5ant123,
+    "ad5ant124": prove_ad5ant124,
+    "ad5ant124OLD": prove_ad5ant124OLD,
+    "ad5ant125": prove_ad5ant125,
+    "ad5ant13": prove_ad5ant13,
+    "ad5ant134": prove_ad5ant134,
+    "ad5ant134OLD": prove_ad5ant134OLD,
+    "ad5ant135": prove_ad5ant135,
+    "ad5ant135OLD": prove_ad5ant135OLD,
     "ad5ant14": prove_ad5ant14,
+    "ad5ant145": prove_ad5ant145,
     "ad5ant15": prove_ad5ant15,
+    "ad5ant23": prove_ad5ant23,
     "ad5ant24": prove_ad5ant24,
+    "ad5ant245": prove_ad5ant245,
     "ad5ant25": prove_ad5ant25,
+    "ad5ant235": prove_ad5ant235,
+    "ad5antlr": prove_ad5antlr,
     "adantl3r": prove_adantl3r,
     "adantl4r": prove_adantl4r,
     "adantl5r": prove_adantl5r,
@@ -16257,9 +22121,12 @@ MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "adantllr": prove_adantllr,
     "adantlr": prove_adantlr,
     "adantlrl": prove_adantlrl,
+    "adantlrr": prove_adantlrr,
     "adantrll": prove_adantrll,
     "adantrlr": prove_adantrlr,
     "adantrrl": prove_adantrrl,
+    "ad7antlr": prove_ad7antlr,
+    "ad8antlr": prove_ad8antlr,
     "adantrrr": prove_adantrrr,
     "anabsan": prove_anabsan,
     "anabsan2": prove_anabsan2,
@@ -16278,62 +22145,190 @@ MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "anim1ci": prove_anim1ci,
     "anim1i": prove_anim1i,
     "anim2i": prove_anim2i,
+    "biadan": prove_biadan,
+    "biadani": prove_biadani,
+    "biadanii": prove_biadanii,
     "bi2anan9": prove_bi2anan9,
     "bi2anan9r": prove_bi2anan9r,
     "im2anan9": prove_im2anan9,
     "im2anan9r": prove_im2anan9r,
+    "intn3an1d": prove_intn3an1d,
     "mpan9": prove_mpan9,
     "mpanl1": prove_mpanl1,
     "mpanl2": prove_mpanl2,
     "mpanlr1": prove_mpanlr1,
     "mpanr1": prove_mpanr1,
     "pclem6": prove_pclem6,
+    "pm5.16": prove_pm5_16,
     "pm5.31r": prove_pm5_31r,
     "simp1": prove_simp1,
     "simp11": prove_simp11,
+    "simp111": prove_simp111,
     "simp11l": prove_simp11l,
     "simp11r": prove_simp11r,
+    "simp1ll": prove_simp1ll,
     "simp12": prove_simp12,
+    "simp112": prove_simp112,
+    "simp113": prove_simp113,
     "simp12l": prove_simp12l,
     "simp12r": prove_simp12r,
     "simp13": prove_simp13,
     "simp13l": prove_simp13l,
+    "simp13r": prove_simp13r,
+    "simp131": prove_simp131,
+    "simp132": prove_simp132,
+    "simp133": prove_simp133,
     "simp1bi": prove_simp1bi,
     "simp1d": prove_simp1d,
+    "simp1i": prove_simp1i,
     "simp1l": prove_simp1l,
+    "simp1l1": prove_simp1l1,
+    "simp1l2": prove_simp1l2,
+    "simp1l3": prove_simp1l3,
+    "simp1lr": prove_simp1lr,
     "simp1r": prove_simp1r,
+    "simp1r1": prove_simp1r1,
+    "simp1r2": prove_simp1r2,
+    "simp1r3": prove_simp1r3,
+    "simp1rl": prove_simp1rl,
+    "simp1rr": prove_simp1rr,
     "simp2": prove_simp2,
+    "simp2i": prove_simp2i,
     "simp21": prove_simp21,
     "simp21l": prove_simp21l,
+    "simp21r": prove_simp21r,
     "simp22": prove_simp22,
+    "simp222": prove_simp222,
     "simp22l": prove_simp22l,
+    "simp22r": prove_simp22r,
     "simp23": prove_simp23,
+    "simp23l": prove_simp23l,
     "simp23r": prove_simp23r,
+    "simp231": prove_simp231,
+    "simp232": prove_simp232,
+    "simp233": prove_simp233,
+    "simp121": prove_simp121,
+    "simp122": prove_simp122,
+    "simp123": prove_simp123,
+    "simp211": prove_simp211,
+    "simp212": prove_simp212,
+    "simp213": prove_simp213,
+    "simp221": prove_simp221,
+    "simp223": prove_simp223,
     "simp2bi": prove_simp2bi,
     "simp2d": prove_simp2d,
     "simp2l": prove_simp2l,
+    "simp2l1": prove_simp2l1,
+    "simp2l3": prove_simp2l3,
+    "simp2l2": prove_simp2l2,
+    "simp2ll": prove_simp2ll,
+    "simp2lr": prove_simp2lr,
     "simp2r": prove_simp2r,
+    "simp2r1": prove_simp2r1,
+    "simp2r2": prove_simp2r2,
+    "simp2r3": prove_simp2r3,
     "simp2rl": prove_simp2rl,
+    "simp2rr": prove_simp2rr,
     "simp3": prove_simp3,
+    "simp3i": prove_simp3i,
     "simp31": prove_simp31,
+    "simp311": prove_simp311,
+    "simp31l": prove_simp31l,
+    "simp31r": prove_simp31r,
+    "simp312": prove_simp312,
+    "simp313": prove_simp313,
     "simp32": prove_simp32,
+    "simp321": prove_simp321,
+    "simp322": prove_simp322,
+    "simp323": prove_simp323,
+    "simp32l": prove_simp32l,
+    "simp32r": prove_simp32r,
     "simp33": prove_simp33,
+    "simp33l": prove_simp33l,
+    "simp33r": prove_simp33r,
+    "simp331": prove_simp331,
+    "simp332": prove_simp332,
+    "simp333": prove_simp333,
+    "simp-4l": prove_simp_4l,
+    "simp-5l": prove_simp_5l,
+    "simp-5r": prove_simp_5r,
+    "simp-6l": prove_simp_6l,
+    "simp-7l": prove_simp_7l,
+    "simp-6r": prove_simp_6r,
+    "simp-7r": prove_simp_7r,
+    "simp-8l": prove_simp_8l,
+    "simp-8r": prove_simp_8r,
+    "simp-9r": prove_simp_9r,
+    "simp-9l": prove_simp_9l,
+    "simp-10r": prove_simp_10r,
+    "simp-10l": prove_simp_10l,
+    "simp-11l": prove_simp_11l,
+    "simp-11r": prove_simp_11r,
     "simp3bi": prove_simp3bi,
     "simp3d": prove_simp3d,
     "simp3l": prove_simp3l,
+    "simp3l1": prove_simp3l1,
+    "simp3l2": prove_simp3l2,
+    "simp3l3": prove_simp3l3,
+    "simp3ll": prove_simp3ll,
+    "simp3lr": prove_simp3lr,
     "simp3r": prove_simp3r,
+    "simp3r1": prove_simp3r1,
+    "simp3r2": prove_simp3r2,
+    "simp3r3": prove_simp3r3,
     "simp3rl": prove_simp3rl,
+    "simp3rr": prove_simp3rr,
     "simplbi2comt": prove_simplbi2comt,
+    "simpll": prove_simpll,
+    "simpll1": prove_simpll1,
+    "simpll2": prove_simpll2,
+    "simpll3": prove_simpll3,
+    "simplll": prove_simplll,
+    "simpllr": prove_simpllr,
     "simplr": prove_simplr,
+    "simplr1": prove_simplr1,
     "simplr2": prove_simplr2,
+    "simplr3": prove_simplr3,
+    "simplrl": prove_simplrl,
     "simplrr": prove_simplrr,
+    "simpr13": prove_simpr13,
+    "simpr3": prove_simpr3,
+    "simpr23": prove_simpr23,
+    "simprl1": prove_simprl1,
+    "simprl3": prove_simprl3,
+    "simpr31": prove_simpr31,
+    "simpr32": prove_simpr32,
+    "simpr33": prove_simpr33,
+    "simpr3l": prove_simpr3l,
+    "simpr3r": prove_simpr3r,
+    "simprr1": prove_simprr1,
+    "simprr2": prove_simprr2,
     "simprr3": prove_simprr3,
     "syl2an": prove_syl2an,
     "syl2an2r": prove_syl2an2r,
     "syl2an3an": prove_syl2an3an,
+    "syl2an23an": prove_syl2an23an,
     "syl2anb": prove_syl2anb,
+    "syl2anbr": prove_syl2anbr,
     "syl2anr": prove_syl2anr,
     "syl3an": prove_syl3an,
+    "syl3an1": prove_syl3an1,
+    "syl3an1b": prove_syl3an1b,
+    "syl3an1br": prove_syl3an1br,
+    "syl3an2": prove_syl3an2,
+    "syl3an2b": prove_syl3an2b,
+    "syl3an2br": prove_syl3an2br,
+    "syl3anl2": prove_syl3anl2,
+    "syl3anl3": prove_syl3anl3,
+    "syl3anr3": prove_syl3anr3,
+    "syl3an3": prove_syl3an3,
+    "syl3an3b": prove_syl3an3b,
+    "syl3an3br": prove_syl3an3br,
+    "syl3an132": prove_syl3an132,
+    "syl3anl": prove_syl3anl,
+    "syl3anl1": prove_syl3anl1,
+    "syl3anr1": prove_syl3anr1,
+    "syl3anr2": prove_syl3anr2,
     "sylan": prove_sylan,
     "sylanb": prove_sylanb,
     "sylanbr": prove_sylanbr,
@@ -16341,6 +22336,29 @@ MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "sylanl2": prove_sylanl2,
     "sylanr1": prove_sylanr1,
     "sylanr2": prove_sylanr2,
+    "syld3an1": prove_syld3an1,
+    "syld3an2": prove_syld3an2,
     "syld3an3": prove_syld3an3,
     "syldanl": prove_syldanl,
+    "simpl1": prove_simpl1,
+    "simpl12": prove_simpl12,
+    "simpl13": prove_simpl13,
+    "simpl1r": prove_simpl1r,
+    "simpl11": prove_simpl11,
+    "simpl1l": prove_simpl1l,
+    "simpl2": prove_simpl2,
+    "simpl2l": prove_simpl2l,
+    "simpl2r": prove_simpl2r,
+    "simpl21": prove_simpl21,
+    "simpl22": prove_simpl22,
+    "simpl31": prove_simpl31,
+    "simpl32": prove_simpl32,
+    "simpl3": prove_simpl3,
+    "simpl3l": prove_simpl3l,
+    "simpl3r": prove_simpl3r,
+    "simpl23": prove_simpl23,
+    "simpl33": prove_simpl33,
+    "nic-dfim": prove_nic_dfim,
+    "nic-stdmp": prove_nic_stdmp,
+    "nic-dfneg": prove_nic_dfneg,
 }

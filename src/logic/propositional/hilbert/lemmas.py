@@ -338,6 +338,7 @@ from logic.propositional.hilbert.adder import (
     prove_cadbi123d,
     prove_cadbi123i,
     prove_cadcoma,
+    prove_cador,
     prove_cadtru,
 )
 from logic.propositional.hilbert.conjunction import (
@@ -2287,6 +2288,7 @@ __all__ = [
     "prove_cadbi123d",
     "prove_cadbi123i",
     "prove_cadcoma",
+    "prove_cador",
     "prove_cadtru",
     "prove_com12",
     "prove_com13",

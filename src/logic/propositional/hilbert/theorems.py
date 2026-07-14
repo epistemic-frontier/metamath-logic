@@ -4,6 +4,12 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 
 from . import System
+from .adder import (
+    prove_cad1,
+    prove_cadifp,
+    prove_hadbi123d,
+    prove_hadbi123i,
+)
 from .conjunction import MIGRATION_THEOREMS as CONJUNCTION_MIGRATIONS
 from .constants import MIGRATION_THEOREMS as CONSTANT_MIGRATIONS
 from .disjunction import MIGRATION_THEOREMS as DISJUNCTION_MIGRATIONS
@@ -364,6 +370,7 @@ from .lemmas import (
     prove_cadbi123d,
     prove_cadbi123i,
     prove_cadcoma,
+    prove_cador,
     prove_cadtru,
     prove_cases2,
     prove_cases2ALT,
@@ -1370,6 +1377,13 @@ from .stoic import MIGRATION_THEOREMS as STOIC_MIGRATIONS
 
 LemmaCtor = Callable[[System], Proof]
 
+ADDER_MIGRATIONS: Mapping[str, LemmaCtor] = {
+    "cad1": prove_cad1,
+    "cadifp": prove_cadifp,
+    "hadbi123d": prove_hadbi123d,
+    "hadbi123i": prove_hadbi123i,
+}
+
 
 _LEGACY_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "1fpid3": prove_1fpid3,
@@ -1889,6 +1903,7 @@ _LEGACY_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
     "cadbi123d": prove_cadbi123d,
     "cadbi123i": prove_cadbi123i,
     "cadcoma": prove_cadcoma,
+    "cador": prove_cador,
     "cadtru": prove_cadtru,
     "com12": prove_com12,
     "syl5": prove_syl5,
@@ -2731,6 +2746,7 @@ _LEGACY_HILBERT_LEMMAS: Mapping[str, LemmaCtor] = {
 def _merge_migration_registries() -> Mapping[str, LemmaCtor]:
     merged = dict(_LEGACY_HILBERT_LEMMAS)
     registries = (
+        ADDER_MIGRATIONS,
         IMPLICATION_MIGRATIONS,
         NEGATION_MIGRATIONS,
         STOIC_MIGRATIONS,

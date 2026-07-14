@@ -4612,6 +4612,37 @@ def prove_pm5_13(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_pm5_15(sys: System) -> Proof:
+    """pm5.15: ( ( φ ↔ ψ ) ∨ ( φ ↔ ¬ ψ ) ).
+
+    Either two propositions are equivalent or the first is equivalent to
+    the negation of the second.  (Contributed by NM, 5-Aug-1993.)
+    set.mm proof: xor3 biimpi orri.
+    """
+    lb = ProofBuilder(sys, "pm5.15")
+    s_xor3 = lb.ref(
+        "s_xor3",
+        "( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )",
+        ref="xor3",
+        note="xor3",
+    )
+    s_impl = lb.ref(
+        "s_impl",
+        "( ¬ ( φ ↔ ψ ) → ( φ ↔ ¬ ψ ) )",
+        s_xor3,
+        ref="biimpi",
+        note="biimpi xor3",
+    )
+    res = lb.ref(
+        "res",
+        "( ( φ ↔ ψ ) ∨ ( φ ↔ ¬ ψ ) )",
+        s_impl,
+        ref="orri",
+        note="orri",
+    )
+    return lb.build(res)
+
+
 def prove_pm5_17(sys: System) -> Proof:
     """pm5.17: ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) ) ↔ ( φ ↔ ¬ ψ ).
 
@@ -7852,12 +7883,898 @@ def prove_pm5_24(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_4exmid(sys: System) -> Proof:
+    """4exmid: ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ∨ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ).
+
+    Law of the excluded middle for four cases.
+    """
+    lb = ProofBuilder(sys, "4exmid")
+
+    s1 = lb.ref(
+        "s1",
+        "¬ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        ref="pm5.24",
+        note="pm5.24",
+    )
+
+    s2 = lb.ref(
+        "s2",
+        "¬ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) → ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        s1,
+        ref="biimpi",
+        note="biimpi",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ∨ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        s2,
+        ref="orri",
+        note="orri",
+    )
+
+    return lb.build(res)
+
+
+def prove_nbi2(sys: System) -> Proof:
+    """nbi2: ( ¬ ( φ ↔ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) ) ).
+
+    Negated biconditional expressed as exclusive disjunction (XOR).
+    """
+    lb = ProofBuilder(sys, "nbi2")
+
+    s_xor3 = lb.ref(
+        "s_xor3",
+        "( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )",
+        ref="xor3",
+        note="xor3",
+    )
+
+    s_pm5_17 = lb.ref(
+        "s_pm5_17",
+        "( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) ) ↔ ( φ ↔ ¬ ψ )",
+        ref="pm5.17",
+        note="pm5.17",
+    )
+
+    res = lb.ref(
+        "res",
+        "( ¬ ( φ ↔ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) ) )",
+        s_xor3,
+        s_pm5_17,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_xor2(sys: System) -> Proof:
+    """xor2: ( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) ).
+
+    XOR expressed as exclusive disjunction: exclusive or is equivalent to
+    the disjunction of the two propositions conjoined with the negation of
+    their conjunction.
+    """
+    lb = ProofBuilder(sys, "xor2")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) ↔ ¬ ( φ ↔ ψ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    s2 = lb.ref(
+        "s2",
+        "¬ ( φ ↔ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )",
+        ref="nbi2",
+        note="nbi2",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_xornan(sys: System) -> Proof:
+    """xornan: ( φ ⊻ ψ ) → ¬ ( φ ∧ ψ ).
+
+    Exclusive or implies not both. From xor2 via simprbi.
+    """
+    lb = ProofBuilder(sys, "xornan")
+
+    # xor2: ( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )",
+        ref="xor2",
+        note="xor2",
+    )
+
+    # simprbi: from the biconditional, extract the second conjunct
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ψ ) → ¬ ( φ ∧ ψ )",
+        s1,
+        ref="simprbi",
+        note="simprbi",
+    )
+
+    return lb.build(res)
+
+
+def prove_xornan2(sys: System) -> Proof:
+    """xornan2: ( φ ⊻ ψ ) → ( φ ⊼ ψ ).
+
+    Exclusive or implies nand. From xornan and df-nan via sylibr.
+    """
+    lb = ProofBuilder(sys, "xornan2")
+
+    # xornan: ( φ ⊻ ψ ) → ¬ ( φ ∧ ψ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) → ¬ ( φ ∧ ψ )",
+        ref="xornan",
+        note="xornan",
+    )
+
+    # df-nan: ( φ ⊼ ψ ) ↔ ¬ ( φ ∧ ψ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ⊼ ψ ) ↔ ¬ ( φ ∧ ψ )",
+        ref="df-nan",
+        note="df-nan",
+    )
+
+    # sylibr: from the implication and biconditional, get the result
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ψ ) → ( φ ⊼ ψ )",
+        s1,
+        s2,
+        ref="sylibr",
+        note="sylibr",
+    )
+
+    return lb.build(res)
+
+
+def prove_andi(sys: System) -> Proof:
+    """andi: ( φ ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ).
+
+    Distribution of conjunction over disjunction (∧ over ∨).
+    Forward: jaodan with orc/olc.  Reverse: anim2i(orc/olc) then jaoi.
+    Combined with impbii.
+    """
+    lb = ProofBuilder(sys, "andi")
+
+    # Forward: ( φ ∧ ( ψ ∨ χ ) ) → ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )
+    s1 = lb.ref("s1", "( φ ∧ ψ ) → ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )", ref="orc", note="orc")
+    s2 = lb.ref("s2", "( φ ∧ χ ) → ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )", ref="olc", note="olc")
+    s3 = lb.ref(
+        "s3",
+        "( φ ∧ ( ψ ∨ χ ) ) → ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )",
+        s1,
+        s2,
+        ref="jaodan",
+        note="jaodan(orc, olc)",
+    )
+
+    # Reverse: ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) → ( φ ∧ ( ψ ∨ χ ) )
+    s4 = lb.ref("s4", "ψ → ( ψ ∨ χ )", ref="orc", note="orc")
+    s5 = lb.ref("s5", "( φ ∧ ψ ) → ( φ ∧ ( ψ ∨ χ ) )", s4, ref="anim2i", note="anim2i(orc)")
+    s6 = lb.ref("s6", "χ → ( ψ ∨ χ )", ref="olc", note="olc")
+    s7 = lb.ref("s7", "( φ ∧ χ ) → ( φ ∧ ( ψ ∨ χ ) )", s6, ref="anim2i", note="anim2i(olc)")
+    s8 = lb.ref(
+        "s8",
+        "( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) → ( φ ∧ ( ψ ∨ χ ) )",
+        s5,
+        s7,
+        ref="jaoi",
+        note="jaoi(anim2i(orc), anim2i(olc))",
+    )
+
+    # Biconditional
+    res = lb.ref(
+        "res",
+        "( φ ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )",
+        s3,
+        s8,
+        ref="impbii",
+        note="impbii(s3, s8)",
+    )
+    return lb.build(res)
+
+
+def prove_andir(sys: System) -> Proof:
+    """andir: ( ( φ ∨ ψ ) ∧ χ ) ↔ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ).
+
+    Distribution of conjunction over disjunction — right-hand-side form.
+    """
+    lb = ProofBuilder(sys, "andir")
+
+    # ancom: swap LHS conjunction
+    s_ancom_l = lb.ref(
+        "s_ancom_l",
+        "( ( φ ∨ ψ ) ∧ χ ) ↔ ( χ ∧ ( φ ∨ ψ ) )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    # andi: distribute χ over ( φ ∨ ψ )
+    s_andi = lb.ref(
+        "s_andi",
+        "( χ ∧ ( φ ∨ ψ ) ) ↔ ( ( χ ∧ φ ) ∨ ( χ ∧ ψ ) )",
+        ref="andi",
+        note="andi",
+    )
+
+    # ancom: swap each conjunct on the RHS
+    s_ancom_ph = lb.ref(
+        "s_ancom_ph",
+        "( φ ∧ χ ) ↔ ( χ ∧ φ )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    s_ancom_ps = lb.ref(
+        "s_ancom_ps",
+        "( ψ ∧ χ ) ↔ ( χ ∧ ψ )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    # orbi12i: combine the two ancom biconditionals with ∨
+    s_orbi12i = lb.ref(
+        "s_orbi12i",
+        "( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( χ ∧ φ ) ∨ ( χ ∧ ψ ) )",
+        s_ancom_ph,
+        s_ancom_ps,
+        ref="orbi12i",
+        note="orbi12i",
+    )
+
+    # 3bitr4i: chain inner, left, right equivalences
+    res = lb.ref(
+        "res",
+        "( ( φ ∨ ψ ) ∧ χ ) ↔ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        s_andi,
+        s_ancom_l,
+        s_orbi12i,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_anddi(sys: System) -> Proof:
+    """anddi: ( ( φ ∨ ψ ) ∧ ( χ ∨ θ ) ) ↔ ( ( ( φ ∧ χ ) ∨ ( φ ∧ θ ) ) ∨ ( ( ψ ∧ χ ) ∨ ( ψ ∧ θ ) ) ).
+
+    Distribution of conjunction over disjunction — double distribution form.
+    """
+    lb = ProofBuilder(sys, "anddi")
+
+    # andir: ( ( φ ∨ ψ ) ∧ ( χ ∨ θ ) ) ↔ ( ( φ ∧ ( χ ∨ θ ) ) ∨ ( ψ ∧ ( χ ∨ θ ) ) )
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ∨ ψ ) ∧ ( χ ∨ θ ) ) ↔ ( ( φ ∧ ( χ ∨ θ ) ) ∨ ( ψ ∧ ( χ ∨ θ ) ) )",
+        ref="andir",
+        note="andir",
+    )
+
+    # andi on left: ( φ ∧ ( χ ∨ θ ) ) ↔ ( ( φ ∧ χ ) ∨ ( φ ∧ θ ) )
+    s2 = lb.ref(
+        "s2",
+        "( φ ∧ ( χ ∨ θ ) ) ↔ ( ( φ ∧ χ ) ∨ ( φ ∧ θ ) )",
+        ref="andi",
+        note="andi",
+    )
+
+    # andi on right: ( ψ ∧ ( χ ∨ θ ) ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∧ θ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ψ ∧ ( χ ∨ θ ) ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∧ θ ) )",
+        ref="andi",
+        note="andi",
+    )
+
+    # orbi12i: combine the two andi results
+    s4 = lb.ref(
+        "s4",
+        "( ( φ ∧ ( χ ∨ θ ) ) ∨ ( ψ ∧ ( χ ∨ θ ) ) ) ↔ ( ( ( φ ∧ χ ) ∨ ( φ ∧ θ ) ) ∨ ( ( ψ ∧ χ ) ∨ ( ψ ∧ θ ) ) )",
+        s2,
+        s3,
+        ref="orbi12i",
+        note="orbi12i(andi, andi)",
+    )
+
+    # bitri: chain andir + orbi12i
+    res = lb.ref(
+        "res",
+        "( ( φ ∨ ψ ) ∧ ( χ ∨ θ ) ) ↔ ( ( ( φ ∧ χ ) ∨ ( φ ∧ θ ) ) ∨ ( ( ψ ∧ χ ) ∨ ( ψ ∧ θ ) ) )",
+        s1,
+        s4,
+        ref="bitri",
+        note="bitri(andir, orbi12i)",
+    )
+
+    return lb.build(res)
+
+
+def prove_cases(sys: System) -> Proof:
+    """cases: ψ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) ).
+
+    Case elimination: a biconditional can be deduced from two implication
+    hypotheses that together cover all cases.
+    """
+    lb = ProofBuilder(sys, "cases")
+    h1 = lb.hyp("cases.1", "φ → ( ψ ↔ χ )")
+    h2 = lb.hyp("cases.2", "¬ φ → ( ψ ↔ θ )")
+
+    # exmid: φ ∨ ¬ φ
+    s1 = lb.ref("s1", "( φ ∨ ¬ φ )", ref="exmid", note="exmid")
+
+    # biantrur: ψ ↔ ( ( φ ∨ ¬ φ ) ∧ ψ )
+    s2 = lb.ref("s2", "ψ ↔ ( ( φ ∨ ¬ φ ) ∧ ψ )", s1, ref="biantrur", note="biantrur")
+
+    # andir: ( ( φ ∨ ¬ φ ) ∧ ψ ) ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ψ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ( φ ∨ ¬ φ ) ∧ ψ ) ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ψ ) )",
+        ref="andir",
+        note="andir",
+    )
+
+    # pm5.32i with h1: ( φ ∧ ψ ) ↔ ( φ ∧ χ )
+    s4 = lb.ref("s4", "( φ ∧ ψ ) ↔ ( φ ∧ χ )", h1, ref="pm5.32i", note="pm5.32i")
+
+    # pm5.32i with h2: ( ¬ φ ∧ ψ ) ↔ ( ¬ φ ∧ θ )
+    s5 = lb.ref("s5", "( ¬ φ ∧ ψ ) ↔ ( ¬ φ ∧ θ )", h2, ref="pm5.32i", note="pm5.32i")
+
+    # orbi12i: ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ψ ) ) ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )
+    s6 = lb.ref(
+        "s6",
+        "( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ψ ) ) ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )",
+        s4,
+        s5,
+        ref="orbi12i",
+        note="orbi12i",
+    )
+
+    # 3bitri: ψ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )
+    res = lb.ref(
+        "res",
+        "ψ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )",
+        s2,
+        s3,
+        s6,
+        ref="3bitri",
+        note="3bitri",
+    )
+    return lb.build(res)
+
+
+def prove_3jaao(sys: System) -> Proof:
+    """3jaao: ( φ ∧ θ ∧ η ) → ( ( ψ ∨ τ ∨ ζ ) → χ ).
+
+    Inference joining three implications under a triple conjunction.
+    """
+    lb = ProofBuilder(sys, "3jaao")
+    h1 = lb.hyp("3jaao.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("3jaao.2", "θ → ( τ → χ )")
+    h3 = lb.hyp("3jaao.3", "η → ( ζ → χ )")
+
+    # 3jao: ((ψ → χ) ∧ (τ → χ) ∧ (ζ → χ)) → ((ψ ∨ τ ∨ ζ) → χ)
+    s1 = lb.ref(
+        "s1",
+        "( ( ψ → χ ) ∧ ( τ → χ ) ∧ ( ζ → χ ) ) → ( ( ψ ∨ τ ∨ ζ ) → χ )",
+        ref="3jao",
+        note="3jao",
+    )
+
+    # syl3an: (φ ∧ θ ∧ η) → ((ψ ∨ τ ∨ ζ) → χ)
+    res = lb.ref(
+        "res",
+        "( φ ∧ θ ∧ η ) → ( ( ψ ∨ τ ∨ ζ ) → χ )",
+        h1,
+        h2,
+        h3,
+        s1,
+        ref="syl3an",
+        note="syl3an",
+    )
+
+    return lb.build(res)
+
+
+def prove_3jaaoOLD(sys: System) -> Proof:
+    """3jaaoOLD: ( φ ∧ θ ∧ η ) → ( ( ψ ∨ τ ∨ ζ ) → χ ).
+
+    Inference joining three implications under a triple conjunction.
+    set.mm proof: 3ad2ant1 3ad2ant2 3ad2ant3 3jaod.
+    """
+    lb = ProofBuilder(sys, "3jaaoOLD")
+    h1 = lb.hyp("3jaao.1", "φ → ( ψ → χ )")
+    h2 = lb.hyp("3jaao.2", "θ → ( τ → χ )")
+    h3 = lb.hyp("3jaao.3", "η → ( ζ → χ )")
+
+    # 3ad2ant1: ( φ ∧ θ ∧ η ) → ( ψ → χ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ∧ θ ∧ η ) → ( ψ → χ )",
+        h1,
+        ref="3ad2ant1",
+        note="3ad2ant1(3jaao.1)",
+    )
+
+    # 3ad2ant2: ( φ ∧ θ ∧ η ) → ( τ → χ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ∧ θ ∧ η ) → ( τ → χ )",
+        h2,
+        ref="3ad2ant2",
+        note="3ad2ant2(3jaao.2)",
+    )
+
+    # 3ad2ant3: ( φ ∧ θ ∧ η ) → ( ζ → χ )
+    s3 = lb.ref(
+        "s3",
+        "( φ ∧ θ ∧ η ) → ( ζ → χ )",
+        h3,
+        ref="3ad2ant3",
+        note="3ad2ant3(3jaao.3)",
+    )
+
+    # 3jaod: combine the three implications
+    res = lb.ref(
+        "res",
+        "( φ ∧ θ ∧ η ) → ( ( ψ ∨ τ ∨ ζ ) → χ )",
+        s1,
+        s2,
+        s3,
+        ref="3jaod",
+        note="3jaod(s1, s2, s3)",
+    )
+
+    return lb.build(res)
+
+
+def prove_excxor(sys: System) -> Proof:
+    """excxor: ( φ ⊻ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ¬ φ ∧ ψ ) ).
+
+    Exclusive-or expressed directly as exclusive disjunction of the two
+    cases where the two operands have opposite truth values.
+    """
+    lb = ProofBuilder(sys, "excxor")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) ↔ ¬ ( φ ↔ ψ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    s2 = lb.ref(
+        "s2",
+        "¬ ( φ ↔ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) )",
+        ref="xor",
+        note="xor",
+    )
+
+    s3 = lb.ref(
+        "s3",
+        "( ψ ∧ ¬ φ ) ↔ ( ¬ φ ∧ ψ )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    s4 = lb.ref(
+        "s4",
+        "( ( φ ∧ ¬ ψ ) ∨ ( ψ ∧ ¬ φ ) ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ¬ φ ∧ ψ ) )",
+        s3,
+        ref="orbi2i",
+        note="orbi2i",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ψ ) ↔ ( ( φ ∧ ¬ ψ ) ∨ ( ¬ φ ∧ ψ ) )",
+        s1,
+        s2,
+        s4,
+        ref="3bitri",
+        note="3bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_xoror(sys: System) -> Proof:
+    """xoror: ( φ ⊻ ψ ) → ( φ ∨ ψ ).
+
+    Exclusive or implies inclusive or.
+    """
+    lb = ProofBuilder(sys, "xoror")
+
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )",
+        ref="xor2",
+        note="xor2",
+    )
+
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ψ ) → ( φ ∨ ψ )",
+        s1,
+        ref="simplbi",
+        note="simplbi xor2",
+    )
+
+    return lb.build(res)
+
+
 # New migrations register here beside their implementation.
 # The aggregate registry imports this mapping, avoiding another edit to global shim files.
+def prove_cadan(sys: System) -> Proof:
+    """cadan: cadd(φ, ψ, χ) ↔ ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ)).
+
+    The adder carry expressed as a ternary conjunction of binary
+    disjunctions (CNF).
+    """
+    lb = ProofBuilder(sys, "cadan")
+
+    # cador: cadd φ ψ χ ↔ ((φ ∧ ψ) ∨ (φ ∧ χ) ∨ (ψ ∧ χ))
+    s_cador = lb.ref(
+        "s_cador",
+        "cadd φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        ref="cador",
+        note="cador",
+    )
+
+    # df-3or: expand ternary OR to binary
+    s_df3or = lb.ref(
+        "s_df3or",
+        "( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) )",
+        ref="df-3or",
+        note="df-3or",
+    )
+
+    #  -- core: DNF_binary ↔ CNF_binary --
+
+    # andi: ( φ ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )
+    s_andi = lb.ref(
+        "s_andi",
+        "( φ ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) )",
+        ref="andi",
+        note="andi",
+    )
+
+    # orbi1i on andi with C = ( ψ ∧ χ ):
+    #   ( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) )
+    s_x_to_dnf = lb.ref(
+        "s_x_to_dnf",
+        "( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) )",
+        s_andi,
+        ref="orbi1i",
+        note="orbi1i(andi)",
+    )
+
+    # ordir: ( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) ) ↔
+    #          ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )
+    s_ordir = lb.ref(
+        "s_ordir",
+        "( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )",
+        ref="ordir",
+        note="ordir",
+    )
+
+    # animorl: ( ψ ∧ χ ) → ( ψ ∨ χ )
+    s_animorl = lb.ref(
+        "s_animorl",
+        "( ψ ∧ χ ) → ( ψ ∨ χ )",
+        ref="animorl",
+        note="animorl",
+    )
+
+    # pm4.72: ( ( ψ ∧ χ ) → ( ψ ∨ χ ) ) ↔
+    #          ( ( ψ ∨ χ ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) ) )
+    s_pm472 = lb.ref(
+        "s_pm472",
+        "( ( ψ ∧ χ ) → ( ψ ∨ χ ) ) ↔ ( ( ψ ∨ χ ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) ) )",
+        ref="pm4.72",
+        note="pm4.72",
+    )
+
+    # mpbi: ( ψ ∨ χ ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) )
+    s_mpbi = lb.ref(
+        "s_mpbi",
+        "( ψ ∨ χ ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) )",
+        s_animorl,
+        s_pm472,
+        ref="mpbi",
+        note="mpbi(animorl, pm4.72)",
+    )
+
+    # orcom: ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) ) ↔ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) )
+    s_orcom = lb.ref(
+        "s_orcom",
+        "( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) ) ↔ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) )",
+        ref="orcom",
+        note="orcom",
+    )
+
+    # bicomi on s_orcom: ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) )
+    s_orcom_rev = lb.ref(
+        "s_orcom_rev",
+        "( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ψ ∧ χ ) ∨ ( ψ ∨ χ ) )",
+        s_orcom,
+        ref="bicomi",
+        note="bicomi(orcom)",
+    )
+
+    # bitr4i: ( ψ ∨ χ ) ↔ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) )
+    s_abs = lb.ref(
+        "s_abs",
+        "( ψ ∨ χ ) ↔ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) )",
+        s_mpbi,
+        s_orcom_rev,
+        ref="bitr4i",
+        note="bitr4i(mpbi, bicomi(orcom))",
+    )
+
+    # biid: ( φ ∨ ( ψ ∧ χ ) ) ↔ ( φ ∨ ( ψ ∧ χ ) )
+    s_biid = lb.ref(
+        "s_biid",
+        "( φ ∨ ( ψ ∧ χ ) ) ↔ ( φ ∨ ( ψ ∧ χ ) )",
+        ref="biid",
+        note="biid",
+    )
+
+    # anbi12i: ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) ) ↔
+    #            ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )
+    s_anbi12i = lb.ref(
+        "s_anbi12i",
+        "( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )",
+        s_biid,
+        s_abs,
+        ref="anbi12i",
+        note="anbi12i(biid, mpbi+orcom)",
+    )
+
+    # ordi: ( φ ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) )
+    s_ordi = lb.ref(
+        "s_ordi",
+        "( φ ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) )",
+        ref="ordi",
+        note="ordi",
+    )
+
+    # biid: ( ψ ∨ χ ) ↔ ( ψ ∨ χ )
+    s_biid2 = lb.ref(
+        "s_biid2",
+        "( ψ ∨ χ ) ↔ ( ψ ∨ χ )",
+        ref="biid",
+        note="biid",
+    )
+
+    # anbi12i: ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) ) ↔
+    #            ( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) )
+    s_cnf = lb.ref(
+        "s_cnf",
+        "( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) ) ↔ ( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) )",
+        s_ordi,
+        s_biid2,
+        ref="anbi12i",
+        note="anbi12i(ordi, biid)",
+    )
+
+    # Now assemble the core chain DNF_binary ↔ CNF_binary
+    # We have:
+    #   s_x_to_dnf:  X ↔ DNF_binary
+    #   s_ordir:     X ↔ Y
+    #   s_anbi12i:   Z ↔ Y
+    #   s_cnf:       Z ↔ CNF_binary
+    # where:
+    #   X = ((φ ∧ (ψ ∨ χ)) ∨ (ψ ∧ χ))
+    #   Y = ((φ ∨ (ψ ∧ χ)) ∧ ((ψ ∨ χ) ∨ (ψ ∧ χ)))
+    #   Z = ((φ ∨ (ψ ∧ χ)) ∧ (ψ ∨ χ))
+    #   DNF_binary = (((φ ∧ ψ) ∨ (φ ∧ χ)) ∨ (ψ ∧ χ))
+    #   CNF_binary = (((φ ∨ ψ) ∧ (φ ∨ χ)) ∧ (ψ ∨ χ))
+
+    # bicomi on s_x_to_dnf: DNF_binary ↔ X
+    s_dnf_to_x = lb.ref(
+        "s_dnf_to_x",
+        "( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) )",
+        s_x_to_dnf,
+        ref="bicomi",
+        note="bicomi(orbi1i(andi))",
+    )
+
+    # bicomi on s_ordir: Y ↔ X
+    s_y_to_x = lb.ref(
+        "s_y_to_x",
+        "( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) ) ↔ ( ( φ ∧ ( ψ ∨ χ ) ) ∨ ( ψ ∧ χ ) )",
+        s_ordir,
+        ref="bicomi",
+        note="bicomi(ordir)",
+    )
+
+    # bitr4i(dnf_to_x, y_to_x): DNF_binary ↔ Y
+    s_dnf_to_y = lb.ref(
+        "s_dnf_to_y",
+        "( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )",
+        s_dnf_to_x,
+        s_y_to_x,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    # bicomi on s_anbi12i: Y ↔ Z
+    s_y_to_z = lb.ref(
+        "s_y_to_z",
+        "( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) )",
+        s_anbi12i,
+        ref="bicomi",
+        note="bicomi(anbi12i)",
+    )
+
+    # bicomi on s_y_to_z: Z ↔ Y
+    s_z_to_y = lb.ref(
+        "s_z_to_y",
+        "( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ( ψ ∨ χ ) ∨ ( ψ ∧ χ ) ) )",
+        s_y_to_z,
+        ref="bicomi",
+        note="bicomi(y_to_z)",
+    )
+
+    # bitr4i(dnf_to_y, z_to_y): DNF_binary ↔ Z
+    s_dnf_to_z = lb.ref(
+        "s_dnf_to_z",
+        "( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) )",
+        s_dnf_to_y,
+        s_z_to_y,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    # bicomi on s_cnf: CNF_binary ↔ Z
+    s_cnf_to_z = lb.ref(
+        "s_cnf_to_z",
+        "( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∨ ( ψ ∧ χ ) ) ∧ ( ψ ∨ χ ) )",
+        s_cnf,
+        ref="bicomi",
+        note="bicomi(anbi12i(ordi, biid))",
+    )
+
+    # bitr4i(dnf_to_z, cnf_to_z): DNF_binary ↔ CNF_binary
+    s_core = lb.ref(
+        "s_core",
+        "( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) )",
+        s_dnf_to_z,
+        s_cnf_to_z,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    # -- end core --
+
+    # bicomi on s_df3or: DNF_binary ↔ DNF_ternary
+    s_df3or_rev = lb.ref(
+        "s_df3or_rev",
+        "( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        s_df3or,
+        ref="bicomi",
+        note="bicomi(df-3or)",
+    )
+
+    # bitr4i(cador, df3or_rev): cadd ↔ DNF_binary
+    s_cadd_dnf = lb.ref(
+        "s_cadd_dnf",
+        "cadd φ ψ χ ↔ ( ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ) ∨ ( ψ ∧ χ ) )",
+        s_cador,
+        s_df3or_rev,
+        ref="bitr4i",
+        note="bitr4i(cador, bicomi(df-3or))",
+    )
+
+    # df-3an: ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) ↔
+    #          ( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) )
+    s_df3an = lb.ref(
+        "s_df3an",
+        "( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) ↔ ( ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ) ∧ ( ψ ∨ χ ) )",
+        ref="df-3an",
+        note="df-3an",
+    )
+
+    # 3bitr4i: cadd φ ψ χ ↔ ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) )
+    res = lb.ref(
+        "res",
+        "cadd φ ψ χ ↔ ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) )",
+        s_core,
+        s_cadd_dnf,
+        s_df3an,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_anifp(sys: System) -> Proof:
+    """anifp: ( ψ ∧ χ ) → if- φ ψ χ.
+
+    Conjunction implies the conditional.
+    (Contributed by NM, 3-Jan-2005.)
+    """
+    lb = ProofBuilder(sys, "anifp")
+
+    # olc: ψ → ( ¬ φ ∨ ψ )
+    s1 = lb.ref("s1", "ψ → ( ¬ φ ∨ ψ )", ref="olc", note="olc")
+
+    # olc: χ → ( φ ∨ χ )
+    s2 = lb.ref("s2", "χ → ( φ ∨ χ )", ref="olc", note="olc")
+
+    # anim12i: ( ψ ∧ χ ) → ( ( ¬ φ ∨ ψ ) ∧ ( φ ∨ χ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ψ ∧ χ ) → ( ( ¬ φ ∨ ψ ) ∧ ( φ ∨ χ ) )",
+        s1,
+        s2,
+        ref="anim12i",
+        note="anim12i",
+    )
+
+    # dfifp4: if- φ ψ χ ↔ ( ( ¬ φ ∨ ψ ) ∧ ( φ ∨ χ ) )
+    s4 = lb.ref(
+        "s4",
+        "if- φ ψ χ ↔ ( ( ¬ φ ∨ ψ ) ∧ ( φ ∨ χ ) )",
+        ref="dfifp4",
+        note="dfifp4",
+    )
+
+    # sylibr: ( ψ ∧ χ ) → if- φ ψ χ
+    res = lb.ref(
+        "res",
+        "( ψ ∧ χ ) → if- φ ψ χ",
+        s3,
+        s4,
+        ref="sylibr",
+        note="sylibr",
+    )
+
+    return lb.build(res)
+
+
 MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "pm5.15": prove_pm5_15,
+    "anifp": prove_anifp,
     "ifpor": prove_ifpor,
     "ornld": prove_ornld,
     "pm4.39": prove_pm4_39,
     "pm5.24": prove_pm5_24,
+    "4exmid": prove_4exmid,
     "xor": prove_xor,
+    "excxor": prove_excxor,
+    "nbi2": prove_nbi2,
+    "xor2": prove_xor2,
+    "xornan": prove_xornan,
+    "xornan2": prove_xornan2,
+    "andi": prove_andi,
+    "andir": prove_andir,
+    "cases": prove_cases,
+    "anddi": prove_anddi,
+    "3jaao": prove_3jaao,
+    "xoror": prove_xoror,
+    "3jaaoOLD": prove_3jaaoOLD,
+    "cadan": prove_cadan,
 }

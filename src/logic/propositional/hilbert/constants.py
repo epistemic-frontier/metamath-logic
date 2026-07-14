@@ -1940,6 +1940,83 @@ def prove_falnantru(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_falnanfal(sys: System) -> Proof:
+    """falnanfal: ( ⊥ ⊼ ⊥ ) ↔ ⊤.
+
+    The nand of falsehood with itself is equivalent to truth.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "falnanfal")
+
+    # nannot with φ := ⊥: ¬ ⊥ ↔ ( ⊥ ⊼ ⊥ )
+    s_nannot = lb.ref(
+        "s_nannot",
+        "¬ ⊥ ↔ ( ⊥ ⊼ ⊥ )",
+        ref="nannot",
+        note="nannot",
+    )
+
+    # notfal: ¬ ⊥ ↔ ⊤
+    s_notfal = lb.ref(
+        "s_notfal",
+        "¬ ⊥ ↔ ⊤",
+        ref="notfal",
+        note="notfal",
+    )
+
+    # bitr3i: ( ¬ ⊥ ↔ ( ⊥ ⊼ ⊥ ) ), ( ¬ ⊥ ↔ ⊤ ) → ( ⊥ ⊼ ⊥ ) ↔ ⊤
+    res = lb.ref(
+        "res",
+        "( ⊥ ⊼ ⊥ ) ↔ ⊤",
+        s_nannot,
+        s_notfal,
+        ref="bitr3i",
+        note="bitr3i",
+    )
+
+    return lb.build(res)
+
+
+def prove_trunantru(sys: System) -> Proof:
+    """trunantru: ( ⊤ ⊼ ⊤ ) ↔ ⊥.
+
+    The nand of truth with itself is equivalent to falsehood.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "trunantru")
+
+    # nannot with φ := ⊤: ¬ ⊤ ↔ ( ⊤ ⊼ ⊤ )
+    s_nannot = lb.ref(
+        "s_nannot",
+        "¬ ⊤ ↔ ( ⊤ ⊼ ⊤ )",
+        ref="nannot",
+        note="nannot",
+    )
+
+    # nottru: ¬ ⊤ ↔ ⊥
+    s_nottru = lb.ref(
+        "s_nottru",
+        "¬ ⊤ ↔ ⊥",
+        ref="nottru",
+        note="nottru",
+    )
+
+    # bitr3i: ( ¬ ⊤ ↔ ( ⊤ ⊼ ⊤ ) ), ( ¬ ⊤ ↔ ⊥ ) → ( ⊤ ⊼ ⊤ ) ↔ ⊥
+    res = lb.ref(
+        "res",
+        "( ⊤ ⊼ ⊤ ) ↔ ⊥",
+        s_nannot,
+        s_nottru,
+        ref="bitr3i",
+        note="bitr3i",
+    )
+
+    return lb.build(res)
+
+
 # New migrations register here beside their implementation. The aggregate
 # registry imports this mapping, avoiding another edit to global shim files.
-MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {}
+MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "falnanfal": prove_falnanfal,
+    "trunantru": prove_trunantru,
+}

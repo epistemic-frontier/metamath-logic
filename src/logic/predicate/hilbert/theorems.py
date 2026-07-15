@@ -4,6 +4,9 @@ from collections.abc import Callable, Mapping
 
 from skfd.proof import Proof, SystemCore
 
+from logic.predicate.hilbert.definitions import (
+    MIGRATION_THEOREMS as DEFINITION_MIGRATIONS,
+)
 from logic.predicate.hilbert.lemmas import (
     MIGRATION_THEOREMS as PREDICATE_MIGRATIONS,
 )
@@ -292,6 +295,7 @@ from logic.predicate.hilbert.lemmas import (
     prove_sb2imi,
     prove_sb3an,
     prove_sban,
+    prove_sbbi,
     prove_sbbidv,
     prove_sbbii,
     prove_sbcom4,
@@ -565,6 +569,7 @@ _LEGACY_PREDICATE_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
     "sbn1": prove_sbn1,
     "sban": prove_sban,
     "sb3an": prove_sb3an,
+    "sbbi": prove_sbbi,
     "sbbii": prove_sbbii,
     "2sbbii": prove_2sbbii,
     "sbcom4": prove_sbcom4,
@@ -690,12 +695,11 @@ _LEGACY_PREDICATE_THEOREMS: Mapping[str, PredicateTheoremCtor] = {
 
 def _merge_migration_registries() -> Mapping[str, PredicateTheoremCtor]:
     merged = dict(_LEGACY_PREDICATE_THEOREMS)
-    duplicates = merged.keys() & PREDICATE_MIGRATIONS.keys()
-    if duplicates:
-        raise RuntimeError(
-            f"duplicate predicate theorem registrations: {sorted(duplicates)}"
-        )
-    merged.update(PREDICATE_MIGRATIONS)
+    for extra in (DEFINITION_MIGRATIONS, PREDICATE_MIGRATIONS):
+        dups = merged.keys() & extra.keys()
+        if dups:
+            raise RuntimeError(f"duplicate predicate theorem registrations: {sorted(dups)}")
+        merged.update(extra)
     return merged
 
 

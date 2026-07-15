@@ -55,9 +55,7 @@ def render_catalogue() -> str:
     missing = registry_functions - set(source_constructors)
 
     if missing:
-        raise RuntimeError(
-            f"registered constructors missing from source audit: {sorted(missing)}"
-        )
+        raise RuntimeError(f"registered constructors missing from source audit: {sorted(missing)}")
     if uncovered:
         raise RuntimeError(
             f"source proof constructors outside emission closure: {sorted(uncovered)}"

@@ -63,6 +63,88 @@ def prove_cad11(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_cad1(sys: System) -> Proof:
+    """cad1: χ → ( cadd( φ , ψ , χ ) ↔ ( φ ∨ ψ ) ).
+
+    Conditional addition carry with true carry-in is equivalent to
+    disjunction.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "cad1")
+
+    # cadan: cadd φ ψ χ ↔ ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ))
+    s1 = lb.ref(
+        "s1",
+        "cadd φ ψ χ ↔ ( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) )",
+        ref="cadan",
+        note="cadan",
+    )
+
+    # 3anass: ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ)) ↔ ((φ ∨ ψ) ∧ ((φ ∨ χ) ∧ (ψ ∨ χ)))
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ∨ ψ ) ∧ ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) ↔ ( ( φ ∨ ψ ) ∧ ( ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) )",
+        ref="3anass",
+        note="3anass",
+    )
+
+    # bitri: cadd φ ψ χ ↔ ((φ ∨ ψ) ∧ ((φ ∨ χ) ∧ (ψ ∨ χ)))
+    s3 = lb.ref(
+        "s3",
+        "cadd φ ψ χ ↔ ( ( φ ∨ ψ ) ∧ ( ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) )",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # olc: χ → (φ ∨ χ)
+    s4 = lb.ref(
+        "s4",
+        "χ → ( φ ∨ χ )",
+        ref="olc",
+        note="olc",
+    )
+
+    # olc: χ → (ψ ∨ χ)
+    s5 = lb.ref(
+        "s5",
+        "χ → ( ψ ∨ χ )",
+        ref="olc",
+        note="olc",
+    )
+
+    # jca: χ → ((φ ∨ χ) ∧ (ψ ∨ χ))
+    s6 = lb.ref(
+        "s6",
+        "χ → ( ( φ ∨ χ ) ∧ ( ψ ∨ χ ) )",
+        s4,
+        s5,
+        ref="jca",
+        note="jca",
+    )
+
+    # biantrud: χ → ((φ ∨ ψ) ↔ ((φ ∨ ψ) ∧ ((φ ∨ χ) ∧ (ψ ∨ χ))))
+    s7 = lb.ref(
+        "s7",
+        "χ → ( ( φ ∨ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ( ( φ ∨ χ ) ∧ ( ψ ∨ χ ) ) ) )",
+        s6,
+        ref="biantrud",
+        note="biantrud",
+    )
+
+    # bitr4id: χ → (cadd φ ψ χ ↔ (φ ∨ ψ))
+    res = lb.ref(
+        "res",
+        "χ → ( cadd φ ψ χ ↔ ( φ ∨ ψ ) )",
+        s7,
+        s3,
+        ref="bitr4id",
+        note="bitr4id",
+    )
+
+    return lb.build(res)
+
+
 def prove_cad0(sys: System) -> Proof:
     """cad0: ¬ χ → ( cadd( φ , ψ , χ ) ↔ ( φ ∧ ψ ) ).
 
@@ -132,6 +214,39 @@ def prove_cad0(sys: System) -> Proof:
         s7,
         ref="impbid1",
         note="impbid1",
+    )
+    return lb.build(res)
+
+
+def prove_cadifp(sys: System) -> Proof:
+    """cadifp: cadd(φ, ψ, χ) ↔ if-(χ, (φ ∨ ψ), (φ ∧ ψ)).
+
+    Conditional addition carry expressed in terms of the conditional
+    operator.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "cadifp")
+    # cad1: χ → (cadd φ ψ χ ↔ (φ ∨ ψ))
+    s1 = lb.ref(
+        "s1",
+        "χ → ( cadd φ ψ χ ↔ ( φ ∨ ψ ) )",
+        ref="cad1",
+        note="cad1",
+    )
+    # cad0: ¬χ → (cadd φ ψ χ ↔ (φ ∧ ψ))
+    s2 = lb.ref(
+        "s2",
+        "¬ χ → ( cadd φ ψ χ ↔ ( φ ∧ ψ ) )",
+        ref="cad0",
+        note="cad0",
+    )
+    # casesifp: from φ→(ψ↔χ) and ¬φ→(ψ↔θ), conclude ψ ↔ if-(φ, χ, θ)
+    res = lb.ref(
+        "res",
+        "cadd φ ψ χ ↔ if- χ ( φ ∨ ψ ) ( φ ∧ ψ )",
+        s1,
+        s2,
+        ref="casesifp",
+        note="casesifp",
     )
     return lb.build(res)
 
@@ -349,22 +464,278 @@ def prove_cadbi123i(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_hadbi123i(sys: System) -> Proof:
+    """hadbi123i: hadd( φ , χ , τ ) ↔ hadd( ψ , θ , η ).
+
+    Inference joining three biconditionals with half-adder sum.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadbi123i")
+    h1 = lb.hyp("hadbii.1", "( φ ↔ ψ )")
+    h2 = lb.hyp("hadbii.2", "( χ ↔ θ )")
+    h3 = lb.hyp("hadbii.3", "( τ ↔ η )")
+
+    # a1i: T. → ( φ ↔ ψ )
+    s1 = lb.ref("s1", "T. → ( φ ↔ ψ )", h1, ref="a1i", note="a1i")
+    # a1i: T. → ( χ ↔ θ )
+    s2 = lb.ref("s2", "T. → ( χ ↔ θ )", h2, ref="a1i", note="a1i")
+    # a1i: T. → ( τ ↔ η )
+    s3 = lb.ref("s3", "T. → ( τ ↔ η )", h3, ref="a1i", note="a1i")
+
+    # hadbi123d: T. → ( hadd φ χ τ ↔ hadd ψ θ η )
+    s4 = lb.ref(
+        "s4",
+        "T. → ( hadd φ χ τ ↔ hadd ψ θ η )",
+        s1,
+        s2,
+        s3,
+        ref="hadbi123d",
+        note="hadbi123d",
+    )
+
+    # mptru: hadd φ χ τ ↔ hadd ψ θ η
+    res = lb.ref(
+        "res",
+        "hadd φ χ τ ↔ hadd ψ θ η",
+        s4,
+        ref="mptru",
+        note="mptru",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadbi123d(sys: System) -> Proof:
+    """hadbi123d: φ → ( hadd ψ θ η ↔ hadd χ τ ζ ).
+
+    Deduction joining three biconditionals with half-adder sum.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadbi123d")
+    h1 = lb.hyp("hadbid.1", "φ → ( ψ ↔ χ )")
+    h2 = lb.hyp("hadbid.2", "φ → ( θ ↔ τ )")
+    h3 = lb.hyp("hadbid.3", "φ → ( η ↔ ζ )")
+
+    # xorbi12d: φ → ( ( ψ ⊻ θ ) ↔ ( χ ⊻ τ ) )
+    s1 = lb.ref(
+        "s1",
+        "φ → ( ( ψ ⊻ θ ) ↔ ( χ ⊻ τ ) )",
+        h1,
+        h2,
+        ref="xorbi12d",
+        note="xorbi12d",
+    )
+
+    # xorbi12d: φ → ( ( ( ψ ⊻ θ ) ⊻ η ) ↔ ( ( χ ⊻ τ ) ⊻ ζ ) )
+    s2 = lb.ref(
+        "s2",
+        "φ → ( ( ( ψ ⊻ θ ) ⊻ η ) ↔ ( ( χ ⊻ τ ) ⊻ ζ ) )",
+        s1,
+        h3,
+        ref="xorbi12d",
+        note="xorbi12d",
+    )
+
+    # df-had: hadd ψ θ η ↔ ( ( ψ ⊻ θ ) ⊻ η )
+    s3 = lb.ref(
+        "s3",
+        "hadd ψ θ η ↔ ( ( ψ ⊻ θ ) ⊻ η )",
+        ref="df-had",
+        note="df-had",
+    )
+
+    # df-had: hadd χ τ ζ ↔ ( ( χ ⊻ τ ) ⊻ ζ )
+    s4 = lb.ref(
+        "s4",
+        "hadd χ τ ζ ↔ ( ( χ ⊻ τ ) ⊻ ζ )",
+        ref="df-had",
+        note="df-had",
+    )
+
+    # 3bitr4g: φ → ( hadd ψ θ η ↔ hadd χ τ ζ )
+    res = lb.ref(
+        "res",
+        "φ → ( hadd ψ θ η ↔ hadd χ τ ζ )",
+        s2,
+        s3,
+        s4,
+        ref="3bitr4g",
+        note="3bitr4g",
+    )
+
+    return lb.build(res)
+
+
+def prove_cador(sys: System) -> Proof:
+    """cador: cadd( φ , ψ , χ ) ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ).
+
+    The adder carry in disjunctive normal form.
+    (Contributed by NM, 5-Aug-1993.)
+    (Proof shortened by Wolf Lammen, 11-Jul-2020.)
+    """
+    lb = ProofBuilder(sys, "cador")
+
+    # xor2: ( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )
+    s_xor2 = lb.ref(
+        "s_xor2",
+        "( φ ⊻ ψ ) ↔ ( ( φ ∨ ψ ) ∧ ¬ ( φ ∧ ψ ) )",
+        ref="xor2",
+        note="xor2",
+    )
+
+    # rbaib with xor2 as hypothesis:
+    #   xor2 is of form A ↔ (B ∧ C) where A = (φ ⊻ ψ), B = (φ ∨ ψ), C = ¬(φ ∧ ψ)
+    #   rbaib gives: C → (A ↔ B) = ¬(φ ∧ ψ) → ((φ ⊻ ψ) ↔ (φ ∨ ψ))
+    s_rbaib = lb.ref(
+        "s_rbaib",
+        "¬ ( φ ∧ ψ ) → ( ( φ ⊻ ψ ) ↔ ( φ ∨ ψ ) )",
+        s_xor2,
+        ref="rbaib",
+        note="rbaib",
+    )
+
+    # anbi1d: from ¬(φ∧ψ) → ((φ⊻ψ) ↔ (φ∨ψ)), add χ as conjunct:
+    #   ¬(φ ∧ ψ) → (((φ ⊻ ψ) ∧ χ) ↔ ((φ ∨ ψ) ∧ χ))
+    s_anbi1d = lb.ref(
+        "s_anbi1d",
+        "¬ ( φ ∧ ψ ) → ( ( ( φ ⊻ ψ ) ∧ χ ) ↔ ( ( φ ∨ ψ ) ∧ χ ) )",
+        s_rbaib,
+        ref="anbi1d",
+        note="anbi1d",
+    )
+
+    # ancom: ((φ ⊻ ψ) ∧ χ) ↔ (χ ∧ (φ ⊻ ψ))
+    s_ancom = lb.ref(
+        "s_ancom",
+        "( ( φ ⊻ ψ ) ∧ χ ) ↔ ( χ ∧ ( φ ⊻ ψ ) )",
+        ref="ancom",
+        note="ancom",
+    )
+
+    # andir: ((φ ∨ ψ) ∧ χ) ↔ ((φ ∧ χ) ∨ (ψ ∧ χ))
+    s_andir = lb.ref(
+        "s_andir",
+        "( ( φ ∨ ψ ) ∧ χ ) ↔ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        ref="andir",
+        note="andir",
+    )
+
+    # 3bitr3g: from h1: ¬(φ∧ψ)→(((φ⊻ψ)∧χ)↔((φ∨ψ)∧χ))
+    #          h2: ((φ⊻ψ)∧χ) ↔ (χ∧(φ⊻ψ))
+    #          h3: ((φ∨ψ)∧χ) ↔ ((φ∧χ)∨(ψ∧χ))
+    #   gives: ¬(φ∧ψ) → ((χ∧(φ⊻ψ)) ↔ ((φ∧χ)∨(ψ∧χ)))
+    s_3bitr3g = lb.ref(
+        "s_3bitr3g",
+        "¬ ( φ ∧ ψ ) → ( ( χ ∧ ( φ ⊻ ψ ) ) ↔ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) )",
+        s_anbi1d,
+        s_ancom,
+        s_andir,
+        ref="3bitr3g",
+        note="3bitr3g",
+    )
+
+    # pm5.74i:
+    #   (¬(φ∧ψ) → ((χ∧(φ⊻ψ)) ↔ ((φ∧χ)∨(ψ∧χ))))
+    #   → ((¬(φ∧ψ) → (χ∧(φ⊻ψ))) ↔ (¬(φ∧ψ) → ((φ∧χ)∨(ψ∧χ))))
+    s_pm5_74i = lb.ref(
+        "s_pm5_74i",
+        "( ( ¬ ( φ ∧ ψ ) → ( χ ∧ ( φ ⊻ ψ ) ) ) ↔ ( ¬ ( φ ∧ ψ ) → ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ) )",
+        s_3bitr3g,
+        ref="pm5.74i",
+        note="pm5.74i",
+    )
+
+    # df-or: ((φ ∧ ψ) ∨ (χ ∧ (φ ⊻ ψ))) ↔ (¬(φ ∧ ψ) → (χ ∧ (φ ⊻ ψ)))
+    s_df_or_left = lb.ref(
+        "s_df_or_left",
+        "( ( φ ∧ ψ ) ∨ ( χ ∧ ( φ ⊻ ψ ) ) ) ↔ ( ¬ ( φ ∧ ψ ) → ( χ ∧ ( φ ⊻ ψ ) ) )",
+        ref="df-or",
+        note="df-or",
+    )
+
+    # df-or: ((φ ∧ ψ) ∨ ((φ ∧ χ) ∨ (ψ ∧ χ))) ↔ (¬(φ ∧ ψ) → ((φ ∧ χ) ∨ (ψ ∧ χ)))
+    s_df_or_right = lb.ref(
+        "s_df_or_right",
+        "( ( φ ∧ ψ ) ∨ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ) ↔ ( ¬ ( φ ∧ ψ ) → ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) )",
+        ref="df-or",
+        note="df-or",
+    )
+
+    # 3bitr4i: chain the three biconditionals
+    #   h1: pm5.74i result
+    #   h2: df-or left
+    #   h3: df-or right
+    #   gives: ((φ∧ψ)∨(χ∧(φ⊻ψ))) ↔ ((φ∧ψ)∨((φ∧χ)∨(ψ∧χ)))
+    s_3bitr4i = lb.ref(
+        "s_3bitr4i",
+        "( ( φ ∧ ψ ) ∨ ( χ ∧ ( φ ⊻ ψ ) ) ) ↔ ( ( φ ∧ ψ ) ∨ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) )",
+        s_pm5_74i,
+        s_df_or_left,
+        s_df_or_right,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    # df-cad: cadd(φ, ψ, χ) ↔ ((φ ∧ ψ) ∨ (χ ∧ (φ ⊻ ψ)))
+    s_df_cad = lb.ref(
+        "s_df_cad",
+        "cadd φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( χ ∧ ( φ ⊻ ψ ) ) )",
+        ref="df-cad",
+        note="df-cad",
+    )
+
+    # 3orass: ((φ ∧ ψ) ∨ (φ ∧ χ) ∨ (ψ ∧ χ)) ↔ ((φ ∧ ψ) ∨ ((φ ∧ χ) ∨ (ψ ∧ χ)))
+    s_3orass = lb.ref(
+        "s_3orass",
+        "( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( φ ∧ ψ ) ∨ ( ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) )",
+        ref="3orass",
+        note="3orass",
+    )
+
+    # Final 3bitr4i:
+    #   h1: s_3bitr4i
+    #   h2: s_df_cad
+    #   h3: s_3orass
+    #   gives: cadd(φ, ψ, χ) ↔ ((φ ∧ ψ) ∨ (φ ∧ χ) ∨ (ψ ∧ χ))
+    res = lb.ref(
+        "res",
+        "cadd φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        s_3bitr4i,
+        s_df_cad,
+        s_3orass,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
 THEOREMS: Mapping[str, LemmaCtor] = {
     "cad0": prove_cad0,
+    "cad1": prove_cad1,
     "cad11": prove_cad11,
     "cadbi123d": prove_cadbi123d,
     "cadbi123i": prove_cadbi123i,
+    "cadifp": prove_cadifp,
     "cadcoma": prove_cadcoma,
     "cadtru": prove_cadtru,
+    "cador": prove_cador,
+    "hadbi123i": prove_hadbi123i,
+    "hadbi123d": prove_hadbi123d,
 }
 
 __all__ = [
     "LemmaCtor",
     "THEOREMS",
     "prove_cad0",
+    "prove_cad1",
     "prove_cad11",
     "prove_cadbi123d",
     "prove_cadbi123i",
+    "prove_cadifp",
     "prove_cadcoma",
     "prove_cadtru",
+    "prove_cador",
+    "prove_hadbi123i",
+    "prove_hadbi123d",
 ]

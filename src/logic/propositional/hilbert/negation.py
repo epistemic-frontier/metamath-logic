@@ -2202,6 +2202,20 @@ def prove_mptnan(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_mptxor(sys: System) -> Proof:
+    """mptxor: ¬ ψ.
+
+    Modus ponendo tollens from exclusive or: from φ and (φ ⊻ ψ), infer ¬ ψ.
+    """
+    lb = ProofBuilder(sys, "mptxor")
+    h1 = lb.hyp("mptxor.min", "φ")
+    h2 = lb.hyp("mptxor.maj", "φ ⊻ ψ")
+    s_xornan = lb.ref("s_xornan", "( φ ⊻ ψ ) → ¬ ( φ ∧ ψ )", ref="xornan", note="xornan")
+    s1 = lb.mp("s1", h2, s_xornan, "MP: mptxor.maj, xornan")
+    res = lb.ref("res", "¬ ψ", h1, s1, ref="mptnan", note="mptnan")
+    return lb.build(res)
+
+
 def prove_merlem7(sys: System) -> Proof:
     """merlem7: φ → ( ( ( ψ → χ ) → θ ) → ( ( ( χ → τ ) → ( ¬ θ → ¬ ψ ) ) → θ ) ).
 
@@ -3467,10 +3481,223 @@ def prove_pm2_61dda(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_nic_luk2(sys: System) -> Proof:
+    """nic-luk2: ( ¬ φ → φ ) → φ.
+
+    Łukasiewicz's second axiom (Pierce's law variant) derived in the Nicod
+    NAND-based system from ~ nic-ax and ~ nic-mp .
+    """
+    lb = ProofBuilder(sys, "nic-luk2")
+
+    # Step 1: nic-dfim (definition of implication via NAND)
+    #   with φ ≔ ¬ φ, ψ ≔ φ
+    s1 = lb.ref(
+        "s1",
+        "(( ( ¬ φ ) ⊼ ( φ ⊼ φ ) ) ⊼ ( ¬ φ → φ )) ⊼ ((( ( ¬ φ ) ⊼ ( φ ⊼ φ ) ) ⊼ ( ( ¬ φ ) ⊼ ( φ ⊼ φ ) )) ⊼ (( ¬ φ → φ ) ⊼ ( ¬ φ → φ )))",
+        ref="nic-dfim",
+        note="nic-dfim",
+    )
+
+    # Step 2: nic-bi2 from s1
+    s2 = lb.ref(
+        "s2",
+        "( ¬ φ → φ ) ⊼ (( ( ¬ φ ) ⊼ ( φ ⊼ φ ) ) ⊼ ( ( ¬ φ ) ⊼ ( φ ⊼ φ ) ))",
+        s1,
+        ref="nic-bi2",
+        note="nic-bi2",
+    )
+
+    # Step 3: nic-dfneg (definition of negation via NAND)
+    s3 = lb.ref(
+        "s3",
+        "(( φ ⊼ φ ) ⊼ ¬ φ ) ⊼ ((( φ ⊼ φ ) ⊼ ( φ ⊼ φ )) ⊼ ( ( ¬ φ ) ⊼ ¬ φ ))",
+        ref="nic-dfneg",
+        note="nic-dfneg",
+    )
+
+    # Step 4: nic-id with τ ≔ ( φ ⊼ φ )
+    s4 = lb.ref(
+        "s4",
+        "( φ ⊼ φ ) ⊼ (( φ ⊼ φ ) ⊼ ( φ ⊼ φ ))",
+        ref="nic-id",
+        note="nic-id",
+    )
+
+    # Step 5: nic-iimp1 on s3, s4
+    s5 = lb.ref(
+        "s5",
+        "( φ ⊼ φ ) ⊼ (( φ ⊼ φ ) ⊼ ¬ φ )",
+        s3,
+        s4,
+        ref="nic-iimp1",
+        note="nic-iimp1",
+    )
+
+    # Step 6: nic-isw2 on s5
+    s6 = lb.ref(
+        "s6",
+        "( φ ⊼ φ ) ⊼ (( ¬ φ ) ⊼ ( φ ⊼ φ ))",
+        s5,
+        ref="nic-isw2",
+        note="nic-isw2",
+    )
+
+    # Step 7: nic-iimp1 on s2, s6
+    s7 = lb.ref(
+        "s7",
+        "( φ ⊼ φ ) ⊼ ( ¬ φ → φ )",
+        s2,
+        s6,
+        ref="nic-iimp1",
+        note="nic-iimp1",
+    )
+
+    # Step 8: nic-isw1 on s7
+    s8 = lb.ref(
+        "s8",
+        "( ¬ φ → φ ) ⊼ ( φ ⊼ φ )",
+        s7,
+        ref="nic-isw1",
+        note="nic-isw1",
+    )
+
+    # Step 9: nic-dfim with φ ≔ ( ¬ φ → φ ), ψ ≔ φ
+    s9 = lb.ref(
+        "s9",
+        "((( ¬ φ → φ ) ⊼ ( φ ⊼ φ )) ⊼ (( ¬ φ → φ ) → φ )) ⊼ (((( ¬ φ → φ ) ⊼ ( φ ⊼ φ )) ⊼ (( ¬ φ → φ ) ⊼ ( φ ⊼ φ ))) ⊼ ((( ¬ φ → φ ) → φ ) ⊼ (( ¬ φ → φ ) → φ )))",
+        ref="nic-dfim",
+        note="nic-dfim",
+    )
+
+    # Step 10: nic-bi1 on s9
+    s10 = lb.ref(
+        "s10",
+        "(( ¬ φ → φ ) ⊼ ( φ ⊼ φ )) ⊼ ((( ¬ φ → φ ) → φ ) ⊼ (( ¬ φ → φ ) → φ ))",
+        s9,
+        ref="nic-bi1",
+        note="nic-bi1",
+    )
+
+    # Step 11: nic-mp on s8 (nic-jmin), s10 (nic-jmaj)
+    res = lb.ref(
+        "res",
+        "( ¬ φ → φ ) → φ",
+        s8,
+        s10,
+        ref="nic-mp",
+        note="nic-mp",
+    )
+
+    return lb.build(res)
+
+
 # New migrations register here beside their implementation.
 # The aggregate registry imports this mapping, avoiding another edit to global shim files.
+def prove_nic_luk3(sys: System) -> Proof:
+    """nic-luk3: φ → (¬ φ → ψ).
+
+    Łukasiewicz's third axiom (pm2.24 / Duns Scotus law) derived in the
+    Nicod NAND-based system from ~ nic-ax and ~ nic-mp .
+    """
+    lb = ProofBuilder(sys, "nic-luk3")
+
+    # Step 1: nic-dfim with φ := ¬ φ, ψ := ψ
+    s1 = lb.ref(
+        "s1",
+        "(( ( ¬ φ ) ⊼ ( ψ ⊼ ψ ) ) ⊼ ( ¬ φ → ψ )) ⊼ ((( ( ¬ φ ) ⊼ ( ψ ⊼ ψ ) ) ⊼ ( ( ¬ φ ) ⊼ ( ψ ⊼ ψ ) )) ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ )))",
+        ref="nic-dfim",
+        note="nic-dfim",
+    )
+
+    # Step 2: nic-bi1 on s1
+    s2 = lb.ref(
+        "s2",
+        "( ( ¬ φ ) ⊼ ( ψ ⊼ ψ ) ) ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ ))",
+        s1,
+        ref="nic-bi1",
+        note="nic-bi1",
+    )
+
+    # Step 3: nic-dfneg
+    s3 = lb.ref(
+        "s3",
+        "(( φ ⊼ φ ) ⊼ ¬ φ ) ⊼ ((( φ ⊼ φ ) ⊼ ( φ ⊼ φ )) ⊼ ( ( ¬ φ ) ⊼ ( ¬ φ ) ))",
+        ref="nic-dfneg",
+        note="nic-dfneg",
+    )
+
+    # Step 4: nic-bi2 on s3
+    s4 = lb.ref(
+        "s4",
+        "( ¬ φ ) ⊼ (( φ ⊼ φ ) ⊼ ( φ ⊼ φ ))",
+        s3,
+        ref="nic-bi2",
+        note="nic-bi2",
+    )
+
+    # Step 5: nic-id
+    s5 = lb.ref(
+        "s5",
+        "φ ⊼ ( φ ⊼ φ )",
+        ref="nic-id",
+        note="nic-id",
+    )
+
+    # Step 6: nic-iimp1 on s4, s5
+    s6 = lb.ref(
+        "s6",
+        "φ ⊼ ¬ φ",
+        s4,
+        s5,
+        ref="nic-iimp1",
+        note="nic-iimp1",
+    )
+
+    # Step 7: nic-iimp2 on s2, s6
+    s7 = lb.ref(
+        "s7",
+        "φ ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ ))",
+        s2,
+        s6,
+        ref="nic-iimp2",
+        note="nic-iimp2",
+    )
+
+    # Step 8: nic-dfim with φ := φ, ψ := ( ¬ φ → ψ )
+    s8 = lb.ref(
+        "s8",
+        "(( φ ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ ))) ⊼ ( φ → ( ¬ φ → ψ ))) ⊼ ((( φ ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ ))) ⊼ ( φ ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ )))) ⊼ (( φ → ( ¬ φ → ψ )) ⊼ ( φ → ( ¬ φ → ψ ))))",
+        ref="nic-dfim",
+        note="nic-dfim",
+    )
+
+    # Step 9: nic-bi1 on s8
+    s9 = lb.ref(
+        "s9",
+        "( φ ⊼ (( ¬ φ → ψ ) ⊼ ( ¬ φ → ψ ))) ⊼ (( φ → ( ¬ φ → ψ )) ⊼ ( φ → ( ¬ φ → ψ )))",
+        s8,
+        ref="nic-bi1",
+        note="nic-bi1",
+    )
+
+    # Step 10: nic-mp on s7 (nic-jmin), s9 (nic-jmaj)
+    res = lb.ref(
+        "res",
+        "φ → ( ¬ φ → ψ )",
+        s7,
+        s9,
+        ref="nic-mp",
+        note="nic-mp",
+    )
+
+    return lb.build(res)
+
+
 MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
+    "nic-luk3": prove_nic_luk3,
+    "nic-luk2": prove_nic_luk2,
     "pm2.61dan": prove_pm2_61dan,
     "pm2.61dda": prove_pm2_61dda,
     "pm2.61ddan": prove_pm2_61ddan,
+    "mptxor": prove_mptxor,
 }

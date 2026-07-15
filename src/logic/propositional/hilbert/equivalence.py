@@ -500,6 +500,7 @@ def prove_2th(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -793,6 +794,7 @@ def prove_con34b(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -831,6 +833,7 @@ def prove_imdi(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -869,6 +872,7 @@ def prove_bi2_04(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -941,6 +945,7 @@ def prove_con2b(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -1174,6 +1179,7 @@ def prove_con1b(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -1355,6 +1361,7 @@ def prove_pm4_81(sys: System) -> Proof:
     )
 
     return lb.build(res)
+
     return lb.build(res)
 
 
@@ -7509,15 +7516,1409 @@ def prove_pm5_19(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_xor3(sys: System) -> Proof:
+    """xor3: ( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) ).
+
+    The negation of a biconditional is equivalent to the biconditional
+    with a negated second argument.  (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xor3")
+
+    # pm5.18: ( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ ) )",
+        ref="pm5.18",
+        note="pm5.18",
+    )
+
+    # con2bii on s1: ( ( φ ↔ ¬ ψ ) ↔ ¬ ( φ ↔ ψ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ↔ ¬ ψ ) ↔ ¬ ( φ ↔ ψ ) )",
+        s1,
+        ref="con2bii",
+        note="con2bii",
+    )
+
+    # bicomi on s2: ( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )
+    res = lb.ref(
+        "res",
+        "( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )",
+        s2,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    return lb.build(res)
+
+
+def prove_xorexmid(sys: System) -> Proof:
+    """xorexmid: ( φ ⊻ ¬ φ ).
+
+    Excluded middle expressed with exclusive or.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xorexmid")
+
+    # pm5.19: ¬ ( φ ↔ ¬ φ )
+    s1 = lb.ref("s1", "¬ ( φ ↔ ¬ φ )", ref="pm5.19", note="pm5.19")
+
+    # df-xor: ( φ ⊻ ¬ φ ) ↔ ¬ ( φ ↔ ¬ φ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ⊻ ¬ φ ) ↔ ¬ ( φ ↔ ¬ φ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    # mpbir: from pm5.19 and df-xor, conclude ( φ ⊻ ¬ φ )
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ¬ φ )",
+        s1,
+        s2,
+        ref="mpbir",
+        note="mpbir",
+    )
+
+    return lb.build(res)
+
+
+def prove_nbbnOLD(sys: System) -> Proof:
+    """nbbnOLD: ( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) ).
+
+    Older proof of nbbn using xor3, con2bi, bicom, and 3bitrri.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "nbbnOLD")
+
+    # xor3: ( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ) )",
+        ref="xor3",
+        note="xor3",
+    )
+
+    # con2bi: ( ( φ ↔ ¬ ψ ) ↔ ( ψ ↔ ¬ φ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ↔ ¬ ψ ) ↔ ( ψ ↔ ¬ φ ) )",
+        ref="con2bi",
+        note="con2bi",
+    )
+
+    # bicom: ( ( ψ ↔ ¬ φ ) ↔ ( ¬ φ ↔ ψ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ( ψ ↔ ¬ φ ) ↔ ( ¬ φ ↔ ψ ) )",
+        ref="bicom",
+        note="bicom",
+    )
+
+    # 3bitrri chains the three biconditionals: ( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) )
+    res = lb.ref(
+        "res",
+        "( ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ ) )",
+        s1,
+        s2,
+        s3,
+        ref="3bitrri",
+        note="3bitrri",
+    )
+
+    return lb.build(res)
+
+
+def prove_casesifp(sys: System) -> Proof:
+    """casesifp: ψ ↔ if- φ χ θ.
+
+    Case elimination via the conditional operator.
+    """
+    lb = ProofBuilder(sys, "casesifp")
+    h1 = lb.hyp("casesifp.1", "φ → ( ψ ↔ χ )")
+    h2 = lb.hyp("casesifp.2", "¬ φ → ( ψ ↔ θ )")
+
+    # cases: ψ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )
+    s1 = lb.ref(
+        "s1",
+        "ψ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )",
+        h1,
+        h2,
+        ref="cases",
+        note="cases",
+    )
+
+    # df-ifp: if- φ χ θ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )
+    s2 = lb.ref(
+        "s2",
+        "if- φ χ θ ↔ ( ( φ ∧ χ ) ∨ ( ¬ φ ∧ θ ) )",
+        ref="df-ifp",
+        note="df-ifp",
+    )
+
+    # bitr4i: ψ ↔ if- φ χ θ
+    res = lb.ref(
+        "res",
+        "ψ ↔ if- φ χ θ",
+        s1,
+        s2,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_nanbi(sys: System) -> Proof:
+    """nanbi: ( φ ↔ ψ ) ↔ ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) ).
+
+    Express the biconditional solely in terms of NAND.
+    """
+    lb = ProofBuilder(sys, "nanbi")
+
+    # (1) dfbi3: ( φ ↔ ψ ) ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( φ ↔ ψ ) ↔ ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) )",
+        ref="dfbi3",
+        note="dfbi3",
+    )
+
+    # (2) df-or: ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ¬ ( φ ∧ ψ ) → ( ¬ φ ∧ ¬ ψ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ¬ ( φ ∧ ψ ) → ( ¬ φ ∧ ¬ ψ ) )",
+        ref="df-or",
+        note="df-or",
+    )
+
+    # (3) df-nan: ( φ ⊼ ψ ) ↔ ¬ ( φ ∧ ψ )
+    s3 = lb.ref(
+        "s3",
+        "( φ ⊼ ψ ) ↔ ¬ ( φ ∧ ψ )",
+        ref="df-nan",
+        note="df-nan",
+    )
+
+    # (4) bicomi on s3: ¬ ( φ ∧ ψ ) ↔ ( φ ⊼ ψ )
+    s4 = lb.ref(
+        "s4",
+        "¬ ( φ ∧ ψ ) ↔ ( φ ⊼ ψ )",
+        s3,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # (5) nannot: ¬ φ ↔ ( φ ⊼ φ )
+    s5 = lb.ref(
+        "s5",
+        "¬ φ ↔ ( φ ⊼ φ )",
+        ref="nannot",
+        note="nannot",
+    )
+
+    # (6) nannot with ψ: ¬ ψ ↔ ( ψ ⊼ ψ )
+    s6 = lb.ref(
+        "s6",
+        "¬ ψ ↔ ( ψ ⊼ ψ )",
+        ref="nannot",
+        note="nannot",
+    )
+
+    # (7) anbi12i on s5, s6: ( ¬ φ ∧ ¬ ψ ) ↔ ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) )
+    s7 = lb.ref(
+        "s7",
+        "( ¬ φ ∧ ¬ ψ ) ↔ ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) )",
+        s5,
+        s6,
+        ref="anbi12i",
+        note="anbi12i",
+    )
+
+    # (8) imbi12i on s4, s7:
+    #     ( ¬ ( φ ∧ ψ ) → ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )
+    s8 = lb.ref(
+        "s8",
+        "( ¬ ( φ ∧ ψ ) → ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )",
+        s4,
+        s7,
+        ref="imbi12i",
+        note="imbi12i",
+    )
+
+    # (9) bitri on s2, s8:
+    #     ( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )
+    s9 = lb.ref(
+        "s9",
+        "( ( φ ∧ ψ ) ∨ ( ¬ φ ∧ ¬ ψ ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )",
+        s2,
+        s8,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # (10) nannan with φ:=(φ⊼ψ), ψ:=(φ⊼φ), χ:=(ψ⊼ψ):
+    #      ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )
+    s10 = lb.ref(
+        "s10",
+        "( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) ) ↔ ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) )",
+        ref="nannan",
+        note="nannan",
+    )
+
+    # (11) bicomi on s10:
+    #      ( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) ) ↔ ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) )
+    s11 = lb.ref(
+        "s11",
+        "( ( φ ⊼ ψ ) → ( ( φ ⊼ φ ) ∧ ( ψ ⊼ ψ ) ) ) ↔ ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) )",
+        s10,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # (12) 3bitri on s1, s9, s11:
+    #      ( φ ↔ ψ ) ↔ ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) )
+    res = lb.ref(
+        "res",
+        "( φ ↔ ψ ) ↔ ( ( φ ⊼ ψ ) ⊼ ( ( φ ⊼ φ ) ⊼ ( ψ ⊼ ψ ) ) )",
+        s1,
+        s9,
+        s11,
+        ref="3bitri",
+        note="3bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_xorneg1(sys: System) -> Proof:
+    """xorneg1: ( ¬ φ ⊻ ψ ) ↔ ¬ ( φ ⊻ ψ ).
+
+    The XOR of a negated proposition and another is equivalent to the
+    negation of their XOR.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xorneg1")
+
+    # xorcom applied to ¬φ and ψ: ( ¬ φ ⊻ ψ ) ↔ ( ψ ⊻ ¬ φ )
+    s1 = lb.ref(
+        "s1",
+        "( ¬ φ ⊻ ψ ) ↔ ( ψ ⊻ ¬ φ )",
+        ref="xorcom",
+        note="xorcom",
+    )
+
+    # xorneg2 applied to ψ and φ: ( ψ ⊻ ¬ φ ) ↔ ¬ ( ψ ⊻ φ )
+    s2 = lb.ref(
+        "s2",
+        "( ψ ⊻ ¬ φ ) ↔ ¬ ( ψ ⊻ φ )",
+        ref="xorneg2",
+        note="xorneg2",
+    )
+
+    # xorcom applied to ψ and φ: ( ψ ⊻ φ ) ↔ ( φ ⊻ ψ )
+    s3 = lb.ref(
+        "s3",
+        "( ψ ⊻ φ ) ↔ ( φ ⊻ ψ )",
+        ref="xorcom",
+        note="xorcom",
+    )
+
+    # xchbinx with s2 and s3: ( ψ ⊻ ¬ φ ) ↔ ¬ ( φ ⊻ ψ )
+    s4 = lb.ref(
+        "s4",
+        "( ψ ⊻ ¬ φ ) ↔ ¬ ( φ ⊻ ψ )",
+        s2,
+        s3,
+        ref="xchbinx",
+        note="xchbinx",
+    )
+
+    # bitri with s1 and s4: ( ¬ φ ⊻ ψ ) ↔ ¬ ( φ ⊻ ψ )
+    res = lb.ref(
+        "res",
+        "( ¬ φ ⊻ ψ ) ↔ ¬ ( φ ⊻ ψ )",
+        s1,
+        s4,
+        ref="bitri",
+        note="bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_xorneg2(sys: System) -> Proof:
+    """xorneg2: ( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ψ ).
+
+    The XOR of a proposition and the negation of another is equivalent to
+    the negation of their XOR.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xorneg2")
+
+    # df-xor with ¬ψ for ψ: ( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ↔ ¬ ψ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ↔ ¬ ψ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    # pm5.18: ( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ )
+    s2 = lb.ref(
+        "s2",
+        "( φ ↔ ψ ) ↔ ¬ ( φ ↔ ¬ ψ )",
+        ref="pm5.18",
+        note="pm5.18",
+    )
+
+    # xnor: ( φ ↔ ψ ) ↔ ¬ ( φ ⊻ ψ )
+    s3 = lb.ref(
+        "s3",
+        "( φ ↔ ψ ) ↔ ¬ ( φ ⊻ ψ )",
+        ref="xnor",
+        note="xnor",
+    )
+
+    # 3bitr2i chains s1, s2, s3: ( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ψ )
+    res = lb.ref(
+        "res",
+        "( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ψ )",
+        s1,
+        s2,
+        s3,
+        ref="3bitr2i",
+        note="3bitr2i",
+    )
+
+    return lb.build(res)
+
+
+def prove_xorass(sys: System) -> Proof:
+    """xorass: ( ( φ ⊻ ψ ) ⊻ χ ) ↔ ( φ ⊻ ( ψ ⊻ χ ) ).
+
+    Associativity of exclusive or: exclusive or is associative.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xorass")
+
+    # df-xor: ( φ ⊻ ψ ) ↔ ¬ ( φ ↔ ψ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ψ ) ↔ ¬ ( φ ↔ ψ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+    s2 = lb.ref(
+        "s2",
+        "( ψ ⊻ χ ) ↔ ¬ ( ψ ↔ χ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    # bibi1i / bibi2i: push df-xor through the biconditional
+    s3 = lb.ref(
+        "s3",
+        "( ( φ ⊻ ψ ) ↔ χ ) ↔ ( ¬ ( φ ↔ ψ ) ↔ χ )",
+        s1,
+        ref="bibi1i",
+        note="bibi1i",
+    )
+    s4 = lb.ref(
+        "s4",
+        "( φ ↔ ( ψ ⊻ χ ) ) ↔ ( φ ↔ ¬ ( ψ ↔ χ ) )",
+        s2,
+        ref="bibi2i",
+        note="bibi2i",
+    )
+
+    # nbbn: ( ¬ φ ↔ ψ ) ↔ ¬ ( φ ↔ ψ )
+    s5 = lb.ref(
+        "s5",
+        "( ¬ ( φ ↔ ψ ) ↔ χ ) ↔ ¬ ( ( φ ↔ ψ ) ↔ χ )",
+        ref="nbbn",
+        note="nbbn",
+    )
+
+    # xor3: ¬ ( φ ↔ ψ ) ↔ ( φ ↔ ¬ ψ ), then bicomi
+    s6 = lb.ref(
+        "s6",
+        "¬ ( φ ↔ ( ψ ↔ χ ) ) ↔ ( φ ↔ ¬ ( ψ ↔ χ ) )",
+        ref="xor3",
+        note="xor3",
+    )
+    s7 = lb.ref(
+        "s7",
+        "( φ ↔ ¬ ( ψ ↔ χ ) ) ↔ ¬ ( φ ↔ ( ψ ↔ χ ) )",
+        s6,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # Chain with bitri
+    s8 = lb.ref(
+        "s8",
+        "( ( φ ⊻ ψ ) ↔ χ ) ↔ ¬ ( ( φ ↔ ψ ) ↔ χ )",
+        s3,
+        s5,
+        ref="bitri",
+        note="bitri",
+    )
+    s9 = lb.ref(
+        "s9",
+        "( φ ↔ ( ψ ⊻ χ ) ) ↔ ¬ ( φ ↔ ( ψ ↔ χ ) )",
+        s4,
+        s7,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # biass: ( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) )
+    s10 = lb.ref(
+        "s10",
+        "( ( φ ↔ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ↔ χ ) )",
+        ref="biass",
+        note="biass",
+    )
+
+    # notbii on s10: negate both sides
+    s11 = lb.ref(
+        "s11",
+        "¬ ( ( φ ↔ ψ ) ↔ χ ) ↔ ¬ ( φ ↔ ( ψ ↔ χ ) )",
+        s10,
+        ref="notbii",
+        note="notbii",
+    )
+
+    # 3bitr4i combines s11, s8, s9
+    s12 = lb.ref(
+        "s12",
+        "( ( φ ⊻ ψ ) ↔ χ ) ↔ ( φ ↔ ( ψ ⊻ χ ) )",
+        s11,
+        s8,
+        s9,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    # notbii on s12: negate both sides
+    s13 = lb.ref(
+        "s13",
+        "¬ ( ( φ ⊻ ψ ) ↔ χ ) ↔ ¬ ( φ ↔ ( ψ ⊻ χ ) )",
+        s12,
+        ref="notbii",
+        note="notbii",
+    )
+
+    # df-xor for the outer xor on each side
+    s14 = lb.ref(
+        "s14",
+        "( ( φ ⊻ ψ ) ⊻ χ ) ↔ ¬ ( ( φ ⊻ ψ ) ↔ χ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+    s15 = lb.ref(
+        "s15",
+        "( φ ⊻ ( ψ ⊻ χ ) ) ↔ ¬ ( φ ↔ ( ψ ⊻ χ ) )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    # 3bitr4i combines s13, s14, s15 for the final result
+    res = lb.ref(
+        "res",
+        "( ( φ ⊻ ψ ) ⊻ χ ) ↔ ( φ ⊻ ( ψ ⊻ χ ) )",
+        s13,
+        s14,
+        s15,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_xorneg(sys: System) -> Proof:
+    """xorneg: ( ( ¬ φ ⊻ ¬ ψ ) ↔ ( φ ⊻ ψ ) ).
+
+    Negating both arguments of an exclusive-or yields the same result.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "xorneg")
+
+    # xorneg2: ( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ψ )
+    s1 = lb.ref(
+        "s1",
+        "( φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ψ )",
+        ref="xorneg2",
+        note="xorneg2",
+    )
+
+    # con2bii on s1: ( ( φ ⊻ ψ ) ↔ ¬ ( φ ⊻ ¬ ψ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ⊻ ψ ) ↔ ¬ ( φ ⊻ ¬ ψ ) )",
+        s1,
+        ref="con2bii",
+        note="con2bii",
+    )
+
+    # xorneg1 with ψ := ¬ψ: ( ( ¬ φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ¬ ψ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ( ¬ φ ⊻ ¬ ψ ) ↔ ¬ ( φ ⊻ ¬ ψ ) )",
+        ref="xorneg1",
+        note="xorneg1",
+    )
+
+    # bitr4i on s2 and s3: ( ( φ ⊻ ψ ) ↔ ( ¬ φ ⊻ ¬ ψ ) )
+    s4 = lb.ref(
+        "s4",
+        "( ( φ ⊻ ψ ) ↔ ( ¬ φ ⊻ ¬ ψ ) )",
+        s2,
+        s3,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    # bicomi on s4: ( ( ¬ φ ⊻ ¬ ψ ) ↔ ( φ ⊻ ψ ) )
+    res = lb.ref(
+        "res",
+        "( ( ¬ φ ⊻ ¬ ψ ) ↔ ( φ ⊻ ψ ) )",
+        s4,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    return lb.build(res)
+
+
+def prove_just2_df(sys: System) -> Proof:
+    """just2-df: φ → ( ψ ↔ χ ).
+
+    Inference from a biconditional: from φ ↔ ( ψ ∧ χ ), deduce φ → ( ψ ↔ χ ).
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "just2-df")
+
+    h1 = lb.hyp("just2-df.1", "( φ ↔ ( ψ ∧ χ ) )")
+
+    # abab: ( ψ ∧ χ ) ↔ ( ψ ∧ ( ψ ↔ χ ) )
+    s_abab = lb.ref(
+        "s_abab",
+        "( ψ ∧ χ ) ↔ ( ψ ∧ ( ψ ↔ χ ) )",
+        ref="abab",
+        note="abab",
+    )
+
+    # bitri: ( φ ↔ ( ψ ∧ χ ) ), ( ψ ∧ χ ) ↔ ( ψ ∧ ( ψ ↔ χ ) ) |- ( φ ↔ ( ψ ∧ ( ψ ↔ χ ) ) )
+    s_bitri = lb.ref(
+        "s_bitri",
+        "( φ ↔ ( ψ ∧ ( ψ ↔ χ ) ) )",
+        h1,
+        s_abab,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # simprbi: ( φ ↔ ( ψ ∧ ( ψ ↔ χ ) ) ) |- φ → ( ψ ↔ χ )
+    res = lb.ref(
+        "res",
+        "φ → ( ψ ↔ χ )",
+        s_bitri,
+        ref="simprbi",
+        note="simprbi",
+    )
+
+    return lb.build(res)
+
+
 # New migrations register here beside their implementation.
+
+
+def prove_hadass(sys: System) -> Proof:
+    """hadass: hadd φ ψ χ ↔ ( φ ⊻ ( ψ ⊻ χ ) ).
+
+    Associativity of the half-adder sum: the half-adder sum is
+    equivalent to exclusive-or of the first argument with the
+    exclusive-or of the second and third.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadass")
+
+    # df-had: hadd φ ψ χ ↔ ( ( φ ⊻ ψ ) ⊻ χ )
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ ( ( φ ⊻ ψ ) ⊻ χ )",
+        ref="df-had",
+        note="df-had",
+    )
+
+    # xorass: ( ( φ ⊻ ψ ) ⊻ χ ) ↔ ( φ ⊻ ( ψ ⊻ χ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ⊻ ψ ) ⊻ χ ) ↔ ( φ ⊻ ( ψ ⊻ χ ) )",
+        ref="xorass",
+        note="xorass",
+    )
+
+    # bitri: chain s1 and s2
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ ( φ ⊻ ( ψ ⊻ χ ) )",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadcomb(sys: System) -> Proof:
+    """hadcomb: hadd φ ψ χ ↔ hadd φ χ ψ.
+
+    Commutation of the last two arguments of the half-adder sum:
+    the half-adder sum is symmetric in its second and third arguments.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadcomb")
+
+    # hadass: hadd φ ψ χ ↔ ( φ ⊻ ( ψ ⊻ χ ) )
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ ( φ ⊻ ( ψ ⊻ χ ) )",
+        ref="hadass",
+        note="hadass",
+    )
+
+    # hadass: hadd φ χ ψ ↔ ( φ ⊻ ( χ ⊻ ψ ) )
+    s2 = lb.ref(
+        "s2",
+        "hadd φ χ ψ ↔ ( φ ⊻ ( χ ⊻ ψ ) )",
+        ref="hadass",
+        note="hadass",
+    )
+
+    # biid: φ ↔ φ
+    s3 = lb.ref("s3", "φ ↔ φ", ref="biid", note="biid")
+
+    # xorcom: ( ψ ⊻ χ ) ↔ ( χ ⊻ ψ )
+    s4 = lb.ref(
+        "s4",
+        "( ψ ⊻ χ ) ↔ ( χ ⊻ ψ )",
+        ref="xorcom",
+        note="xorcom",
+    )
+
+    # xorbi12i: ( ( φ ⊻ ( ψ ⊻ χ ) ) ↔ ( φ ⊻ ( χ ⊻ ψ ) ) )
+    s5 = lb.ref(
+        "s5",
+        "( ( φ ⊻ ( ψ ⊻ χ ) ) ↔ ( φ ⊻ ( χ ⊻ ψ ) ) )",
+        s3,
+        s4,
+        ref="xorbi12i",
+        note="xorbi12i",
+    )
+
+    # 3bitr4i: hadd φ ψ χ ↔ hadd φ χ ψ
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ hadd φ χ ψ",
+        s5,
+        s1,
+        s2,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadrot(sys: System) -> Proof:
+    """hadrot: hadd φ ψ χ ↔ hadd ψ χ φ.
+
+    Rotation of the arguments of the half-adder sum:
+    the half-adder sum is invariant under cyclic permutation of its arguments.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadrot")
+
+    # hadcoma: hadd φ ψ χ ↔ hadd ψ φ χ
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ hadd ψ φ χ",
+        ref="hadcoma",
+        note="hadcoma",
+    )
+
+    # hadcomb: hadd ψ φ χ ↔ hadd ψ χ φ
+    s2 = lb.ref(
+        "s2",
+        "hadd ψ φ χ ↔ hadd ψ χ φ",
+        ref="hadcomb",
+        note="hadcomb",
+    )
+
+    # bitri: hadd φ ψ χ ↔ hadd ψ χ φ
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ hadd ψ χ φ",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_cadcomb(sys: System) -> Proof:
+    """cadcomb: cadd φ ψ χ ↔ cadd φ χ ψ.
+
+    The adder carry is symmetric in its second and third arguments:
+    swapping the last two arguments yields an equivalent proposition.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "cadcomb")
+
+    # cadan: cadd φ ψ χ ↔ ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ))
+    s1 = lb.ref(
+        "s1",
+        "cadd φ ψ χ ↔ ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ))",
+        ref="cadan",
+        note="cadan",
+    )
+
+    # 3ancoma: ((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ)) ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (ψ ∨ χ))
+    s2 = lb.ref(
+        "s2",
+        "((φ ∨ ψ) ∧ (φ ∨ χ) ∧ (ψ ∨ χ)) ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (ψ ∨ χ))",
+        ref="3ancoma",
+        note="3ancoma",
+    )
+
+    # orcom: (ψ ∨ χ) ↔ (χ ∨ ψ)
+    s3 = lb.ref(
+        "s3",
+        "(ψ ∨ χ) ↔ (χ ∨ ψ)",
+        ref="orcom",
+        note="orcom",
+    )
+
+    # 3anbi3i: ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (ψ ∨ χ)) ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))
+    s4 = lb.ref(
+        "s4",
+        "((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (ψ ∨ χ)) ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))",
+        s3,
+        ref="3anbi3i",
+        note="3anbi3i",
+    )
+
+    # 3bitri: cadd φ ψ χ ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))
+    s5 = lb.ref(
+        "s5",
+        "cadd φ ψ χ ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))",
+        s1,
+        s2,
+        s4,
+        ref="3bitri",
+        note="3bitri",
+    )
+
+    # cadan: cadd φ χ ψ ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))
+    s6 = lb.ref(
+        "s6",
+        "cadd φ χ ψ ↔ ((φ ∨ χ) ∧ (φ ∨ ψ) ∧ (χ ∨ ψ))",
+        ref="cadan",
+        note="cadan",
+    )
+
+    # bitr4i: cadd φ ψ χ ↔ cadd φ χ ψ
+    res = lb.ref(
+        "res",
+        "cadd φ ψ χ ↔ cadd φ χ ψ",
+        s5,
+        s6,
+        ref="bitr4i",
+        note="bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_cadrot(sys: System) -> Proof:
+    """cadrot: cadd φ ψ χ ↔ cadd ψ χ φ.
+
+    Rotation of the arguments of the conditional addition (full-adder carry):
+    the adder carry is invariant under cyclic permutation of its arguments.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "cadrot")
+
+    # cadcoma: cadd φ ψ χ ↔ cadd ψ φ χ
+    s1 = lb.ref(
+        "s1",
+        "cadd φ ψ χ ↔ cadd ψ φ χ",
+        ref="cadcoma",
+        note="cadcoma",
+    )
+
+    # cadcomb: cadd ψ φ χ ↔ cadd ψ χ φ
+    s2 = lb.ref(
+        "s2",
+        "cadd ψ φ χ ↔ cadd ψ χ φ",
+        ref="cadcomb",
+        note="cadcomb",
+    )
+
+    # bitri: cadd φ ψ χ ↔ cadd ψ χ φ
+    res = lb.ref(
+        "res",
+        "cadd φ ψ χ ↔ cadd ψ χ φ",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    return lb.build(res)
+
+
+def prove_cadnot(sys: System) -> Proof:
+    """cadnot: ¬ cadd φ ψ χ ↔ cadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ).
+
+    Negation distributes over the carry connective: the negation of
+    the carry is equivalent to the carry of the negations.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "cadnot")
+
+    # ianor: ¬ ( φ ∧ ψ ) ↔ ( ¬ φ ∨ ¬ ψ ) — three instances
+    s_ianor_ab = lb.ref(
+        "s_ianor_ab",
+        "¬ ( φ ∧ ψ ) ↔ ( ¬ φ ∨ ¬ ψ )",
+        ref="ianor",
+        note="ianor",
+    )
+    s_ianor_ac = lb.ref(
+        "s_ianor_ac",
+        "¬ ( φ ∧ χ ) ↔ ( ¬ φ ∨ ¬ χ )",
+        ref="ianor",
+        note="ianor",
+    )
+    s_ianor_bc = lb.ref(
+        "s_ianor_bc",
+        "¬ ( ψ ∧ χ ) ↔ ( ¬ ψ ∨ ¬ χ )",
+        ref="ianor",
+        note="ianor",
+    )
+
+    # 3anbi123i: combine the three ianor steps
+    s_3anbi123i = lb.ref(
+        "s_3anbi123i",
+        "( ¬ ( φ ∧ ψ ) ∧ ¬ ( φ ∧ χ ) ∧ ¬ ( ψ ∧ χ ) ) ↔ ( ( ¬ φ ∨ ¬ ψ ) ∧ ( ¬ φ ∨ ¬ χ ) ∧ ( ¬ ψ ∨ ¬ χ ) )",
+        s_ianor_ab,
+        s_ianor_ac,
+        s_ianor_bc,
+        ref="3anbi123i",
+        note="3anbi123i",
+    )
+
+    # 3ioran: ¬ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ¬ ( φ ∧ ψ ) ∧ ¬ ( φ ∧ χ ) ∧ ¬ ( ψ ∧ χ ) )
+    s_3ioran = lb.ref(
+        "s_3ioran",
+        "¬ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ¬ ( φ ∧ ψ ) ∧ ¬ ( φ ∧ χ ) ∧ ¬ ( ψ ∧ χ ) )",
+        ref="3ioran",
+        note="3ioran",
+    )
+
+    # bitri: chain 3ioran and 3anbi123i
+    s_chain = lb.ref(
+        "s_chain",
+        "¬ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) ) ↔ ( ( ¬ φ ∨ ¬ ψ ) ∧ ( ¬ φ ∨ ¬ χ ) ∧ ( ¬ ψ ∨ ¬ χ ) )",
+        s_3ioran,
+        s_3anbi123i,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # cador: cadd φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )
+    s_cador = lb.ref(
+        "s_cador",
+        "cadd φ ψ χ ↔ ( ( φ ∧ ψ ) ∨ ( φ ∧ χ ) ∨ ( ψ ∧ χ ) )",
+        ref="cador",
+        note="cador",
+    )
+
+    # xchnxbir: from ¬((φ∧ψ)∨...)↔(...) and cadd↔((φ∧ψ)∨...), get ¬cadd↔(...)
+    s_xchnxbir = lb.ref(
+        "s_xchnxbir",
+        "¬ cadd φ ψ χ ↔ ( ( ¬ φ ∨ ¬ ψ ) ∧ ( ¬ φ ∨ ¬ χ ) ∧ ( ¬ ψ ∨ ¬ χ ) )",
+        s_chain,
+        s_cador,
+        ref="xchnxbir",
+        note="xchnxbir",
+    )
+
+    # cadan: cadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ( ¬ φ ∨ ¬ ψ ) ∧ ( ¬ φ ∨ ¬ χ ) ∧ ( ¬ ψ ∨ ¬ χ ) )
+    s_cadan = lb.ref(
+        "s_cadan",
+        "cadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ( ¬ φ ∨ ¬ ψ ) ∧ ( ¬ φ ∨ ¬ χ ) ∧ ( ¬ ψ ∨ ¬ χ ) )",
+        ref="cadan",
+        note="cadan",
+    )
+
+    # biid: reflexivity for 3bitr4i
+    s_biid = lb.ref(
+        "s_biid",
+        "¬ cadd φ ψ χ ↔ ¬ cadd φ ψ χ",
+        ref="biid",
+        note="biid",
+    )
+
+    # 3bitr4i: combine xchnxbir and cadan
+    res = lb.ref(
+        "res",
+        "¬ cadd φ ψ χ ↔ cadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ )",
+        s_xchnxbir,
+        s_biid,
+        s_cadan,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadbi(sys: System) -> Proof:
+    """hadbi: ( hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ ) ).
+
+    The ternary XOR `hadd` is equivalent to the biconditional of one
+    argument with the biconditional of the other two.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadbi")
+
+    # df-had: hadd φ ψ χ ↔ ((φ ⊻ ψ) ⊻ χ)
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ ( ( φ ⊻ ψ ) ⊻ χ )",
+        ref="df-had",
+        note="df-had",
+    )
+
+    # df-xor: ((φ ⊻ ψ) ⊻ χ) ↔ ¬((φ ⊻ ψ) ↔ χ)
+    s2 = lb.ref(
+        "s2",
+        "( ( φ ⊻ ψ ) ⊻ χ ) ↔ ¬ ( ( φ ⊻ ψ ) ↔ χ )",
+        ref="df-xor",
+        note="df-xor",
+    )
+
+    # xnor: (φ ↔ ψ) ↔ ¬(φ ⊻ ψ)
+    s3 = lb.ref(
+        "s3",
+        "( φ ↔ ψ ) ↔ ¬ ( φ ⊻ ψ )",
+        ref="xnor",
+        note="xnor",
+    )
+
+    # bibi1i: from (φ ↔ ψ) ↔ ¬(φ ⊻ ψ), get ((φ ↔ ψ) ↔ χ) ↔ (¬(φ ⊻ ψ) ↔ χ)
+    s4 = lb.ref(
+        "s4",
+        "( ( φ ↔ ψ ) ↔ χ ) ↔ ( ¬ ( φ ⊻ ψ ) ↔ χ )",
+        s3,
+        ref="bibi1i",
+        note="bibi1i",
+    )
+
+    # nbbn: (¬(φ ⊻ ψ) ↔ χ) ↔ ¬((φ ⊻ ψ) ↔ χ)
+    s5 = lb.ref(
+        "s5",
+        "( ¬ ( φ ⊻ ψ ) ↔ χ ) ↔ ¬ ( ( φ ⊻ ψ ) ↔ χ )",
+        ref="nbbn",
+        note="nbbn",
+    )
+
+    # bitri: ((φ ↔ ψ) ↔ χ) ↔ ¬((φ ⊻ ψ) ↔ χ)
+    s6 = lb.ref(
+        "s6",
+        "( ( φ ↔ ψ ) ↔ χ ) ↔ ¬ ( ( φ ⊻ ψ ) ↔ χ )",
+        s4,
+        s5,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # 3bitr4i: bridge = s2 (A↔B), left = s1 (C↔A), right = s6 (D↔B)
+    # → hadd φ ψ χ ↔ ((φ ↔ ψ) ↔ χ)  (C ↔ D)
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ )",
+        s2,
+        s1,
+        s6,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_had0(sys: System) -> Proof:
+    """had0: ¬ φ → ( hadd( φ , ψ , χ ) ↔ ( ψ ⊻ χ ) ).
+
+    When the first input is false, the half-adder sum reduces to the
+    exclusive-or of the other two inputs.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "had0")
+
+    # had1 with ¬φ, ¬ψ, ¬χ:
+    # ¬ φ → ( hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ¬ ψ ↔ ¬ χ ) )
+    s1 = lb.ref(
+        "s1",
+        "¬ φ → ( hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ¬ ψ ↔ ¬ χ ) )",
+        ref="had1",
+        note="had1",
+    )
+
+    # hadnot: ¬ hadd φ ψ χ ↔ hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ )
+    s2 = lb.ref(
+        "s2",
+        "¬ hadd φ ψ χ ↔ hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ )",
+        ref="hadnot",
+        note="hadnot",
+    )
+
+    # xnor: ( ψ ↔ χ ) ↔ ¬ ( ψ ⊻ χ )
+    s3 = lb.ref(
+        "s3",
+        "( ψ ↔ χ ) ↔ ¬ ( ψ ⊻ χ )",
+        ref="xnor",
+        note="xnor",
+    )
+
+    # notbi: ( ψ ↔ χ ) ↔ ( ¬ ψ ↔ ¬ χ )
+    s4 = lb.ref(
+        "s4",
+        "( ψ ↔ χ ) ↔ ( ¬ ψ ↔ ¬ χ )",
+        ref="notbi",
+        note="notbi",
+    )
+
+    # bitr3i from notbi and xnor: ( ¬ ψ ↔ ¬ χ ) ↔ ¬ ( ψ ⊻ χ )
+    s5 = lb.ref(
+        "s5",
+        "( ¬ ψ ↔ ¬ χ ) ↔ ¬ ( ψ ⊻ χ )",
+        s4,
+        s3,
+        ref="bitr3i",
+        note="bitr3i",
+    )
+
+    # bicomi to flip: ¬ ( ψ ⊻ χ ) ↔ ( ¬ ψ ↔ ¬ χ )
+    s5f = lb.ref(
+        "s5f",
+        "¬ ( ψ ⊻ χ ) ↔ ( ¬ ψ ↔ ¬ χ )",
+        s5,
+        ref="bicomi",
+        note="bicomi",
+    )
+
+    # 3bitr4g: ¬ φ → ( ¬ hadd φ ψ χ ↔ ¬ ( ψ ⊻ χ ) )
+    s6 = lb.ref(
+        "s6",
+        "¬ φ → ( ¬ hadd φ ψ χ ↔ ¬ ( ψ ⊻ χ ) )",
+        s1,
+        s2,
+        s5f,
+        ref="3bitr4g",
+        note="3bitr4g",
+    )
+
+    # con4bid: ¬ φ → ( hadd φ ψ χ ↔ ( ψ ⊻ χ ) )
+    res = lb.ref(
+        "res",
+        "¬ φ → ( hadd φ ψ χ ↔ ( ψ ⊻ χ ) )",
+        s6,
+        ref="con4bid",
+        note="con4bid",
+    )
+
+    return lb.build(res)
+
+
+def prove_had1(sys: System) -> Proof:
+    """had1: φ → ( hadd( φ , ψ , χ ) ↔ ( ψ ↔ χ ) ).
+
+    When the first input is true, the half-adder sum reduces to the
+    biconditional of the other two inputs.
+    (Contributed by NM, 5-Aug-1993.)
+    (Proof shortened by Wolf Lammen, 12-Jul-2020.)
+    """
+    lb = ProofBuilder(sys, "had1")
+
+    # hadrot: hadd φ ψ χ ↔ hadd ψ χ φ
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ hadd ψ χ φ",
+        ref="hadrot",
+        note="hadrot",
+    )
+
+    # hadbi (with φ↦ψ, ψ↦χ, χ↦φ): hadd ψ χ φ ↔ ((ψ ↔ χ) ↔ φ)
+    s2 = lb.ref(
+        "s2",
+        "hadd ψ χ φ ↔ ( ( ψ ↔ χ ) ↔ φ )",
+        ref="hadbi",
+        note="hadbi",
+    )
+
+    # bitri(s1, s2): hadd φ ψ χ ↔ ((ψ ↔ χ) ↔ φ)
+    s3 = lb.ref(
+        "s3",
+        "hadd φ ψ χ ↔ ( ( ψ ↔ χ ) ↔ φ )",
+        s1,
+        s2,
+        ref="bitri",
+        note="bitri",
+    )
+
+    # biass with φ↦hadd(φ,ψ,χ), ψ↦(ψ↔χ), χ↦φ:
+    # ((hadd(φ,ψ,χ) ↔ (ψ↔χ)) ↔ φ) ↔ (hadd(φ,ψ,χ) ↔ ((ψ↔χ) ↔ φ))
+    s4 = lb.ref(
+        "s4",
+        "( ( hadd φ ψ χ ↔ ( ψ ↔ χ ) ) ↔ φ ) ↔ ( hadd φ ψ χ ↔ ( ( ψ ↔ χ ) ↔ φ ) )",
+        ref="biass",
+        note="biass",
+    )
+
+    # mpbir(min=s3, maj=s4):
+    #   mpbir.min = I = hadd φ ψ χ ↔ ((ψ ↔ χ) ↔ φ)
+    #   mpbir.maj = G ↔ I
+    #   conclusion = G = ((hadd φ ψ χ ↔ (ψ ↔ χ)) ↔ φ)
+    s5 = lb.ref(
+        "s5",
+        "( ( hadd φ ψ χ ↔ ( ψ ↔ χ ) ) ↔ φ )",
+        s3,
+        s4,
+        ref="mpbir",
+        note="mpbir",
+    )
+
+    # biimpri(s5): from ((hadd φ ψ χ ↔ (ψ ↔ χ)) ↔ φ),
+    #   derive (φ → (hadd φ ψ χ ↔ (ψ ↔ χ)))
+    res = lb.ref(
+        "res",
+        "φ → ( hadd φ ψ χ ↔ ( ψ ↔ χ ) )",
+        s5,
+        ref="biimpri",
+        note="biimpri",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadcoma(sys: System) -> Proof:
+    """hadcoma: hadd φ ψ χ ↔ hadd ψ φ χ.
+
+    Commutation of the first two arguments of the half-adder sum:
+    the half-adder sum is symmetric in its first and second arguments.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadcoma")
+
+    # hadbi: hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ )
+    s1 = lb.ref(
+        "s1",
+        "hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ )",
+        ref="hadbi",
+        note="hadbi",
+    )
+
+    # hadbi: hadd ψ φ χ ↔ ( ( ψ ↔ φ ) ↔ χ )
+    s2 = lb.ref(
+        "s2",
+        "hadd ψ φ χ ↔ ( ( ψ ↔ φ ) ↔ χ )",
+        ref="hadbi",
+        note="hadbi",
+    )
+
+    # bicom: ( φ ↔ ψ ) ↔ ( ψ ↔ φ )
+    s3 = lb.ref(
+        "s3",
+        "( φ ↔ ψ ) ↔ ( ψ ↔ φ )",
+        ref="bicom",
+        note="bicom",
+    )
+
+    # bibi1i: ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ( ψ ↔ φ ) ↔ χ )
+    s4 = lb.ref(
+        "s4",
+        "( ( φ ↔ ψ ) ↔ χ ) ↔ ( ( ψ ↔ φ ) ↔ χ )",
+        s3,
+        ref="bibi1i",
+        note="bibi1i",
+    )
+
+    # 3bitr4i: hadd φ ψ χ ↔ hadd ψ φ χ
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ hadd ψ φ χ",
+        s4,
+        s1,
+        s2,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadnot(sys: System) -> Proof:
+    """hadnot: ¬ hadd( φ , ψ , χ ) ↔ hadd( ¬ φ , ¬ ψ , ¬ χ ).
+
+    The adder sum distributes over negation.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadnot")
+
+    # Step 1: notbi → ( ( φ ↔ ψ ) ↔ ( ¬ φ ↔ ¬ ψ ) )
+    s1 = lb.ref(
+        "s1",
+        "( ( φ ↔ ψ ) ↔ ( ¬ φ ↔ ¬ ψ ) )",
+        ref="notbi",
+        note="notbi",
+    )
+
+    # Step 2: bibi1i → ( ( ( φ ↔ ψ ) ↔ ¬ χ ) ↔ ( ( ¬ φ ↔ ¬ ψ ) ↔ ¬ χ ) )
+    s2 = lb.ref(
+        "s2",
+        "( ( ( φ ↔ ψ ) ↔ ¬ χ ) ↔ ( ( ¬ φ ↔ ¬ ψ ) ↔ ¬ χ ) )",
+        s1,
+        ref="bibi1i",
+        note="bibi1i",
+    )
+
+    # Step 3: xor3 → ( ¬ ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ( φ ↔ ψ ) ↔ ¬ χ ) )
+    s3 = lb.ref(
+        "s3",
+        "( ¬ ( ( φ ↔ ψ ) ↔ χ ) ↔ ( ( φ ↔ ψ ) ↔ ¬ χ ) )",
+        ref="xor3",
+        note="xor3",
+    )
+
+    # Step 4: hadbi → ( hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ ) )
+    s4 = lb.ref(
+        "s4",
+        "( hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ χ ) )",
+        ref="hadbi",
+        note="hadbi",
+    )
+
+    # Step 5: xchnxbir → ( ¬ hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ ¬ χ ) )
+    s5 = lb.ref(
+        "s5",
+        "( ¬ hadd φ ψ χ ↔ ( ( φ ↔ ψ ) ↔ ¬ χ ) )",
+        s3,
+        s4,
+        ref="xchnxbir",
+        note="xchnxbir",
+    )
+
+    # Step 6: hadbi → ( hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ( ¬ φ ↔ ¬ ψ ) ↔ ¬ χ ) )
+    s6 = lb.ref(
+        "s6",
+        "( hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) ↔ ( ( ¬ φ ↔ ¬ ψ ) ↔ ¬ χ ) )",
+        ref="hadbi",
+        note="hadbi",
+    )
+
+    # Step 7: 3bitr4i → conclusion
+    res = lb.ref(
+        "res",
+        "( ¬ hadd φ ψ χ ↔ hadd ( ¬ φ ) ( ¬ ψ ) ( ¬ χ ) )",
+        s2,
+        s5,
+        s6,
+        ref="3bitr4i",
+        note="3bitr4i",
+    )
+
+    return lb.build(res)
+
+
+def prove_hadifp(sys: System) -> Proof:
+    """hadifp: hadd φ ψ χ ↔ if- φ ( ψ ↔ χ ) ( ψ ⊻ χ ).
+
+    Express the half-adder sum in terms of the conditional operator.
+    (Contributed by NM, 5-Aug-1993.)
+    """
+    lb = ProofBuilder(sys, "hadifp")
+
+    # had1: φ → ( hadd φ ψ χ ↔ ( ψ ↔ χ ) )
+    h1 = lb.ref(
+        "h1",
+        "φ → ( hadd φ ψ χ ↔ ( ψ ↔ χ ) )",
+        ref="had1",
+        note="had1",
+    )
+
+    # had0: ¬ φ → ( hadd φ ψ χ ↔ ( ψ ⊻ χ ) )
+    h2 = lb.ref(
+        "h2",
+        "¬ φ → ( hadd φ ψ χ ↔ ( ψ ⊻ χ ) )",
+        ref="had0",
+        note="had0",
+    )
+
+    # casesifp: hadd φ ψ χ ↔ if- φ ( ψ ↔ χ ) ( ψ ⊻ χ )
+    res = lb.ref(
+        "res",
+        "hadd φ ψ χ ↔ if- φ ( ψ ↔ χ ) ( ψ ⊻ χ )",
+        h1,
+        h2,
+        ref="casesifp",
+        note="casesifp",
+    )
+
+    return lb.build(res)
+
+
 # The aggregate registry imports this mapping, avoiding another edit to global shim files.
 MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "biass": prove_biass,
+    "xorneg2": prove_xorneg2,
+    "xorneg1": prove_xorneg1,
+    "xorneg": prove_xorneg,
     "biluk": prove_biluk,
     "mpbiran2d": prove_mpbiran2d,
     "mpbirand": prove_mpbirand,
+    "nanbi": prove_nanbi,
     "nannot": prove_nannot,
     "nbbn": prove_nbbn,
     "pm5.18": prove_pm5_18,
     "pm5.19": prove_pm5_19,
+    "xor3": prove_xor3,
+    "xorexmid": prove_xorexmid,
+    "casesifp": prove_casesifp,
+    "nbbnOLD": prove_nbbnOLD,
+    "hadass": prove_hadass,
+    "hadcomb": prove_hadcomb,
+    "hadrot": prove_hadrot,
+    "xorass": prove_xorass,
+    "cadcomb": prove_cadcomb,
+    "cadrot": prove_cadrot,
+    "cadnot": prove_cadnot,
+    "just2-df": prove_just2_df,
+    "hadbi": prove_hadbi,
+    "hadcoma": prove_hadcoma,
+    "hadnot": prove_hadnot,
+    "had0": prove_had0,
+    "had1": prove_had1,
+    "hadifp": prove_hadifp,
 }

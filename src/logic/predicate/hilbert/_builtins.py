@@ -69,7 +69,10 @@ class PredicateBuiltins:
             origin_module_id=origin_module_id, local_name="e.", kind="Const", origin_ref=origin_ref
         )
         cv = interner.intern(
-            origin_module_id=origin_module_id, local_name="cv", kind="Const", origin_ref=origin_ref
+            origin_module_id=origin_module_id,
+            local_name="class-of",
+            kind="Const",
+            origin_ref=origin_ref,
         )
         nf = interner.intern(
             origin_module_id=origin_module_id, local_name="F/", kind="Const", origin_ref=origin_ref

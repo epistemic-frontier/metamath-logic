@@ -45,6 +45,21 @@ def prove_mtpor(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_mtpxor(sys: System) -> Proof:
+    """mtpxor: ψ.
+
+    Modus tollendo ponens for exclusive disjunction.
+    Given ¬ φ and ( φ ⊻ ψ ), conclude ψ.
+    """
+    lb = ProofBuilder(sys, "mtpxor")
+    mtpxor_min = lb.hyp("mtpxor.min", "¬ φ")
+    mtpxor_maj = lb.hyp("mtpxor.maj", "( φ ⊻ ψ )")
+    xoror_step = lb.ref("xoror_step", "( φ ⊻ ψ ) → ( φ ∨ ψ )", ref="xoror", note="xoror")
+    s1 = lb.mp("s1", mtpxor_maj, xoror_step, "xoror(mtpxor.maj)")
+    res = lb.ref("res", "ψ", mtpxor_min, s1, ref="mtpor", note="mtpor")
+    return lb.build(res)
+
+
 def prove_stoic1a(sys: System) -> Proof:
     r"""stoic1a: ( ( ph /\ -. th ) -> -. ps ).
 
@@ -115,6 +130,7 @@ __all__ = [
     "prove_stoic1b",
     "prove_stoic2a",
     "prove_stoic2b",
+    "prove_mtpxor",
 ]
 
 
@@ -133,6 +149,46 @@ def prove_stoic3(sys: System) -> Proof:
     return lb.build(res)
 
 
+def prove_stoic4a(sys: System) -> Proof:
+    """stoic4a: ( φ ∧ ψ ∧ θ ) → τ.
+
+    Syllogism deduction with introduced third antecedent.
+    From ( φ ∧ ψ ) → χ and ( χ ∧ φ ∧ θ ) → τ,
+    deduce ( φ ∧ ψ ∧ θ ) → τ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "stoic4a")
+    h1 = lb.hyp("stoic4a.1", "( φ ∧ ψ ) → χ")
+    h2 = lb.hyp("stoic4a.2", "( χ ∧ φ ∧ θ ) → τ")
+    s1 = lb.ref("s1", "( φ ∧ ψ ∧ θ ) → χ", h1, ref="3adant3", note="3adant3")
+    s2 = lb.ref("s2", "( φ ∧ ψ ∧ θ ) → φ", ref="simp1", note="simp1")
+    s3 = lb.ref("s3", "( φ ∧ ψ ∧ θ ) → θ", ref="simp3", note="simp3")
+    res = lb.ref("res", "( φ ∧ ψ ∧ θ ) → τ", s1, s2, s3, h2, ref="syl3anc", note="syl3anc")
+    return lb.build(res)
+
+
+def prove_stoic4b(sys: System) -> Proof:
+    """stoic4b: ( φ ∧ ψ ∧ θ ) → τ.
+
+    Syllogism deduction with introduced second and third antecedents.
+    From ( φ ∧ ψ ) → χ and ( ( χ ∧ φ ∧ ψ ) ∧ θ ) → τ,
+    deduce ( φ ∧ ψ ∧ θ ) → τ.
+    (Contributed by NM, 3-Jan-1993.)
+    """
+    lb = ProofBuilder(sys, "stoic4b")
+    h1 = lb.hyp("stoic4b.1", "( φ ∧ ψ ) → χ")
+    h2 = lb.hyp("stoic4b.2", "( ( χ ∧ φ ∧ ψ ) ∧ θ ) → τ")
+    s1 = lb.ref("s1", "( φ ∧ ψ ∧ θ ) → χ", h1, ref="3adant3", note="3adant3")
+    s2 = lb.ref("s2", "( φ ∧ ψ ∧ θ ) → φ", ref="simp1", note="simp1")
+    s3 = lb.ref("s3", "( φ ∧ ψ ∧ θ ) → ψ", ref="simp2", note="simp2")
+    s4 = lb.ref("s4", "( φ ∧ ψ ∧ θ ) → θ", ref="simp3", note="simp3")
+    res = lb.ref("res", "( φ ∧ ψ ∧ θ ) → τ", s1, s2, s3, s4, h2, ref="syl31anc", note="syl31anc")
+    return lb.build(res)
+
+
 MIGRATION_THEOREMS: Mapping[str, LemmaCtor] = {
     "stoic3": prove_stoic3,
+    "stoic4a": prove_stoic4a,
+    "stoic4b": prove_stoic4b,
+    "mtpxor": prove_mtpxor,
 }

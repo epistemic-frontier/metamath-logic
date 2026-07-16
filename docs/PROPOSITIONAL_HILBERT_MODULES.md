@@ -1,7 +1,7 @@
 # Propositional Hilbert Module Map
 
 This document records the implemented module boundaries for propositional
-material from `set.mm` in `logic.propositional.hilbert`.
+material from `set.mm` in `logic.prop`.
 
 Engineering guardrails for applying this plan live in
 `docs/ENGINEERING_GUARDRAILS.md`.
@@ -12,13 +12,13 @@ environment, not as independent proof kernels.
 
 | set.mm section | set.mm range | Target module |
 | --- | ---: | --- |
-| Biconditional calculus | 2411-4048 | `logic.propositional.hilbert.equivalence` |
-| Conjunction calculus | 4049-7376 | `logic.propositional.hilbert.conjunction` |
-| True and false constants | 12135-12463 | `logic.propositional.hilbert.constants` |
-| Truth tables | 12464-12755 | `logic.propositional.hilbert.truth_tables` |
-| Half and full adders | 12756-13003 | `logic.propositional.hilbert.adder` |
-| Other axiomatizations | 13004-14447 | `logic.propositional.hilbert.axiomatizations` |
-| Stoic logic | 14448-14720 | `logic.propositional.hilbert.stoic` |
+| Biconditional calculus | 2411-4048 | `logic.prop.equivalence` |
+| Conjunction calculus | 4049-7376 | `logic.prop.conjunction`, `logic.prop.conjunction_inference` |
+| True and false constants | 12135-12463 | `logic.prop.connectives` |
+| Truth tables | 12464-12755 | `logic.prop.connectives` |
+| Half and full adders | 12756-13003 | `logic.prop.circuits` |
+| Other axiomatizations | 13004-14447 | `logic.prop.axiom_systems` |
+| Stoic logic | 14448-14720 | `logic.prop.axiom_systems` |
 
 ## Registry Pattern
 
@@ -48,4 +48,4 @@ the canonical `mto` replaces the former duplicate package-local
 `df-tru` in set.mm uses temporary predicate/equality syntax (`wal`, `cv`,
 `wceq`). The short-term propositional package should keep `T.` and `F.` as
 nullary propositional constructors. A later fidelity layer can connect this to
-`logic.predicate` once predicate/equality migration is mature.
+`logic.fol` once predicate/equality migration is mature.

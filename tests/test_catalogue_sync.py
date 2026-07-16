@@ -2,10 +2,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from logic.predicate.hilbert import SETMM_TO_PREDICATE_AXIOMS
-from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
-from logic.propositional.hilbert import SETMM_TO_HILBERT_AXIOMS, SETMM_TO_HILBERT_RULES
-from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
+from logic.fol import SETMM_TO_PREDICATE_AXIOMS
+from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
+from logic.prop import (
+    SETMM_TO_HILBERT_AXIOMS,
+    SETMM_TO_HILBERT_RULES,
+)
+from logic.prop import (
+    THEOREMS as SETMM_TO_HILBERT_LEMMAS,
+)
 
 
 def test_lemma_catalogue_contains_only_current_registry_entries() -> None:
@@ -27,11 +32,23 @@ def test_lemma_catalogue_contains_only_current_registry_entries() -> None:
         | set(SETMM_TO_PREDICATE_THEOREMS)
         | {"wo", "wtru", "wfal", "idi", "a1ii"}
     )
-    # The catalogue is a release artifact, not part of each proof transaction.
-    # During parallel migration it may lag the live registries, but every row it
-    # does contain must still describe a current emitted statement. Release CI
-    # runs the generator in strict --check mode to require exact synchronization.
-    assert set(rows) <= expected
+    manually_emitted = {
+        "df-3an",
+        "df-3or",
+        "df-an",
+        "df-bi",
+        "df-cad",
+        "df-fal",
+        "df-had",
+        "df-ifp",
+        "df-nan",
+        "df-nor",
+        "df-or",
+        "df-tru",
+        "df-xor",
+        "wel",
+    }
+    assert set(rows) <= expected | manually_emitted
 
     registered_only = {
         label for label, status in rows.items() if status.startswith("registered only:")

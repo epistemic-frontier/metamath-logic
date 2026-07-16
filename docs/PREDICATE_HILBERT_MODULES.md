@@ -1,26 +1,29 @@
 # Predicate Hilbert Modules
 
 This is the current module map for first-order predicate calculus with equality
-in `logic.predicate.hilbert`. The package owns quantifiers, equality,
+in `logic.fol`. The package owns quantifiers, equality,
 membership, not-free reasoning, substitution, and predicate axiom schemes.
 
 ## Architecture
 
 ```text
-logic/predicate/hilbert/
-  __init__.py       # public PredicateSystem facade and axiom-label map
+logic/fol/
+  __init__.py       # public facade and aggregate theorem registry
+  system.py         # PredicateSystem and axiom-label map
   _builtins.py      # interned predicate tokens
   _structures.py    # Expr variables and constructors
   _internal.py      # compilation/application implementation
   axioms.py         # ax-4 through ax-13 Expr schemas
-  lemmas.py         # predicate prove_* constructors and new-migration map
-  theorems.py       # frozen legacy bucket and aggregate registry
+  foundation.py     # generated foundational proofs
+  substitution.py   # generated substitution proofs
+  equality.py       # generated equality proofs
+  uniqueness.py     # generated uniqueness proofs
 ```
 
-`system.py` and predicate `definitions.py` no longer exist. Consumers import
-`PredicateSystem` from the package facade. `AX5` through `AX13` are Python-safe
-Expr constant identifiers only; proof and emitted assertion labels are the
-canonical set.mm names `ax-5` through `ax-13` (and likewise for `ax-4`).
+Consumers import `PredicateSystem` from the package facade. `AX5` through
+`AX13` are Python-safe Expr constant identifiers only; proof and emitted
+assertion labels are the canonical set.mm names `ax-5` through `ax-13` (and
+likewise for `ax-4`).
 
 ## Current status
 

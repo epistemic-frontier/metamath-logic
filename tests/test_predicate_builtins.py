@@ -7,7 +7,7 @@ from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 from skfd.proof import ProofBuilder
 
-from logic.predicate.hilbert import PredicateSystem
+from logic.fol import PredicateSystem
 
 
 def test_predicate_system_owns_predicate_tokens() -> None:
@@ -26,7 +26,7 @@ def test_predicate_system_owns_predicate_tokens() -> None:
             token_owners.setdefault(d.local_name, set()).add(d.origin_module_id)
 
     assert token_owners.keys() == {"A.", "E.", "=", "e."}
-    assert all("logic.predicate" in owners for owners in token_owners.values())
+    assert all("logic.fol" in owners for owners in token_owners.values())
 
 
 def test_predicate_parser_right_associates_quantifiers() -> None:

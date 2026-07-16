@@ -21,7 +21,7 @@ uv add metamath-logic
 
 ## What this package contains
 
-- A ProofScaffold `build.py` entrypoint that emits the logic layer as a linkable unit.
+- An internal ProofScaffold `_build.py` entrypoint that emits the logic layer as a linkable unit.
 - Authoring-facing propositional and predicate logic libraries (Hilbert-style systems).
 - Complete propositional and predicate theorem registries: 1,684 declared
   proofs, all emitted into the verifier-checked build.

@@ -58,23 +58,17 @@ authoritative layout is:
 
 ```
 metamath-logic/src/logic/
-  build.py
-  propositional/hilbert/  # connective modules, axioms, registry, System facade
-  predicate/hilbert/
-    __init__.py           # PredicateSystem facade
-    _builtins.py
-    _structures.py
-    _internal.py
-    axioms.py
-    lemmas.py
-    theorems.py
+  _build.py             # internal ProofScaffold orchestrator
+  prop/                 # propositional public modules and internal kernel
+  fol/                  # first-order public modules and internal kernel
 ```
 
 Notes:
-- `build.py` is the single orchestrator used by the SKFD driver for `metamath-logic`.
-- The `propositional/*` directory is intended to be “term-free” and should not require `setvar`.
-- `predicate/hilbert` introduces quantifiers and predicate machinery and is the
-  bridge to set theory. Predicate `system.py` and `definitions.py` do not exist.
+- `_build.py` is the single internal orchestrator used by the SKFD driver for
+  `metamath-logic`.
+- The `prop/*` directory is intended to be “term-free” and should not require `setvar`.
+- `fol` introduces quantifiers and predicate machinery and is the bridge to set
+  theory.
 
 ## Historical range plan
 
@@ -89,7 +83,7 @@ they are not the current file map. For the implemented layout and status, use
 - **Anchor lines**:
   - `ax-mp` block begins: [set.mm:L649](file:///Users/mingli/MetaMath/set.mm/set.mm#L649)
   - `ax-1..ax-3`: [set.mm:L679-L701](file:///Users/mingli/MetaMath/set.mm/set.mm#L679-L701)
-- **Python**: `logic/propositional/core.py`
+- **Python**: `logic/prop/core.py`
 - **Exports**:
   - `ax-mp`, `ax-1`, `ax-2`, `ax-3`
   - keep the labels identical to set.mm
@@ -102,7 +96,7 @@ they are not the current file map. For the implemented layout and status, use
 - **Anchor lines**:
   - Section header: [set.mm:L706](file:///Users/mingli/MetaMath/set.mm/set.mm#L706)
   - This region should avoid `ax-3` where possible (set.mm explicitly calls this out).
-- **Python**: `logic/propositional/implication.py`
+- **Python**: `logic/prop/core.py`
 - **Exports (minimum recommended)**:
   - high-frequency infrastructure theorems/rules: `a1i`, `a2i`, `mpd`, `syl`, `mp2`, `mp2b`, `mp1i`
   - plus any lemma that becomes a proof-search “hub” for later sections
@@ -118,7 +112,7 @@ they are not the current file map. For the implemented layout and status, use
   - Universal quantifier subsection: [set.mm:L12142](file:///Users/mingli/MetaMath/set.mm/set.mm#L12142)
   - Equality predicate subsection: [set.mm:L12195](file:///Users/mingli/MetaMath/set.mm/set.mm#L12195)
   - False constant subsection: [set.mm:L12385](file:///Users/mingli/MetaMath/set.mm/set.mm#L12385)
-- **Python**: `logic/propositional/truth.py`
+- **Python**: `logic/prop/connectives.py`
 - **Exports**:
   - `T.` / `F.` related definitions (`df-tru`, `df-fal`) and the minimal supporting lemmas you decide to keep
 - **Dependency contract**:
@@ -130,7 +124,7 @@ they are not the current file map. For the implemented layout and status, use
 - **set.mm range**: **1632–2410**
 - **Anchor lines**:
   - Section header: [set.mm:L1632](file:///Users/mingli/MetaMath/set.mm/set.mm#L1632)
-- **Python**: `logic/propositional/negation.py`
+- **Python**: `logic/prop/core.py`
 - **Exports (minimum recommended)**:
   - core negation transformations required by later connectives and by predicate calculus: double-negation laws, contraposition helpers, etc.
 - **Dependency contract**:
@@ -142,7 +136,7 @@ they are not the current file map. For the implemented layout and status, use
 - **set.mm range**: **4049–7376**
 - **Anchor lines**:
   - Section header: [set.mm:L4049](file:///Users/mingli/MetaMath/set.mm/set.mm#L4049)
-- **Python**: `logic/propositional/conjunction.py`
+- **Python**: `logic/prop/conjunction.py`
 - **Exports**:
   - `df-an` and foundational lemmas (only once `df-an` exists)
 - **Dependency contract**:
@@ -157,8 +151,8 @@ they are not the current file map. For the implemented layout and status, use
   - Stoic logic: [set.mm:L14448](file:///Users/mingli/MetaMath/set.mm/set.mm#L14448)
   - Predicate calculus begins at: [set.mm:L14721](file:///Users/mingli/MetaMath/set.mm/set.mm#L14721)
 - **Python**:
-  - `logic/propositional/disjunction.py`
-  - `logic/propositional/alt_axioms.py` (for alternative axiomatizations like Nicod/Meredith/Tarski-Bernays-Wajsberg, etc., if you keep them)
+  - `logic/prop/connectives.py`
+  - `logic/prop/axiom_systems.py` (alternative axiomatizations such as Nicod/Meredith/Tarski-Bernays-Wajsberg)
 - **Exports**:
   - `df-or` + derived theorems used later
   - only export “hubs”; keep proof-search noise internal
@@ -176,7 +170,7 @@ they are not the current file map. For the implemented layout and status, use
   - `logic/fol/syntax.py` (setvar pool + wff formation rules for `A.`/`E.` and atomic predicates)
   - `logic/fol/quantifiers.py` (df-ex and quantifier manipulation lemmas)
   - `logic/fol/not_free.py` (df-nf + nf lemmas)
-  - `logic/fol/equality.py` (equality axioms and substitution machinery)
+  - `logic/fol/quantified_equality.py` (quantified equality machinery)
   - `logic/fol/membership.py` (`e.` as a predicate, and its logic-level interaction rules)
   - `logic/fol/core_schemes.py` (the main axiom schemes/rules for predicate calculus)
 - **Exports**:

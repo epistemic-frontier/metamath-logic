@@ -17,9 +17,9 @@ module plans.
 ## Package Boundaries
 
 - `metamath-prelude` owns only the foundation frame and stable base tokens.
-- `logic.propositional.hilbert` owns propositional connectives, Hilbert proof
+- `logic.prop` owns propositional connectives, Hilbert proof
   constructors, and alternative propositional axiomatization derivations.
-- `logic.predicate.hilbert` owns `setvar`, quantifiers, equality and membership
+- `logic.fol` owns `setvar`, quantifiers, equality and membership
   predicates, not-free reasoning, substitution, and predicate axiom schemes.
 - Set-theory packages may depend on predicate syntax and theorems, but predicate
   migration must not depend on ZF-specific axioms.
@@ -81,10 +81,10 @@ uv run --no-sync ruff check docs/MODULE_PLAN.md docs/PROPOSITIONAL_HILBERT_MODUL
 For internal-structure or import-only Python changes:
 
 ```bash
-python3 -m compileall -q src/logic/propositional src/logic/predicate
-uv run --no-sync ruff check src/logic/propositional src/logic/predicate docs
-uv run --no-sync python -c 'from logic.propositional.hilbert import axiomatizations'
-uv run --no-sync python -c 'from logic.predicate.hilbert import PredicateSystem'
+python3 -m compileall -q src/logic/prop src/logic/fol
+uv run --no-sync ruff check src/logic/prop src/logic/fol docs
+uv run --no-sync python -c 'from logic.prop import System'
+uv run --no-sync python -c 'from logic.fol import PredicateSystem'
 ```
 
 For theorem registry changes:

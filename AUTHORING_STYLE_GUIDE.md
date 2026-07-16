@@ -139,7 +139,7 @@ Current code references:
 -
 - Export policy:
   - set.mm-aligned labels may be exported as API surface.
-  - non-set.mm labels are internal by default; exporting them requires an explicit rationale in `build.py`.
+  - non-set.mm labels are internal by default; exporting them requires an explicit rationale in `_build.py`.
 
 ### 3.3 Files and functions
 
@@ -198,7 +198,7 @@ This is aligned with the lowered emission support in:
 Hard requirements:
 
 - Every catalogue row with status `lowered/exported` must be lowerable and verifier-backed.
-- Every registered catalogue proof must be emitted by `build.py` and verifier-backed.
+- Every registered catalogue proof must be emitted by `_build.py` and verifier-backed.
 
 ### 5.2 Separate semantics from commentary
 
@@ -220,7 +220,7 @@ Stub lemmas are allowed only for experimental work that is not part of the publi
 - A lemma listed in [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) must not be stubbed.
 - If a lemma is stubbed, it must not be exported.
 
-## 6. build.py Style (Orchestration Only)
+## 6. _build.py Style (Orchestration Only)
 
 `build(ctx)` should:
 
@@ -236,7 +236,7 @@ It should not:
 - access any private fields of `mm`
 - bake dependency naming policy (dist vs module) into author code
 
-See: [`logic/build.py`](src/logic/build.py)
+See: [`logic/_build.py`](src/logic/_build.py)
 
 ## 7. Unicode / Canonicalization Rules
 

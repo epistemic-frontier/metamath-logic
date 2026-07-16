@@ -7,8 +7,8 @@ for unfinished work.
 
 ## Current status
 
-The implementation is split into `logic.propositional.hilbert` and
-`logic.predicate.hilbert`. Their registries contain 1,500 and 396 proofs,
+The implementation is split into `logic.prop` and
+`logic.fol`. Their registries contain 1,500 and 396 proofs,
 respectively (1,896 total), and the complete registry is emitted.
 
 The source closure audit reports 1,896 unique `prove_*` identities, all in the
@@ -21,22 +21,25 @@ Propositional mathematical content is divided by connective among
 `disjunction.py`, `constants.py`, `truth_tables.py`, `adder.py`, `stoic.py`,
 and `axiomatizations/`; `theorems.py` is the aggregate registry.
 
-Predicate architecture is intentionally compact:
+First-order architecture is intentionally compact:
 
 ```text
-logic/predicate/hilbert/
-  __init__.py       # public PredicateSystem facade
+logic/fol/
+  __init__.py       # public facade and aggregate theorem registry
+  system.py         # PredicateSystem
   _builtins.py      # internal tokens
   _structures.py    # internal Expr structures
   _internal.py      # internal processing
   axioms.py         # public axiom schemas
-  lemmas.py         # public proof constructors
-  theorems.py       # public registry
+  foundation.py     # generated foundational proofs
+  substitution.py   # generated substitution proofs
+  equality.py       # generated equality proofs
+  uniqueness.py     # generated uniqueness proofs
 ```
 
-There is no predicate `system.py` or `definitions.py`. Axiom proof labels use
-canonical set.mm spelling `ax-1` through `ax-13`; names such as `A1` and `AX5`
-are only Python-safe Expr identifiers.
+There is no separate `definitions.py`, `lemmas.py`, or `theorems.py`. Axiom
+proof labels use canonical set.mm spelling `ax-1` through `ax-13`; names such
+as `A1` and `AX5` are only Python-safe Expr identifiers.
 
 ## Historical migration plan
 

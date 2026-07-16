@@ -38,10 +38,15 @@ def _proof_constructors() -> dict[str, Path]:
 def render_catalogue() -> str:
     sys.path.insert(0, str(SRC))
 
-    from logic.predicate.hilbert import SETMM_TO_PREDICATE_AXIOMS
-    from logic.predicate.hilbert.theorems import SETMM_TO_PREDICATE_THEOREMS
-    from logic.propositional.hilbert import SETMM_TO_HILBERT_AXIOMS, SETMM_TO_HILBERT_RULES
-    from logic.propositional.hilbert.theorems import SETMM_TO_HILBERT_LEMMAS
+    from logic.fol import SETMM_TO_PREDICATE_AXIOMS
+    from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
+    from logic.prop import (
+        SETMM_TO_HILBERT_AXIOMS,
+        SETMM_TO_HILBERT_RULES,
+    )
+    from logic.prop import (
+        THEOREMS as SETMM_TO_HILBERT_LEMMAS,
+    )
 
     registries: tuple[tuple[str, Mapping[str, Callable[..., object]]], ...] = (
         ("Propositional theorem", SETMM_TO_HILBERT_LEMMAS),
@@ -62,16 +67,12 @@ def render_catalogue() -> str:
         )
 
     rows: list[tuple[str, str, str, str, str]] = []
-    axiom_source = (
-        "[`src/logic/propositional/hilbert/axioms.py`](src/logic/propositional/hilbert/axioms.py)"
-    )
-    system_source = "[`src/logic/propositional/hilbert/__init__.py`](src/logic/propositional/hilbert/__init__.py)"
-    build_source = "[`src/logic/build.py`](src/logic/build.py)"
+    axiom_source = "[`src/logic/prop/axioms.py`](src/logic/prop/axioms.py)"
+    system_source = "[`src/logic/prop/_system.py`](src/logic/prop/_system.py)"
+    build_source = "[`src/logic/_build.py`](src/logic/_build.py)"
     for label in sorted(SETMM_TO_HILBERT_AXIOMS):
         rows.append((label, label, "Axiom", axiom_source, "emitted"))
-    predicate_axiom_source = (
-        "[`src/logic/predicate/hilbert/axioms.py`](src/logic/predicate/hilbert/axioms.py)"
-    )
+    predicate_axiom_source = "[`src/logic/fol/axioms.py`](src/logic/fol/axioms.py)"
     for label in sorted(SETMM_TO_PREDICATE_AXIOMS):
         rows.append((label, label, "Predicate axiom", predicate_axiom_source, "emitted"))
     for label, local in sorted(SETMM_TO_HILBERT_RULES.items()):

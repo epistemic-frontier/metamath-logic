@@ -13,12 +13,12 @@ environment, not as independent proof kernels.
 | set.mm section | set.mm range | Target module |
 | --- | ---: | --- |
 | Biconditional calculus | 2411-4048 | `logic.prop.equivalence` |
-| Conjunction calculus | 4049-7376 | `logic.prop.conjunction`, `logic.prop.conjunction_inference` |
+| Conjunction calculus | 4049-7376 | `logic.prop.conjunction` |
 | True and false constants | 12135-12463 | `logic.prop.connectives` |
 | Truth tables | 12464-12755 | `logic.prop.connectives` |
 | Half and full adders | 12756-13003 | `logic.prop.circuits` |
-| Other axiomatizations | 13004-14447 | `logic.prop.axiom_systems` |
-| Stoic logic | 14448-14720 | `logic.prop.axiom_systems` |
+| Other axiomatizations | 13004-14447 | `logic.prop.alternative_axiomatizations` |
+| Stoic logic | 14448-14720 | `logic.prop.alternative_axiomatizations` |
 
 ## Registry Pattern
 

@@ -5,11 +5,11 @@ from collections.abc import Callable, Mapping
 
 from skfd.proof import Proof
 
-from logic.fol.foundation import _THEOREMS as MODULE_9_THEOREMS
-from logic.fol.quantified_equality import _THEOREMS as MODULE_11_THEOREMS
-from logic.fol.substitution_axioms import _THEOREMS as MODULE_10_THEOREMS
-from logic.fol.systems import _THEOREMS as MODULE_13_THEOREMS
-from logic.fol.uniqueness import _THEOREMS as MODULE_12_THEOREMS
+from logic.fol.foundation import _THEOREMS as MODULE_7_THEOREMS
+from logic.fol.quantified_equality import _THEOREMS as MODULE_9_THEOREMS
+from logic.fol.substitution_axioms import _THEOREMS as MODULE_8_THEOREMS
+from logic.fol.systems import _THEOREMS as MODULE_11_THEOREMS
+from logic.fol.uniqueness import _THEOREMS as MODULE_10_THEOREMS
 
 LemmaCtor = Callable[..., Proof]
 
@@ -17,11 +17,11 @@ LemmaCtor = Callable[..., Proof]
 def _all_theorems() -> Mapping[str, LemmaCtor]:
     merged: dict[str, LemmaCtor] = {}
     for registry in (
+        MODULE_7_THEOREMS,
+        MODULE_8_THEOREMS,
         MODULE_9_THEOREMS,
         MODULE_10_THEOREMS,
         MODULE_11_THEOREMS,
-        MODULE_12_THEOREMS,
-        MODULE_13_THEOREMS,
     ):
         for label, ctor in registry.items():
             previous = merged.get(label)

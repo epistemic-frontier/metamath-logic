@@ -5,15 +5,13 @@ from collections.abc import Callable, Mapping
 
 from skfd.proof import Proof
 
-from logic.prop.axiom_systems import _THEOREMS as MODULE_8_THEOREMS
-from logic.prop.circuits import _THEOREMS as MODULE_7_THEOREMS
+from logic.prop.alternative_axiomatizations import _THEOREMS as MODULE_6_THEOREMS
+from logic.prop.circuits import _THEOREMS as MODULE_5_THEOREMS
 from logic.prop.conjunction import _THEOREMS as MODULE_2_THEOREMS
-from logic.prop.conjunction_inference import _THEOREMS as MODULE_3_THEOREMS
-from logic.prop.connectives import _THEOREMS as MODULE_4_THEOREMS
+from logic.prop.connectives import _THEOREMS as MODULE_3_THEOREMS
 from logic.prop.core import _THEOREMS as MODULE_0_THEOREMS
 from logic.prop.equivalence import _THEOREMS as MODULE_1_THEOREMS
-from logic.prop.ternary import _THEOREMS as MODULE_5_THEOREMS
-from logic.prop.ternary_inference import _THEOREMS as MODULE_6_THEOREMS
+from logic.prop.ternary import _THEOREMS as MODULE_4_THEOREMS
 
 LemmaCtor = Callable[..., Proof]
 
@@ -28,8 +26,6 @@ def _all_theorems() -> Mapping[str, LemmaCtor]:
         MODULE_4_THEOREMS,
         MODULE_5_THEOREMS,
         MODULE_6_THEOREMS,
-        MODULE_7_THEOREMS,
-        MODULE_8_THEOREMS,
     ):
         for label, ctor in registry.items():
             previous = merged.get(label)

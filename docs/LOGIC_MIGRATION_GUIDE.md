@@ -152,7 +152,7 @@ they are not the current file map. For the implemented layout and status, use
   - Predicate calculus begins at: [set.mm:L14721](file:///Users/mingli/MetaMath/set.mm/set.mm#L14721)
 - **Python**:
   - `logic/prop/connectives.py`
-  - `logic/prop/axiom_systems.py` (alternative axiomatizations such as Nicod/Meredith/Tarski-Bernays-Wajsberg)
+  - `logic/prop/alternative_axiomatizations.py` (such as Nicod/Meredith/Tarski-Bernays-Wajsberg)
 - **Exports**:
   - `df-or` + derived theorems used later
   - only export “hubs”; keep proof-search noise internal

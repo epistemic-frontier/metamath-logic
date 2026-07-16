@@ -6,15 +6,15 @@ import pytest
 from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 
-from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
-from logic.prop import THEOREMS as SETMM_TO_HILBERT_LEMMAS
+from logic.fol import THEOREMS as FOL_THEOREMS
+from logic.prop import THEOREMS as PROP_THEOREMS
 from logic.prop import System as PropositionalSystem
 from logic.prop import make as make_system
 from logic.prop._system import _extend_names
 
 
 def test_propositional_and_predicate_registries_are_disjoint() -> None:
-    assert set(SETMM_TO_HILBERT_LEMMAS).isdisjoint(SETMM_TO_PREDICATE_THEOREMS)
+    assert set(PROP_THEOREMS).isdisjoint(FOL_THEOREMS)
 
 
 def test_build_names_cover_all_propositional_variables() -> None:
@@ -24,7 +24,7 @@ def test_build_names_cover_all_propositional_variables() -> None:
     )
 
     for label in ("impsingle-step15", "impsingle-step18", "impsingle-step20"):
-        SETMM_TO_HILBERT_LEMMAS[label](system)
+        PROP_THEOREMS[label](system)
 
 
 def test_hilbert_kernel_theorem_validates_cleanly() -> None:
@@ -36,7 +36,7 @@ def test_hilbert_kernel_theorem_validates_cleanly() -> None:
     system = make_system(interner=SymbolInterner())
     result = validate(
         system=system,
-        constructors={"id": SETMM_TO_HILBERT_LEMMAS["id"]},
+        constructors={"id": PROP_THEOREMS["id"]},
         axioms=system.compile_axioms(),
         reserved={"wi", "wn", "wa", "mp", "mpd", "df-fal", "df-nor", "df-xor"},
     )

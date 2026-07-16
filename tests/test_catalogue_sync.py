@@ -2,15 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from logic.fol import SETMM_TO_PREDICATE_AXIOMS
-from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
-from logic.prop import (
-    SETMM_TO_HILBERT_AXIOMS,
-    SETMM_TO_HILBERT_RULES,
-)
-from logic.prop import (
-    THEOREMS as SETMM_TO_HILBERT_LEMMAS,
-)
+from logic.fol import AXIOMS as FOL_AXIOMS
+from logic.fol import RULES as FOL_RULES
+from logic.fol import THEOREMS as FOL_THEOREMS
+from logic.prop import AXIOMS as PROP_AXIOMS
+from logic.prop import RULES as PROP_RULES
+from logic.prop import THEOREMS as PROP_THEOREMS
 
 
 def test_lemma_catalogue_contains_only_current_registry_entries() -> None:
@@ -25,11 +22,12 @@ def test_lemma_catalogue_contains_only_current_registry_entries() -> None:
         rows[cells[0]] = cells[4]
 
     expected = (
-        set(SETMM_TO_HILBERT_AXIOMS)
-        | set(SETMM_TO_PREDICATE_AXIOMS)
-        | set(SETMM_TO_HILBERT_RULES)
-        | set(SETMM_TO_HILBERT_LEMMAS)
-        | set(SETMM_TO_PREDICATE_THEOREMS)
+        set(PROP_AXIOMS)
+        | set(FOL_AXIOMS)
+        | set(PROP_RULES)
+        | set(FOL_RULES)
+        | set(PROP_THEOREMS)
+        | set(FOL_THEOREMS)
         | {"wo", "wtru", "wfal", "idi", "a1ii"}
     )
     manually_emitted = {
@@ -53,5 +51,5 @@ def test_lemma_catalogue_contains_only_current_registry_entries() -> None:
     registered_only = {
         label for label, status in rows.items() if status.startswith("registered only:")
     }
-    assert registered_only <= set(SETMM_TO_HILBERT_LEMMAS) | set(SETMM_TO_PREDICATE_THEOREMS)
+    assert registered_only <= set(PROP_THEOREMS) | set(FOL_THEOREMS)
     assert not registered_only

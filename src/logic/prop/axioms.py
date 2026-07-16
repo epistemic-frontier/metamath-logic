@@ -117,42 +117,7 @@ def make_axioms() -> Mapping[str, Axiom]:
     return {name_map.get(k, k): v for k, v in raw.items()}
 
 
-SETMM_TO_HILBERT_LABELS: Mapping[str, str] = {
-    "ax-1": "ax-1",
-    "ax-2": "ax-2",
-    "ax-3": "ax-3",
-    "df-bi": "df-bi",
-    "df-an": "df-an",
-    "df-3an": "df-3an",
-    "df-3or": "df-3or",
-    "df-or": "df-or",
-    "df-tru": "df-tru",
-    "df-fal": "df-fal",
-    "df-cad": "df-cad",
-    "df-had": "df-had",
-    "df-nan": "df-nan",
-    "df-nor": "df-nor",
-    "df-xor": "df-xor",
-    "df-ifp": "df-ifp",
-}
+AXIOMS: Mapping[str, Axiom] = make_axioms()
 
 
-__all__ = [
-    "A1",
-    "A2",
-    "A3",
-    "df_bi",
-    "df_3an",
-    "df_3or",
-    "df_tru",
-    "df_fal",
-    "df_or",
-    "df_cad",
-    "df_had",
-    "df_nan",
-    "df_nor",
-    "df_xor",
-    "df_ifp",
-    "make_axioms",
-    "SETMM_TO_HILBERT_LABELS",
-]
+__all__ = ["AXIOMS"]

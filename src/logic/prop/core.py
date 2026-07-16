@@ -2252,7 +2252,7 @@ def prove_bijust(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'mp2': prove_mp2,
     'mp2b': prove_mp2b,
     'a1i': prove_a1i,
@@ -2455,4 +2455,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'bijust': prove_bijust,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

@@ -670,7 +670,7 @@ def prove_axbnd(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'barbara': prove_barbara,
     'celarent': prove_celarent,
     'darii': prove_darii,
@@ -718,4 +718,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'axbnd': prove_axbnd,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

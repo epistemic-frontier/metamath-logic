@@ -46,4 +46,7 @@ def make_axioms() -> Mapping[str, Axiom]:
     return {name_map.get(name, name): axiom for name, axiom in raw.items()}
 
 
-__all__ = ["AX4", "AX5", "AX6", "AX7", "AX8", "AX9", "AX10", "AX11", "AX12", "AX13", "make_axioms"]
+AXIOMS: Mapping[str, Axiom] = make_axioms()
+
+
+__all__ = ["AXIOMS"]

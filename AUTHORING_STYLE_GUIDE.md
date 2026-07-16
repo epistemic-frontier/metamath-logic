@@ -56,72 +56,46 @@ Emission consumes `SymbolId` sequences and produces IR via `MMBuilderV2` only:
 - auto-$f handles floating hypotheses
 - `mm.export(...)` is the only export mechanism
 
-## 2. Directory / File Responsibilities (Hilbert Example)
+## 2. Directory / File Responsibilities
 
 Use strict separation. Each file should have one responsibility:
 
 ```
-logic/propositional/hilbert/
-  _structures.py     # Language skeleton: Vars + constructors only
-  axioms.py          # Axiom schemas (Expr only)
-  _syntactic.py      # Token-level rule skeleton (mp/wi/wn/wa) if needed
-  implication.py     # Proof scripts, by category (see placement rule below)
-  negation.py
-  disjunction.py
-  conjunction.py
-  equivalence.py
-  constants.py
-  syllogism.py       # frozen legacy subdivision of implication (see below)
-  lemmas.py          # pure re-export shim (NO proof defs)
-  theorems.py        # explicit set.mm label → constructor registry
-  __init__.py        # System facade (author_env/compile/apply)
+logic/{prop,fol}/
+  __init__.py        # public facade
+  axioms.py          # public AXIOMS registry
+  rules.py           # public RULES registry
+  theorems.py        # public THEOREMS registry
+  <topic>.py         # public prove_* constructors
+  _system.py         # internal System implementation
+  _structures.py     # internal Expr structures
+  _builtins.py       # internal token definitions
+  _*.py              # internal mechanics
 ```
 
-The predicate facade is `logic/predicate/hilbert/__init__.py` and exposes
-`PredicateSystem`. Predicate internals are `_builtins.py`, `_structures.py`,
-and `_internal.py`; public mathematical content is in `axioms.py`, `lemmas.py`,
-and `theorems.py`. There is no predicate `system.py` or `definitions.py`.
+Both scopes expose `System`, `make`, `AXIOMS`, `RULES`, and `THEOREMS` from
+their facade. Those mappings are builder metadata; downstream proof code should
+directly import `prove_*` constructors from the public topic modules.
 
 ### Proof placement rule (where a `prove_*` lives)
 
 - **Every `prove_*` is defined in exactly one category file.** Never define the
   same proof in two modules.
-- **Choose the category file from the set.mm *section* the label lives in**,
-  which set.mm keys off the *last-introduced connective in the statement* (not
-  the proof). Inference/deduction variants (`*i`, `*d`, `*dd`, `*ii`) live with
-  their closed form.
-
-  | set.mm section | file |
-  |---|---|
-  | Logical implication (pure `→`) | `implication.py` |
-  | Logical negation (`¬`) | `negation.py` |
-  | Logical equivalence (`↔`) | `equivalence.py` |
-  | Logical disjunction (`∨`) | `disjunction.py` |
-  | Logical conjunction (`∧`) | `conjunction.py` |
-  | True/false constants (`⊤`/`⊥`) | `constants.py` |
-  | Stoic / mixed connectives | `stoic.py` |
-
-- `syllogism.py` has **no** set.mm counterpart (`syl*`/`com*` are all in the
-  "Logical implication" section). Treat it as a frozen legacy bucket: leave its
-  existing contents, but **place new proofs by the rule above** — nothing new
-  goes into `syllogism.py`.
+- **Choose the public topic module from the curated set.mm range map.**
+  Inference/deduction variants (`*i`, `*d`, `*dd`, `*ii`) remain with their
+  closed form.
 - Category files must **not** import from one another; proof steps reference
   lemmas by string (`ref="pm2.18"`), so placement never creates import edges.
-- Known legacy misplacements exist (e.g. `notnot`/`notnotr`/`pm2_18` in
-  `implication.py`, `pm2_01`/`pm2_43` in `syllogism.py`). Do not mass-relocate
-  them (pure churn); apply the rule to new and moved code.
-- `lemmas.py` and `theorems.py` contain no propositional `def prove_*`.
-  `lemmas.py` re-exports the full constructor surface (imports from category
-  files + `__all__`); `theorems.py` explicitly defines the
-  `SETMM_TO_HILBERT_LEMMAS` label-to-constructor registry.
+- `theorems.py` contains no `def prove_*`; it only merges private topic registries
+  into the public `THEOREMS` mapping and rejects duplicate labels.
 
 Current code references:
 
-- Language structures: [`hilbert/_structures.py`](src/logic/propositional/hilbert/_structures.py)
-- Axioms: [`hilbert/axioms.py`](src/logic/propositional/hilbert/axioms.py)
-- Proof scripts by category: [`hilbert/implication.py`](src/logic/propositional/hilbert/implication.py), [`negation.py`](src/logic/propositional/hilbert/negation.py), [`disjunction.py`](src/logic/propositional/hilbert/disjunction.py), [`constants.py`](src/logic/propositional/hilbert/constants.py)
-- Re-export surface: [`hilbert/lemmas.py`](src/logic/propositional/hilbert/lemmas.py)
-- Registry: [`hilbert/theorems.py`](src/logic/propositional/hilbert/theorems.py)
+- Propositional facade: [`prop/__init__.py`](src/logic/prop/__init__.py)
+- First-order facade: [`fol/__init__.py`](src/logic/fol/__init__.py)
+- Public registries: [`prop/axioms.py`](src/logic/prop/axioms.py),
+  [`prop/rules.py`](src/logic/prop/rules.py), and
+  [`prop/theorems.py`](src/logic/prop/theorems.py)
 
 ## 3. Naming Conventions
 
@@ -144,12 +118,10 @@ Current code references:
 ### 3.3 Files and functions
 
 - For a set.mm theorem `pm2.24`, the preferred local constructor is `prove_pm2_24`.
-- Register new constructors in `MIGRATION_THEOREMS` at the end of their owning
-  category module. [`theorems.py`](src/logic/propositional/hilbert/theorems.py)
-  composes those local mappings with the legacy registry.
-- [`lemmas.py`](src/logic/propositional/hilbert/lemmas.py) is a frozen
-  compatibility shim; routine migrations must not extend it. New theorem
-  transactions therefore touch only their owning category module.
+- Register new constructors in the private `_THEOREMS` mapping at the end of
+  their owning public topic module. Public
+  [`theorems.py`](src/logic/prop/theorems.py) composes those mappings and rejects
+  duplicate labels.
 - [`LEMMA_CATALOGUE.md`](LEMMA_CATALOGUE.md) is a release artifact generated from
   both registries and the build emission surface. Routine proof migrations must
   not edit it. Release preparation runs

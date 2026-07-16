@@ -11,10 +11,10 @@ from skfd.builder_v2 import MMBuilderV2
 from skfd.core.symbols import SymbolId, SymbolInterner
 from skfd.proof import Proof
 
-from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
+from logic.fol import THEOREMS as FOL_THEOREMS
 from logic.fol._builtins import PredicateBuiltins
 from logic.fol._system import System as FirstOrderSystem
-from logic.prop import THEOREMS as SETMM_TO_HILBERT_LEMMAS
+from logic.prop import THEOREMS as PROP_THEOREMS
 from logic.prop._structures import Imp, phi, psi
 from logic.prop._system import System as PropositionalSystem
 from logic.prop._system import _extend_names
@@ -69,8 +69,8 @@ def build(ctx: BuildContextV2) -> None:
     )
     coverage = getattr(ctx, "coverage", None)
     if coverage is not None:
-        coverage.declare_registry("propositional-hilbert", SETMM_TO_HILBERT_LEMMAS)
-        coverage.declare_registry("predicate-hilbert", SETMM_TO_PREDICATE_THEOREMS)
+        coverage.declare_registry("propositional-hilbert", PROP_THEOREMS)
+        coverage.declare_registry("predicate-hilbert", FOL_THEOREMS)
 
     wff = prelude["wff"]
     provable = prelude["|-"]
@@ -905,7 +905,7 @@ def build(ctx: BuildContextV2) -> None:
     #   - anything that transitively depends on an excluded theorem.
     constructed: dict[str, Proof] = {}
     excluded: dict[str, str] = {}
-    for name, ctor in SETMM_TO_HILBERT_LEMMAS.items():
+    for name, ctor in PROP_THEOREMS.items():
         try:
             p = ctor(system)
         except Exception as exc:
@@ -921,7 +921,7 @@ def build(ctx: BuildContextV2) -> None:
         changed = False
         for name in list(constructed):
             for ref in _refs(constructed[name]):
-                if ref in SETMM_TO_HILBERT_LEMMAS and ref not in constructed:
+                if ref in PROP_THEOREMS and ref not in constructed:
                     excluded[name] = f"depends on excluded theorem {ref!r}"
                     del constructed[name]
                     changed = True
@@ -940,7 +940,7 @@ def build(ctx: BuildContextV2) -> None:
         _log.info(
             "emitting %d/%d declared theorems; excluded %d: %s",
             len(constructed),
-            len(SETMM_TO_HILBERT_LEMMAS),
+            len(PROP_THEOREMS),
             len(excluded),
             "; ".join(f"{n} ({r})" for n, r in sorted(excluded.items())),
         )
@@ -1054,7 +1054,7 @@ def build(ctx: BuildContextV2) -> None:
     }
     predicate_constructed: dict[str, Proof] = {}
     predicate_excluded: dict[str, str] = {}
-    for name, ctor in SETMM_TO_PREDICATE_THEOREMS.items():
+    for name, ctor in FOL_THEOREMS.items():
         if name == "wel":
             continue
         try:
@@ -1083,7 +1083,7 @@ def build(ctx: BuildContextV2) -> None:
         _log.info(
             "emitting %d/%d predicate theorems; excluded %d: %s",
             len(predicate_constructed),
-            len(SETMM_TO_PREDICATE_THEOREMS),
+            len(FOL_THEOREMS),
             len(predicate_excluded),
             "; ".join(f"{n} ({r})" for n, r in sorted(predicate_excluded.items())),
         )

@@ -2723,7 +2723,7 @@ def prove_con3ALT(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'pm4.64': prove_pm4_64,
     'pm4.66': prove_pm4_66,
     'pm2.53': prove_pm2_53,
@@ -2962,4 +2962,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'con3ALT': prove_con3ALT,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

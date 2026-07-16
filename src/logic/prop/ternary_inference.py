@@ -1587,7 +1587,7 @@ def prove_an42ds(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'ad5ant2345': prove_ad5ant2345,
     'syl3anc': prove_syl3anc,
     'syl13anc': prove_syl13anc,
@@ -1711,4 +1711,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'an42ds': prove_an42ds,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

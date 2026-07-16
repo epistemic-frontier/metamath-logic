@@ -8,38 +8,32 @@ for unfinished work.
 ## Current status
 
 The implementation is split into `logic.prop` and
-`logic.fol`. Their registries contain 1,500 and 396 proofs,
-respectively (1,896 total), and the complete registry is emitted.
+`logic.fol`. Their registries contain 1,764 and 911 proofs,
+respectively (2,675 total).
 
-The source closure audit reports 1,896 unique `prove_*` identities, all in the
+The source closure audit reports 2,675 unique `prove_*` identities, all in the
 registries, with 0 support-only and 0 uncovered. Latest verification reports
-1,896 declared, 3,931 emitted, and 0
-declared-but-unemitted proofs. `mmverify`, `metamath`, and `knife` pass.
+2,675 declared, 5,004 emitted, and 213 declared-but-unemitted proofs.
+`mmverify`, `metamath`, and `knife` pass.
 
-Propositional mathematical content is divided by connective among
-`implication.py`, `negation.py`, `equivalence.py`, `conjunction.py`,
-`disjunction.py`, `constants.py`, `truth_tables.py`, `adder.py`, `stoic.py`,
-and `axiomatizations/`; `theorems.py` is the aggregate registry.
-
-First-order architecture is intentionally compact:
+Both scopes now use the same public API architecture:
 
 ```text
-logic/fol/
-  __init__.py       # public facade and aggregate theorem registry
-  system.py         # first-order System
-  _builtins.py      # internal tokens
-  _structures.py    # internal Expr structures
-  _internal.py      # internal processing
-  axioms.py         # public axiom schemas
-  foundation.py     # generated foundational proofs
-  substitution.py   # generated substitution proofs
-  equality.py       # generated equality proofs
-  uniqueness.py     # generated uniqueness proofs
+logic/{prop,fol}/
+  __init__.py       # public facade
+  axioms.py         # AXIOMS
+  rules.py          # RULES
+  theorems.py       # THEOREMS
+  <topic>.py        # public prove_* functions
+  _system.py        # internal System implementation
+  _*.py             # internal structures and mechanics
 ```
 
-There is no separate `definitions.py`, `lemmas.py`, or `theorems.py`. Axiom
-proof labels use canonical set.mm spelling `ax-1` through `ax-13`; names such
-as `A1` and `AX5` are only Python-safe Expr identifiers.
+The three category modules form the metadata API used by the builder. Public
+topic modules remain the direct, low-friction API for importing individual
+`prove_*` constructors. Axiom labels use canonical set.mm spelling `ax-1`
+through `ax-13`; names such as `A1` and `AX5` are only Python implementation
+identifiers.
 
 ## Historical migration plan
 

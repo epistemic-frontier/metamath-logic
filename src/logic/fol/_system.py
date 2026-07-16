@@ -16,7 +16,7 @@ from ._builtins import PredicateBuiltins
 from ._internal import _apply as _apply_impl
 from ._internal import _compile as _compile_impl
 from ._internal import _compile_axioms as _compile_axioms_impl
-from .axioms import make_axioms
+from .axioms import AXIOMS
 
 
 @dataclass(frozen=True)
@@ -38,7 +38,7 @@ class System:
             interner=interner,
             names=names,
             builtins=PredicateBuiltins.ensure(interner, origin_ref=origin_ref),
-            axioms=make_axioms(),
+            axioms=AXIOMS,
         )
 
     def author_env(
@@ -74,12 +74,6 @@ class System:
         return _apply_impl(self, rule, hyps, ctx=ctx)
 
 
-# Predicate axiom labels are canonical set.mm labels throughout the system.
-SETMM_TO_PREDICATE_AXIOMS: Mapping[str, str] = {
-    f"ax-{number}": f"ax-{number}" for number in range(4, 14)
-}
-
-
 def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
     return System.make(
         interner=interner,
@@ -91,6 +85,4 @@ def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
 __all__ = [
     "System",
     "make",
-    "SETMM_TO_PREDICATE_AXIOMS",
-    "make_axioms",
 ]

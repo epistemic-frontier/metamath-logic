@@ -3033,7 +3033,7 @@ def prove_syl2an2(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'pm4.63': prove_pm4_63,
     'pm4.67': prove_pm4_67,
     'imnan': prove_imnan,
@@ -3333,4 +3333,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'syl2an2': prove_syl2an2,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

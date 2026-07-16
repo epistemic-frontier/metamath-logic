@@ -21,7 +21,7 @@ from ._internal import _apply as _apply_impl
 from ._internal import _compile as _compile_impl
 from ._internal import _compile_axioms as _compile_axioms_impl
 from ._syntactic import make_rules
-from .axioms import SETMM_TO_HILBERT_LABELS as SETMM_TO_HILBERT_AXIOMS
+from .axioms import AXIOMS
 
 RuleFn: TypeAlias = Callable[..., Wff]
 
@@ -67,17 +67,13 @@ class System:
         bundle: RuleBundle = make_rules(b)
         rule_app = RuleApp(sigs=bundle.sigs)
 
-        # You may keep the token-level schema view if you still want it.
-        # If you are fully switching to authoring Expr axioms, you can drop this field.
-        from .axioms import make_axioms  # authoring Expr axioms
-
         return cls(
             interner=interner,
             names=names,
             builtins=b,
             rule_app=rule_app,
             rules=cast(Mapping[str, RuleFn], bundle.rules),
-            axioms=make_axioms(),
+            axioms=AXIOMS,
         )
 
     # -------------------------------------------------------------------------
@@ -157,21 +153,8 @@ def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
     return System.make(interner=interner, names=_make_names(), origin_ref=origin_ref)
 
 
-SETMM_TO_HILBERT_RULES: Mapping[str, str] = {
-    "ax-mp": "mp",
-}
-
-SETMM_TO_HILBERT: Mapping[str, str] = {
-    **SETMM_TO_HILBERT_AXIOMS,
-    **SETMM_TO_HILBERT_RULES,
-}
-
-
 __all__ = [
     "System",
     "make",
     "PropositionalBuiltins",
-    "SETMM_TO_HILBERT_AXIOMS",
-    "SETMM_TO_HILBERT_RULES",
-    "SETMM_TO_HILBERT",
 ]

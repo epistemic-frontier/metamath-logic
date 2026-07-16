@@ -8,16 +8,16 @@ membership, not-free reasoning, substitution, and predicate axiom schemes.
 
 ```text
 logic/fol/
-  __init__.py       # public facade and aggregate theorem registry
-  system.py         # first-order System and axiom-label map
+  __init__.py       # public facade
+  axioms.py         # public AXIOMS registry
+  rules.py          # public RULES registry
+  theorems.py       # public THEOREMS registry
+  _system.py        # internal first-order System implementation
   _builtins.py      # interned predicate tokens
   _structures.py    # Expr variables and constructors
   _internal.py      # compilation/application implementation
-  axioms.py         # ax-4 through ax-13 Expr schemas
-  foundation.py     # generated foundational proofs
-  substitution.py   # generated substitution proofs
-  equality.py       # generated equality proofs
-  uniqueness.py     # generated uniqueness proofs
+  foundation.py     # public foundational prove_* functions
+  *.py              # other public theorem topic modules
 ```
 
 Consumers import `System` from the package facade. `AX5` through
@@ -27,21 +27,18 @@ likewise for `ax-4`).
 
 ## Current status
 
-- `SETMM_TO_PREDICATE_THEOREMS` contains 396 proofs.
+- `THEOREMS` contains 911 proofs.
 - Predicate syntax and axioms are integrated into `logic.build`.
-- Every predicate registry proof is emitted; none is registered-only.
-- Predicate theorem constructors live in `lemmas.py`, and the catalogue links
-  there directly.
-- New migrations are registered in the local `MIGRATION_THEOREMS` map in
-  `lemmas.py`. `theorems.py` deterministically merges it with the frozen
-  `_LEGACY_PREDICATE_THEOREMS` bucket and rejects duplicate labels.
-- Together with 1,500 propositional registry proofs, the build declares all
-  1,896 registry proofs.
+- Predicate theorem constructors live in public topic modules and remain
+  directly importable; `theorems.py` deterministically merges their private
+  metadata registries and rejects duplicate labels.
+- Together with 1,764 propositional registry proofs, the build declares 2,675
+  registry proofs.
 
-The complete source audit finds 1,896 unique `prove_*` constructors, all in the
-registries, with 0 support-only and 0 uncovered. Latest verification emitted
-3,931 proofs with 0 declared-but-unemitted;
-`mmverify`, `metamath`, and `knife` all pass.
+The complete source audit finds 2,675 unique `prove_*` constructors, all in the
+registries, with 0 support-only and 0 uncovered. Latest verification reports
+5,004 emitted and 213 declared-but-unemitted proofs; `mmverify`, `metamath`, and
+`knife` all pass.
 
 ## Boundaries
 

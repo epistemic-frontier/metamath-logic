@@ -29,21 +29,20 @@ module plans.
 
 ## Registry Guardrails
 
-- Proof constructors have one owning module. Propositional `lemmas.py`
-  re-exports its category constructors; predicate constructors live directly
-  in predicate `lemmas.py`.
-- Each package exposes its single authoritative aggregate from `theorems.py`:
-  - `SETMM_TO_HILBERT_LEMMAS`
-  - `SETMM_TO_PREDICATE_THEOREMS`
+- Proof constructors have one owning public topic module and remain directly
+  importable by downstream proof code.
+- Both `logic.prop` and `logic.fol` expose the same three authoritative
+  registries: `AXIOMS`, `RULES`, and `THEOREMS`. Their public modules are
+  `axioms.py`, `rules.py`, and `theorems.py`. These registries are build
+  metadata; they do not replace direct imports of `prove_*` functions.
 - Registry keys must be exact set.mm labels.
 - A constructor registered under label `L` must produce proof name `L`.
 - Do not register a theorem until its constructor can be validated locally.
 - Registered entries must be emitted and covered by verification.
 - Registry aggregation order must be deterministic. Prefer explicit module maps
   over `globals()` collection.
-- New predicate migrations are added to `MIGRATION_THEOREMS` beside their
-  implementations in predicate `lemmas.py`; predicate `theorems.py` keeps the
-  frozen legacy bucket and aggregates that local map with duplicate detection.
+- `theorems.py` deterministically merges the topic modules' private registries and
+  rejects duplicate labels.
 
 ## Build and Emission Guardrails
 
@@ -101,8 +100,9 @@ release artifact. Before a release, regenerate it once with
 `uv run --no-sync python tools/generate_lemma_catalogue.py` and validate the
 checked-in result with the same command plus `--check`.
 
-The current gate is expected to report 1,896 declared, 3,931 emitted, and 0
-declared-but-unemitted proofs.
+The latest gate reports 2,675 declared, 5,004 emitted, and 213
+declared-but-unemitted proofs. All three Metamath verifiers pass; reducing the
+registered-only set is tracked separately from the API layout.
 
 ## Counting and Roadmap Guardrails
 

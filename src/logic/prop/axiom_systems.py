@@ -2900,7 +2900,7 @@ def prove_stoic4b(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'minimp': prove_minimp,
     'minimp-syllsimp': prove_minimp_syllsimp,
     'minimp-ax1': prove_minimp_ax1,
@@ -3061,4 +3061,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'stoic4b': prove_stoic4b,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

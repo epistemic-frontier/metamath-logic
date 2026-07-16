@@ -22,26 +22,22 @@ environment, not as independent proof kernels.
 
 ## Registry Pattern
 
-Category modules own proof constructors. `lemmas.py` re-exports those
-constructors, and `theorems.py` explicitly maps every canonical set.mm label to
-its constructor. Category modules do not define per-module registries.
+Public topic modules own directly importable proof constructors. Their private
+`_THEOREMS` mappings feed the uniformly classified metadata API:
 
 ```python
-from .lemmas import prove_df_fal, prove_df_tru
-
-SETMM_TO_HILBERT_LEMMAS = {
-    "df-tru": prove_df_tru,
-    "df-fal": prove_df_fal,
-}
+from logic.prop import AXIOMS, RULES, THEOREMS
 ```
+
+`theorems.py` merges the private per-topic registries and rejects duplicate
+labels. Downstream proofs may directly import constructors, for example
+`from logic.prop.core import prove_id`.
 
 ## Current status
 
-The propositional registry contains 1,353 proofs and every row is emitted.
-Connective lowering and the late modules are integrated; there are no
-registered-only propositional proofs. `dfifp4` is registered and emitted, and
-the canonical `mto` replaces the former duplicate package-local
-`prove_modus_tollens`.
+The propositional `THEOREMS` registry contains 1,764 proofs. Registry membership
+and build emission coverage are reported separately; the latest integrated gate
+passes all three verifiers.
 
 ## Boundary Notes
 

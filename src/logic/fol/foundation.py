@@ -3490,7 +3490,7 @@ def prove_rename_sb(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'alnex': prove_alnex,
     'eximal': prove_eximal,
     'nf2': prove_nf2,
@@ -3774,4 +3774,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'rename-sb': prove_rename_sb,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

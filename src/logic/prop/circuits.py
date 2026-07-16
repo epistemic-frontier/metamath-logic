@@ -1335,7 +1335,7 @@ def prove_cadtru(sys: System) -> Proof:
     return lb.build(res)
 
 
-THEOREMS: Mapping[str, LemmaCtor] = {
+_THEOREMS: Mapping[str, LemmaCtor] = {
     'nanan': prove_nanan,
     'dfnan2': prove_dfnan2,
     'nanor': prove_nanor,
@@ -1451,4 +1451,4 @@ THEOREMS: Mapping[str, LemmaCtor] = {
     'cadtru': prove_cadtru,
 }
 
-__all__ = ['THEOREMS']
+__all__ = [name for name in globals() if name.startswith("prove_")]

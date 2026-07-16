@@ -10,10 +10,10 @@ from skfd.authoring.typing import HypothesisAny, PreludeShapeError, PreludeTypin
 from logic.prop._builtins import PropositionalBuiltins, try_parse_imp
 
 if TYPE_CHECKING:
-    from ._system import PredicateSystem
+    from ._system import System
 
 
-def _compile(system: PredicateSystem, expr: Expr, *, ctx: str = "compile") -> Wff:
+def _compile(system: System, expr: Expr, *, ctx: str = "compile") -> Wff:
     env, registry = system.author_env()
     try:
         return compile_wff(expr, env=env, registry=registry)
@@ -21,7 +21,7 @@ def _compile(system: PredicateSystem, expr: Expr, *, ctx: str = "compile") -> Wf
         raise PreludeTypingError(f"{ctx}: {e}") from e
 
 
-def _compile_axioms(system: PredicateSystem) -> Mapping[str, Wff]:
+def _compile_axioms(system: System) -> Mapping[str, Wff]:
     return {
         key: _compile(system, expr, ctx=f"compile_axiom[{key}]")
         for key, expr in system.axioms.items()
@@ -29,7 +29,7 @@ def _compile_axioms(system: PredicateSystem) -> Mapping[str, Wff]:
 
 
 def _apply(
-    system: PredicateSystem,
+    system: System,
     rule: str,
     hyps: Sequence[HypothesisAny],
     *,

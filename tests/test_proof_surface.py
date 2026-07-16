@@ -8,8 +8,9 @@ from skfd.names import NameResolver
 
 from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
 from logic.prop import THEOREMS as SETMM_TO_HILBERT_LEMMAS
-from logic.prop import System, _extend_names
+from logic.prop import System as PropositionalSystem
 from logic.prop import make as make_system
+from logic.prop._system import _extend_names
 
 
 def test_propositional_and_predicate_registries_are_disjoint() -> None:
@@ -17,7 +18,7 @@ def test_propositional_and_predicate_registries_are_disjoint() -> None:
 
 
 def test_build_names_cover_all_propositional_variables() -> None:
-    system = System.make(
+    system = PropositionalSystem.make(
         interner=SymbolInterner(),
         names=_extend_names(NameResolver()),
     )

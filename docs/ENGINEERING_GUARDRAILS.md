@@ -84,7 +84,7 @@ For internal-structure or import-only Python changes:
 python3 -m compileall -q src/logic/prop src/logic/fol
 uv run --no-sync ruff check src/logic/prop src/logic/fol docs
 uv run --no-sync python -c 'from logic.prop import System'
-uv run --no-sync python -c 'from logic.fol import PredicateSystem'
+uv run --no-sync python -c 'from logic.fol import System'
 ```
 
 For theorem registry changes:

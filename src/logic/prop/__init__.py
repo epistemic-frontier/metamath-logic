@@ -9,7 +9,6 @@ from logic.prop._system import (
     SETMM_TO_HILBERT_AXIOMS,
     SETMM_TO_HILBERT_RULES,
     System,
-    _extend_names,
     make,
 )
 from logic.prop.axiom_systems import THEOREMS as MODULE_8_THEOREMS
@@ -47,6 +46,5 @@ __all__ = [
     "SETMM_TO_HILBERT_RULES",
     "System",
     "THEOREMS",
-    "_extend_names",
     "make",
 ]

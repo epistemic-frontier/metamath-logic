@@ -9,7 +9,7 @@ membership, not-free reasoning, substitution, and predicate axiom schemes.
 ```text
 logic/fol/
   __init__.py       # public facade and aggregate theorem registry
-  system.py         # PredicateSystem and axiom-label map
+  system.py         # first-order System and axiom-label map
   _builtins.py      # interned predicate tokens
   _structures.py    # Expr variables and constructors
   _internal.py      # compilation/application implementation
@@ -20,7 +20,7 @@ logic/fol/
   uniqueness.py     # generated uniqueness proofs
 ```
 
-Consumers import `PredicateSystem` from the package facade. `AX5` through
+Consumers import `System` from the package facade. `AX5` through
 `AX13` are Python-safe Expr constant identifiers only; proof and emitted
 assertion labels are the canonical set.mm names `ax-5` through `ax-13` (and
 likewise for `ax-4`).

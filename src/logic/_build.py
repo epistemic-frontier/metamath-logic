@@ -13,10 +13,11 @@ from skfd.proof import Proof
 
 from logic.fol import THEOREMS as SETMM_TO_PREDICATE_THEOREMS
 from logic.fol._builtins import PredicateBuiltins
-from logic.fol._system import PredicateSystem
+from logic.fol._system import System as FirstOrderSystem
 from logic.prop import THEOREMS as SETMM_TO_HILBERT_LEMMAS
 from logic.prop._structures import Imp, phi, psi
-from logic.prop._system import System, _extend_names
+from logic.prop._system import System as PropositionalSystem
+from logic.prop._system import _extend_names
 
 from ._dv_contracts import ACTIVE_DV_PAIRS
 
@@ -43,7 +44,9 @@ class _PredicateEmissionProvider:
         return self.statements
 
 
-def _emit_rule_skeleton(mm: MMBuilderV2, system: System, *, provable: SymbolId) -> None:
+def _emit_rule_skeleton(
+    mm: MMBuilderV2, system: PropositionalSystem, *, provable: SymbolId
+) -> None:
     phi_wff = system.compile(phi, ctx="rule[mp.phi]")
     psi_wff = system.compile(psi, ctx="rule[mp.psi]")
     imp_wff = system.compile(Imp(phi, psi), ctx="rule[mp.imp]")
@@ -58,9 +61,9 @@ def build(ctx: BuildContextV2) -> None:
     mm = ctx.mm
     prelude = ctx.deps["metamath-prelude"]
 
-    system = System.make(interner=mm.interner, names=_extend_names(ctx.names))
+    system = PropositionalSystem.make(interner=mm.interner, names=_extend_names(ctx.names))
     builtins = system.builtins
-    predicate_system = PredicateSystem.make(
+    predicate_system = FirstOrderSystem.make(
         interner=mm.interner,
         names=system.names,
     )

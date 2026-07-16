@@ -5,7 +5,7 @@ from collections.abc import Callable, Mapping
 
 from skfd.proof import Proof
 
-from logic.fol._system import SETMM_TO_PREDICATE_AXIOMS, PredicateSystem, make
+from logic.fol._system import SETMM_TO_PREDICATE_AXIOMS, System, make
 from logic.fol.axioms import make_axioms
 from logic.fol.foundation import THEOREMS as MODULE_9_THEOREMS
 from logic.fol.quantified_equality import THEOREMS as MODULE_11_THEOREMS
@@ -33,7 +33,7 @@ def _all_theorems() -> Mapping[str, LemmaCtor]:
 THEOREMS = _all_theorems()
 
 __all__ = [
-    "PredicateSystem",
+    "System",
     "SETMM_TO_PREDICATE_AXIOMS",
     "THEOREMS",
     "make",

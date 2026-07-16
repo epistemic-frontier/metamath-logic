@@ -20,7 +20,7 @@ from .axioms import make_axioms
 
 
 @dataclass(frozen=True)
-class PredicateSystem:
+class System:
     interner: SymbolInterner
     names: NameResolver
     builtins: PredicateBuiltins
@@ -33,7 +33,7 @@ class PredicateSystem:
         interner: SymbolInterner,
         names: NameResolver,
         origin_ref: Any = None,
-    ) -> PredicateSystem:
+    ) -> System:
         return cls(
             interner=interner,
             names=names,
@@ -80,8 +80,8 @@ SETMM_TO_PREDICATE_AXIOMS: Mapping[str, str] = {
 }
 
 
-def make(*, interner: SymbolInterner, origin_ref: Any = None) -> PredicateSystem:
-    return PredicateSystem.make(
+def make(*, interner: SymbolInterner, origin_ref: Any = None) -> System:
+    return System.make(
         interner=interner,
         names=NameResolver(),
         origin_ref=origin_ref,
@@ -89,7 +89,7 @@ def make(*, interner: SymbolInterner, origin_ref: Any = None) -> PredicateSystem
 
 
 __all__ = [
-    "PredicateSystem",
+    "System",
     "make",
     "SETMM_TO_PREDICATE_AXIOMS",
     "make_axioms",

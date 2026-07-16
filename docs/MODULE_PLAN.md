@@ -26,7 +26,7 @@ First-order architecture is intentionally compact:
 ```text
 logic/fol/
   __init__.py       # public facade and aggregate theorem registry
-  system.py         # PredicateSystem
+  system.py         # first-order System
   _builtins.py      # internal tokens
   _structures.py    # internal Expr structures
   _internal.py      # internal processing

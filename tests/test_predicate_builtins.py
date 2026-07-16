@@ -7,13 +7,13 @@ from skfd.core.symbols import SymbolInterner
 from skfd.names import NameResolver
 from skfd.proof import ProofBuilder
 
-from logic.fol import PredicateSystem
+from logic.fol import System as FirstOrderSystem
 
 
 def test_predicate_system_owns_predicate_tokens() -> None:
     interner = SymbolInterner()
 
-    system = PredicateSystem.make(interner=interner, names=NameResolver())
+    system = FirstOrderSystem.make(interner=interner, names=NameResolver())
     compiled = system.compile_axioms()
 
     predicate_axioms = {f"ax-{number}" for number in range(4, 14)}
@@ -31,7 +31,7 @@ def test_predicate_system_owns_predicate_tokens() -> None:
 
 def test_predicate_parser_right_associates_quantifiers() -> None:
     interner = SymbolInterner()
-    system = PredicateSystem.make(interner=interner, names=NameResolver())
+    system = FirstOrderSystem.make(interner=interner, names=NameResolver())
 
     formula = ProofBuilder(system, "quantifiers").ref("result", "∀ y ∀ x φ", ref="unused")
 

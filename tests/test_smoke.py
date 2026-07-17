@@ -27,13 +27,72 @@ def test_scoped_public_registries() -> None:
         "System",
         "make",
     }
-    assert set(fol.__all__) == {"AXIOMS", "RULES", "THEOREMS", "System", "make"}
+    assert set(fol.__all__) == {
+        "AXIOMS",
+        "CALCULUS",
+        "LANGUAGE",
+        "RULES",
+        "THEOREMS",
+        "System",
+        "make",
+    }
     assert "ax-1" in prop.AXIOMS
     assert "ax-4" in fol.AXIOMS
-    assert prop.RULES == fol.RULES
     assert set(prop.RULES) == {"ax-mp"}
+    assert set(fol.RULES) == {"ax-mp", "ax-gen"}
+    assert fol.RULES["ax-mp"] is prop.RULES["ax-mp"]
     assert prop.RULES["ax-mp"] is prop.CALCULUS.rule(prop.RULES["ax-mp"].id)
     assert prop.THEOREMS and fol.THEOREMS
+
+
+def test_fol_semantic_binder_and_generalization_canary() -> None:
+    from skfd.authoring.ids import OwnerId
+    from skfd.authoring.metamath_language import LiteralAtom, VariableAtom
+    from skfd.authoring.term import App, VariableRef
+    from skfd.authoring.term_ops import free_variables
+
+    from logic._dv_contracts import ACTIVE_DV_PAIRS
+    from logic.fol.axioms import AX5_SEMANTIC
+    from logic.fol.calculus import CALCULUS, GENERALIZATION
+    from logic.fol.language import LANGUAGE, SETVAR_VARIABLE, All, SetVar
+    from logic.fol.metamath_binding import SETMM_FOL_BINDING, SETMM_FORALL_TOKEN
+    from logic.fol.notation import FOL_UNICODE_NOTATION
+    from logic.prop.calculus import PROVABLE
+    from logic.prop.language import WFF_VARIABLE
+
+    owner = OwnerId("test#fol-canary")
+    x_ref = VariableRef("schema", owner, "x", SETVAR_VARIABLE)
+    phi_ref = VariableRef("schema", owner, "phi", WFF_VARIABLE)
+    x = SetVar(x_ref)
+    phi = LANGUAGE.variable(phi_ref)
+    quantified = All(x, phi)
+
+    assert free_variables(quantified, LANGUAGE) == frozenset((phi_ref,))
+    assert FOL_UNICODE_NOTATION.parse(
+        "forall x phi",
+        {"x": x_ref, "phi": phi_ref},
+    ) == quantified
+    assert FOL_UNICODE_NOTATION.render(quantified, {x_ref: "x", phi_ref: "φ"}) == "∀ x φ"
+    assert SETMM_FOL_BINDING.lower(quantified) == (
+        LiteralAtom(SETMM_FORALL_TOKEN),
+        VariableAtom(x_ref),
+        VariableAtom(phi_ref),
+    )
+
+    generalization = CALCULUS.rule(GENERALIZATION)
+    assert len(generalization.premises) == 1
+    assert generalization.premises[0].kind == PROVABLE
+    assert generalization.conclusion == CALCULUS.judgment(PROVABLE, (generalization.conclusion.arguments[0],))
+    assert isinstance(generalization.conclusion.arguments[0], App)
+    assert generalization.conclusion.arguments[0].constructor == quantified.constructor
+
+    ax5 = AX5_SEMANTIC.declaration
+    assert ax5.conclusion.kind == PROVABLE
+    assert len(ax5.mandatory_distinct) == 1
+    distinct = ax5.mandatory_distinct[0]
+    assert {distinct.left.local_key, distinct.right.local_key} == {"phi", "x"}
+    assert {distinct.left.kind, distinct.right.kind} == {WFF_VARIABLE, SETVAR_VARIABLE}
+    assert ACTIVE_DV_PAIRS["ax-5"] == (("ph", "x"),)
 
 
 def test_prop_semantic_canary_is_independent_of_legacy_registries() -> None:

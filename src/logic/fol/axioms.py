@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import cast
 
+from skfd.authoring.assertion import signature_from_axiom
 from skfd.authoring.dsl import Axiom, export_axioms
 from skfd.authoring.ids import AssertionSemanticId, OwnerId
 from skfd.authoring.judgment import AxiomDecl, DistinctPair, Judgment, resolve_axiom
@@ -71,6 +72,7 @@ AX5_SEMANTIC = resolve_axiom(
     ),
     CALCULUS,
 )
+AX5_SIGNATURE = signature_from_axiom(AX5_SEMANTIC, canonical_label="ax-5")
 
 
 def make_axioms() -> Mapping[str, Axiom]:
@@ -82,4 +84,4 @@ def make_axioms() -> Mapping[str, Axiom]:
 AXIOMS: Mapping[str, Axiom] = make_axioms()
 
 
-__all__ = ["AX5_SEMANTIC", "AXIOMS"]
+__all__ = ["AX5_SEMANTIC", "AX5_SIGNATURE", "AXIOMS"]

@@ -95,6 +95,62 @@ def test_fol_semantic_binder_and_generalization_canary() -> None:
     assert ACTIVE_DV_PAIRS["ax-5"] == (("ph", "x"),)
 
 
+def test_semantic_assertion_application_canaries() -> None:
+    from skfd.authoring.assertion import apply_assertion, start_draft
+    from skfd.authoring.ids import OwnerId, ProofId
+    from skfd.authoring.judgment import DistinctPair, Judgment
+    from skfd.authoring.term import VariableRef
+
+    from logic.fol.axioms import AX5_SIGNATURE
+    from logic.fol.calculus import CALCULUS
+    from logic.fol.language import LANGUAGE, SETVAR_VARIABLE, All, SetVar
+    from logic.prop.calculus import PROVABLE
+    from logic.prop.language import WFF_VARIABLE, Imp
+    from logic.prop.rules import MP_ASSERTION
+
+    owner = OwnerId("test#assertion-application")
+    p_ref = VariableRef("local", owner, "p", WFF_VARIABLE)
+    q_ref = VariableRef("local", owner, "q", WFF_VARIABLE)
+    x_ref = VariableRef("local", owner, "x", SETVAR_VARIABLE)
+    p, q = LANGUAGE.variable(p_ref), LANGUAGE.variable(q_ref)
+    x = SetVar(x_ref)
+
+    mp_draft = start_draft(
+        ProofId("test#proof:mp-canary"),
+        CALCULUS,
+        (
+            Judgment(PROVABLE, (p,)),
+            Judgment(PROVABLE, (Imp(p, q),)),
+        ),
+    )
+    mp = apply_assertion(
+        mp_draft,
+        CALCULUS,
+        MP_ASSERTION,
+        tuple(step.id for step in mp_draft.hypotheses),
+    )
+    assert mp.step.result == Judgment(PROVABLE, (q,))
+
+    ax5_variables = {
+        variable.local_key: variable for variable in AX5_SIGNATURE.schema_variables
+    }
+    ax5_draft = start_draft(
+        ProofId("test#proof:ax5-canary"),
+        CALCULUS,
+        (),
+        active_distinct=(DistinctPair(p_ref, x_ref),),
+    )
+    ax5 = apply_assertion(
+        ax5_draft,
+        CALCULUS,
+        AX5_SIGNATURE,
+        (),
+        subst={ax5_variables["phi"]: p, ax5_variables["x"]: x},
+    )
+    assert ax5.step.result == Judgment(PROVABLE, (Imp(p, All(x, p)),))
+    assert ax5.step.satisfied_distinct == (DistinctPair(p_ref, x_ref),)
+
+
 def test_prop_semantic_canary_is_independent_of_legacy_registries() -> None:
     from prelude.metamath_binding import SETMM_LPAREN_TOKEN, SETMM_RPAREN_TOKEN
     from skfd.authoring.formula import Wff

@@ -1,0 +1,86 @@
+"""set.mm-compatible realization of the semantic propositional language."""
+
+from prelude.metamath_binding import (
+    SETMM_LPAREN_TOKEN,
+    SETMM_PRELUDE_BINDING,
+    SETMM_RPAREN_TOKEN,
+)
+from skfd.authoring.ids import (
+    AssertionSemanticId,
+    BackendBindingId,
+    BackendVocabularyId,
+)
+from skfd.authoring.language import LanguageRequirement
+from skfd.authoring.metamath_language import (
+    ArgumentPart,
+    FormationBinding,
+    LiteralPart,
+    MetamathLanguageBinding,
+    MetamathLanguageRequirement,
+    TokenRef,
+    resolve_metamath_language,
+)
+
+from .language import AND2, AND3, LANGUAGE
+
+PROP_VOCABULARY = BackendVocabularyId("metamath-logic/prop#vocabulary:setmm")
+SETMM_PROP_BINDING_ID = BackendBindingId("metamath-logic/prop#binding:setmm")
+
+
+def _token(local_name: str) -> TokenRef:
+    return TokenRef(PROP_VOCABULARY, local_name)
+
+
+SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
+    id=SETMM_PROP_BINDING_ID,
+    language=LanguageRequirement(
+        id=LANGUAGE.id,
+        semantic_digest=LANGUAGE.semantic_digest,
+    ),
+    foundation=SETMM_PRELUDE_BINDING.foundation,
+    extends=(
+        MetamathLanguageRequirement(
+            id=SETMM_PRELUDE_BINDING.id,
+            digest=SETMM_PRELUDE_BINDING.digest,
+        ),
+    ),
+    formations=(
+        FormationBinding(
+            constructor=AND2,
+            syntax_assertion=AssertionSemanticId("metamath-logic/prop#formation:wa"),
+            template=(
+                LiteralPart(SETMM_LPAREN_TOKEN),
+                ArgumentPart(0),
+                LiteralPart(_token("/\\")),
+                ArgumentPart(1),
+                LiteralPart(SETMM_RPAREN_TOKEN),
+            ),
+        ),
+        FormationBinding(
+            constructor=AND3,
+            syntax_assertion=AssertionSemanticId("metamath-logic/prop#formation:w3a"),
+            template=(
+                LiteralPart(SETMM_LPAREN_TOKEN),
+                ArgumentPart(0),
+                LiteralPart(_token("/\\")),
+                ArgumentPart(1),
+                LiteralPart(_token("/\\")),
+                ArgumentPart(2),
+                LiteralPart(SETMM_RPAREN_TOKEN),
+            ),
+        ),
+    ),
+)
+
+SETMM_PROP_BINDING = resolve_metamath_language(
+    SETMM_PROP_BINDING_SPEC,
+    LANGUAGE,
+    {SETMM_PRELUDE_BINDING.id: SETMM_PRELUDE_BINDING},
+)
+
+__all__ = [
+    "PROP_VOCABULARY",
+    "SETMM_PROP_BINDING",
+    "SETMM_PROP_BINDING_ID",
+    "SETMM_PROP_BINDING_SPEC",
+]

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from prelude.structures import Imp, Not
 from skfd.authoring.dsl import Var, symbol
 from skfd.authoring.formula import Wff
 from skfd.authoring.legacy_metamath import legacy_symbol_spec
@@ -20,7 +21,6 @@ from skfd.authoring.typing import WFF
 
 from ._builtins import (
     PropositionalBuiltins,
-    imp,
     w3a,
     w3o,
     wa,
@@ -29,7 +29,6 @@ from ._builtins import (
     wfal,
     whad,
     wif,
-    wn,
     wnan,
     wnor,
     wo,
@@ -54,16 +53,6 @@ rh = Var("ρ")
 mu = Var("μ")
 la = Var("λ")
 ka = Var("κ")
-
-
-@symbol("->", 2, (WFF, WFF), WFF, op="rshift", precedence=20, assoc="right", aliases=["→", "⇒"])
-def Imp(b: PropositionalBuiltins, args: Sequence[Wff]) -> Wff:
-    return imp(b, args[0], args[1])
-
-
-@symbol("-.", 1, (WFF,), WFF, op="invert", precedence=30, assoc="right", aliases=["¬", "~"])
-def Not(b: PropositionalBuiltins, args: Sequence[Wff]) -> Wff:
-    return wn(b, args[0])
 
 
 _AND2_LEGACY = legacy_symbol_spec(

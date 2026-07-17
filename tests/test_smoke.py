@@ -154,6 +154,16 @@ def test_legacy_binary_and_ternary_conjunction_use_exact_constructor_builders() 
     ]
 
 
+def test_prop_reexports_prelude_implication_and_negation_constructors() -> None:
+    from prelude.structures import Imp as PreludeImp
+    from prelude.structures import Not as PreludeNot
+
+    from logic.prop._structures import Imp, Not
+
+    assert Imp is PreludeImp
+    assert Not is PreludeNot
+
+
 def test_proof_constructors_remain_directly_importable() -> None:
     import logic.fol.foundation as foundation
     import logic.prop.alternative_axiomatizations as alternative_axiomatizations

@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import replace
 from typing import cast
 
 from skfd.authoring.assertion import signature_from_axiom
 from skfd.authoring.dsl import Axiom, export_axioms
 from skfd.authoring.ids import AssertionSemanticId, OwnerId
 from skfd.authoring.judgment import AxiomDecl, DistinctPair, Judgment, resolve_axiom
+from skfd.authoring.source import SourceBuilder, elaborate_block
 from skfd.authoring.term import VariableRef
 
 from logic.prop.calculus import PROVABLE
@@ -74,6 +76,15 @@ AX5_SEMANTIC = resolve_axiom(
 )
 AX5_SIGNATURE = signature_from_axiom(AX5_SEMANTIC, canonical_label="ax-5")
 
+_FOL_SOURCE_BUILDER = SourceBuilder()
+with _FOL_SOURCE_BUILDER.block() as _AX5_BLOCK:
+    _AX5_BLOCK.d(_AX5_PHI_REF, _AX5_X_REF)
+    _AX5_BLOCK.assertion(replace(AX5_SIGNATURE, mandatory_distinct=()))
+AX5_SOURCE_BLOCK = _FOL_SOURCE_BUILDER.build()
+AX5_SOURCE_SNAPSHOT = elaborate_block(AX5_SOURCE_BLOCK).assertions[0]
+if AX5_SOURCE_SNAPSHOT.declaration != AX5_SIGNATURE:
+    raise RuntimeError("ax-5 scoped source contract diverged from its semantic signature")
+
 
 def make_axioms() -> Mapping[str, Axiom]:
     raw = cast(Mapping[str, Axiom], export_axioms(globals()))
@@ -84,4 +95,10 @@ def make_axioms() -> Mapping[str, Axiom]:
 AXIOMS: Mapping[str, Axiom] = make_axioms()
 
 
-__all__ = ["AX5_SEMANTIC", "AX5_SIGNATURE", "AXIOMS"]
+__all__ = [
+    "AX5_SEMANTIC",
+    "AX5_SIGNATURE",
+    "AX5_SOURCE_BLOCK",
+    "AX5_SOURCE_SNAPSHOT",
+    "AXIOMS",
+]

@@ -52,7 +52,7 @@ def test_fol_semantic_binder_and_generalization_canary() -> None:
     from skfd.authoring.term_ops import free_variables
 
     from logic._dv_contracts import ACTIVE_DV_PAIRS
-    from logic.fol.axioms import AX5_SEMANTIC
+    from logic.fol.axioms import AX5_SEMANTIC, AX5_SIGNATURE, AX5_SOURCE_SNAPSHOT
     from logic.fol.calculus import CALCULUS, GENERALIZATION
     from logic.fol.language import LANGUAGE, SETVAR_VARIABLE, All, SetVar
     from logic.fol.metamath_binding import SETMM_FOL_BINDING, SETMM_FORALL_TOKEN
@@ -92,6 +92,9 @@ def test_fol_semantic_binder_and_generalization_canary() -> None:
     distinct = ax5.mandatory_distinct[0]
     assert {distinct.left.local_key, distinct.right.local_key} == {"phi", "x"}
     assert {distinct.left.kind, distinct.right.kind} == {WFF_VARIABLE, SETVAR_VARIABLE}
+    assert AX5_SOURCE_SNAPSHOT.declaration == AX5_SIGNATURE
+    assert AX5_SOURCE_SNAPSHOT.declaration.mandatory_distinct == ax5.mandatory_distinct
+    assert AX5_SOURCE_SNAPSHOT.active_distinct == ax5.mandatory_distinct
     assert ACTIVE_DV_PAIRS["ax-5"] == (("ph", "x"),)
 
 

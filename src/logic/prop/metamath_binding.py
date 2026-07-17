@@ -48,6 +48,7 @@ SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
         FormationBinding(
             constructor=AND2,
             syntax_assertion=AssertionSemanticId("metamath-logic/prop#formation:wa"),
+            syntax_assertion_label="wa",
             template=(
                 LiteralPart(SETMM_LPAREN_TOKEN),
                 ArgumentPart(0),
@@ -59,6 +60,7 @@ SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
         FormationBinding(
             constructor=AND3,
             syntax_assertion=AssertionSemanticId("metamath-logic/prop#formation:w3a"),
+            syntax_assertion_label="w3a",
             template=(
                 LiteralPart(SETMM_LPAREN_TOKEN),
                 ArgumentPart(0),

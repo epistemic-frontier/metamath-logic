@@ -4,13 +4,25 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from prelude.formula import GLOBAL_PRELUDE_MODULE_ID
 from prelude.formula import Builtins as FoundationBuiltins
+from prelude.metamath_binding import (
+    SETMM_IMP_TOKEN,
+    SETMM_LPAREN_TOKEN,
+    SETMM_NEG_TOKEN,
+    SETMM_RPAREN_TOKEN,
+)
 from skfd.authoring.formula import TokenSeq, Wff
+from skfd.authoring.legacy_metamath import build_legacy_formula, legacy_binary_formation
+from skfd.authoring.metamath_language import TokenRef
 from skfd.core.peg import Rule, TokenStream
 from skfd.core.symbols import SymbolId, SymbolInterner
+
+from .language import AND2, AND3
+from .language import WFF as SEMANTIC_WFF
+from .metamath_binding import SETMM_AND_TOKEN, SETMM_PROP_BINDING
 
 
 @dataclass(frozen=True)
@@ -46,7 +58,10 @@ class PropositionalBuiltins:
             origin_ref=origin_ref,
         )
         and_ = interner.intern(
-            origin_module_id=origin_module_id, local_name="/\\", kind="Const", origin_ref=origin_ref
+            origin_module_id=origin_module_id,
+            local_name=SETMM_AND_TOKEN.local_name,
+            kind="Const",
+            origin_ref=origin_ref,
         )
         iff = interner.intern(
             origin_module_id=origin_module_id, local_name="<->", kind="Const", origin_ref=origin_ref
@@ -111,7 +126,6 @@ class PropositionalBuiltins:
             nor=nor,
         )
 
-
 def imp(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
     return Wff("wff", (b.lp, *phi.tokens, b.imp, *psi.tokens, b.rp))
 
@@ -120,8 +134,25 @@ def wn(b: PropositionalBuiltins, phi: Wff) -> Wff:
     return Wff("wff", (b.neg, *phi.tokens))
 
 
+def _conjunction_token_symbols(b: PropositionalBuiltins) -> dict[TokenRef, SymbolId]:
+    return {
+        SETMM_LPAREN_TOKEN: b.lp,
+        SETMM_RPAREN_TOKEN: b.rp,
+        SETMM_IMP_TOKEN: b.imp,
+        SETMM_NEG_TOKEN: b.neg,
+        SETMM_AND_TOKEN: b.and_,
+    }
+
+
 def wa(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
-    return Wff("wff", (b.lp, *phi.tokens, b.and_, *psi.tokens, b.rp))
+    formula = build_legacy_formula(
+        SETMM_PROP_BINDING,
+        AND2,
+        (phi, psi),
+        token_symbols=_conjunction_token_symbols(b),
+        legacy_sorts={SEMANTIC_WFF: "wff"},
+    )
+    return cast(Wff, formula)
 
 
 def wo(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
@@ -146,7 +177,14 @@ def wnan(b: PropositionalBuiltins, phi: Wff, psi: Wff) -> Wff:
 
 def w3a(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
     r"""Ternary conjunction: ( φ /\ ψ /\ χ )."""
-    return Wff("wff", (b.lp, *phi.tokens, b.and_, *psi.tokens, b.and_, *chi.tokens, b.rp))
+    formula = build_legacy_formula(
+        SETMM_PROP_BINDING,
+        AND3,
+        (phi, psi, chi),
+        token_symbols=_conjunction_token_symbols(b),
+        legacy_sorts={SEMANTIC_WFF: "wff"},
+    )
+    return cast(Wff, formula)
 
 
 def w3o(b: PropositionalBuiltins, phi: Wff, psi: Wff, chi: Wff) -> Wff:
@@ -349,7 +387,14 @@ def try_parse_wn(b: PropositionalBuiltins, tokens: Sequence[SymbolId]) -> NegSha
 
 
 def try_parse_wa(b: PropositionalBuiltins, tokens: Sequence[SymbolId]) -> AndShape | None:
-    parts = _peg_try_parse_split_binary(b, tokens, op=b.and_)
+    formation = legacy_binary_formation(SETMM_PROP_BINDING, AND2)
+    symbols = _conjunction_token_symbols(b)
+    if (
+        symbols[formation.left_delimiter] != b.lp
+        or symbols[formation.right_delimiter] != b.rp
+    ):
+        raise ValueError("wa: legacy parser delimiter binding mismatch")
+    parts = _peg_try_parse_split_binary(b, tokens, op=symbols[formation.operator])
     if parts is None:
         return None
     left, right = parts

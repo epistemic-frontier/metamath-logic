@@ -130,6 +130,30 @@ def test_semantic_language_digests_do_not_depend_on_import_order_or_hash_seed() 
     assert outputs[0] == outputs[1]
 
 
+def test_legacy_binary_and_ternary_conjunction_use_exact_constructor_builders() -> None:
+    from skfd.core.symbols import SymbolInterner
+
+    from logic.prop import make
+    from logic.prop._structures import And, And3, chi, phi, psi
+
+    interner = SymbolInterner()
+    system = make(interner=interner)
+    binary = system.compile(And(phi, psi))
+    ternary = system.compile(And3(phi, psi, chi))
+    symbols = interner.symbol_table()
+
+    assert [symbols[token].local_name for token in binary.tokens] == ["(", "ph", "/\\", "ps", ")"]
+    assert [symbols[token].local_name for token in ternary.tokens] == [
+        "(",
+        "ph",
+        "/\\",
+        "ps",
+        "/\\",
+        "ch",
+        ")",
+    ]
+
+
 def test_proof_constructors_remain_directly_importable() -> None:
     import logic.fol.foundation as foundation
     import logic.prop.alternative_axiomatizations as alternative_axiomatizations

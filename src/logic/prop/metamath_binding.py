@@ -31,6 +31,9 @@ def _token(local_name: str) -> TokenRef:
     return TokenRef(PROP_VOCABULARY, local_name)
 
 
+SETMM_AND_TOKEN = _token("/\\")
+
+
 SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
     id=SETMM_PROP_BINDING_ID,
     language=LanguageRequirement(
@@ -52,7 +55,7 @@ SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
             template=(
                 LiteralPart(SETMM_LPAREN_TOKEN),
                 ArgumentPart(0),
-                LiteralPart(_token("/\\")),
+                LiteralPart(SETMM_AND_TOKEN),
                 ArgumentPart(1),
                 LiteralPart(SETMM_RPAREN_TOKEN),
             ),
@@ -64,9 +67,9 @@ SETMM_PROP_BINDING_SPEC = MetamathLanguageBinding(
             template=(
                 LiteralPart(SETMM_LPAREN_TOKEN),
                 ArgumentPart(0),
-                LiteralPart(_token("/\\")),
+                LiteralPart(SETMM_AND_TOKEN),
                 ArgumentPart(1),
-                LiteralPart(_token("/\\")),
+                LiteralPart(SETMM_AND_TOKEN),
                 ArgumentPart(2),
                 LiteralPart(SETMM_RPAREN_TOKEN),
             ),
@@ -80,9 +83,15 @@ SETMM_PROP_BINDING = resolve_metamath_language(
     {SETMM_PRELUDE_BINDING.id: SETMM_PRELUDE_BINDING},
 )
 
+SETMM_WA_LABEL = SETMM_PROP_BINDING.formations[AND2].syntax_assertion_label
+SETMM_W3A_LABEL = SETMM_PROP_BINDING.formations[AND3].syntax_assertion_label
+
 __all__ = [
     "PROP_VOCABULARY",
+    "SETMM_AND_TOKEN",
     "SETMM_PROP_BINDING",
     "SETMM_PROP_BINDING_ID",
     "SETMM_PROP_BINDING_SPEC",
+    "SETMM_W3A_LABEL",
+    "SETMM_WA_LABEL",
 ]

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import TypeAlias, cast
 
 from skfd.authoring.formula import Wff
+from skfd.authoring.ids import ConstructorId
 from skfd.authoring.rules import (
     RuleBundle,
     RuleRegistry,
@@ -25,10 +26,25 @@ from skfd.authoring.typing import (
 )
 
 from ._builtins import PropositionalBuiltins, imp, try_parse_imp, wa, wn
+from .language import AND2, LANGUAGE
+from .language import WFF as SEMANTIC_WFF
+from .metamath_binding import SETMM_WA_LABEL
 
 RuleFn: TypeAlias = Callable[..., Wff]
 
 REGISTRY = RuleRegistry()
+
+
+def _formation_sig(constructor: ConstructorId) -> RuleSig:
+    declaration = LANGUAGE.constructors[constructor]
+    legacy_sorts = {SEMANTIC_WFF: WFF}
+    return RuleSig(
+        in_sorts=tuple(legacy_sorts[item] for item in declaration.inputs),
+        out_sort=legacy_sorts[declaration.output],
+    )
+
+
+WA_SIG = _formation_sig(AND2)
 
 
 @rule(label="wi", kind="axiom", sig=RuleSig(in_sorts=(WFF, WFF), out_sort=WFF), registry=REGISTRY)
@@ -83,11 +99,11 @@ class Wn:
         return wn(self.b, hphi.body)
 
 
-@rule(label="wa", kind="axiom", sig=RuleSig(in_sorts=(WFF, WFF), out_sort=WFF), registry=REGISTRY)
+@rule(label=SETMM_WA_LABEL, kind="axiom", sig=WA_SIG, registry=REGISTRY)
 @dataclass(frozen=True)
 class Wa:
-    label: str = "wa"
-    sig: RuleSig = RuleSig(in_sorts=(WFF, WFF), out_sort=WFF)
+    label: str = SETMM_WA_LABEL
+    sig: RuleSig = WA_SIG
     b: PropositionalBuiltins | None = None
 
     def __call__(self, hphi: HypWff, hpsi: HypWff) -> Wff:

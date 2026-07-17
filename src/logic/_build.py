@@ -15,9 +15,12 @@ from logic.fol import THEOREMS as FOL_THEOREMS
 from logic.fol._builtins import PredicateBuiltins
 from logic.fol._system import System as FirstOrderSystem
 from logic.prop import THEOREMS as PROP_THEOREMS
+from logic.prop._builtins import w3a as build_w3a
+from logic.prop._builtins import wa as build_wa
 from logic.prop._structures import Imp, phi, psi
 from logic.prop._system import System as PropositionalSystem
 from logic.prop._system import _extend_names
+from logic.prop.metamath_binding import SETMM_W3A_LABEL, SETMM_WA_LABEL
 
 from ._dv_contracts import ACTIVE_DV_PAIRS
 
@@ -96,22 +99,35 @@ def build(ctx: BuildContextV2) -> None:
     mm.auto.use_existing_floating(ch, label=prelude["wch"])
 
     wo = mm.sym.label("wo")
-    wa = mm.sym.label("wa")
+    wa_label = mm.sym.label(SETMM_WA_LABEL)
     wtru = mm.sym.label("wtru")
     wfal = mm.sym.label("wfal")
     wb = mm.sym.label("wb")
     idi = mm.sym.label("idi")
     a1ii = mm.sym.label("a1ii")
     mm.a(wo, tc=wff, expr=[builtins.lp, ph, builtins.or_, ps, builtins.rp])
-    mm.a(wa, tc=wff, expr=[builtins.lp, ph, builtins.and_, ps, builtins.rp])
+    mm.a(
+        wa_label,
+        tc=wff,
+        expr=list(build_wa(builtins, Wff("wff", (ph,)), Wff("wff", (ps,))).tokens),
+    )
     mm.a(wtru, tc=wff, expr=[builtins.tru])
 
     mm.a(wfal, tc=wff, expr=[builtins.fal])
     mm.a(wb, tc=wff, expr=[builtins.lp, ph, builtins.iff, ps, builtins.rp])
 
-    w3a_label = mm.sym.label("w3a")
+    w3a_label = mm.sym.label(SETMM_W3A_LABEL)
     mm.a(
-        w3a_label, tc=wff, expr=[builtins.lp, ph, builtins.and_, ps, builtins.and_, ch, builtins.rp]
+        w3a_label,
+        tc=wff,
+        expr=list(
+            build_w3a(
+                builtins,
+                Wff("wff", (ph,)),
+                Wff("wff", (ps,)),
+                Wff("wff", (ch,)),
+            ).tokens
+        ),
     )
 
     w3o_label = mm.sym.label("w3o")

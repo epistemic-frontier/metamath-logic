@@ -8,6 +8,7 @@ from skfd.names import NameResolver
 from skfd.proof import ProofBuilder
 
 from logic.fol import System as FirstOrderSystem
+from logic.prop._structures import And, And3, chi, phi, psi
 
 
 def test_predicate_system_owns_predicate_tokens() -> None:
@@ -51,6 +52,26 @@ def test_predicate_parser_preserves_ternary_connective_with_quantified_operands(
     assert isinstance(expr, App)
     assert expr.ctor.name == "∧"
     assert len(expr.args) == 3
+
+
+def test_predicate_system_reuses_declared_conjunction_lowering() -> None:
+    interner = SymbolInterner()
+    system = FirstOrderSystem.make(interner=interner, names=NameResolver())
+
+    binary = system.compile(And(phi, psi))
+    ternary = system.compile(And3(phi, psi, chi))
+    symbols = interner.symbol_table()
+
+    assert [symbols[token].local_name for token in binary.tokens] == ["(", "ph", "/\\", "ps", ")"]
+    assert [symbols[token].local_name for token in ternary.tokens] == [
+        "(",
+        "ph",
+        "/\\",
+        "ps",
+        "/\\",
+        "ch",
+        ")",
+    ]
 
 
 def test_predicate_parser_accepts_standard_substitution_notation() -> None:

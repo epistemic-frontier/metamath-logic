@@ -99,9 +99,16 @@ def test_fol_semantic_binder_and_generalization_canary() -> None:
 
 
 def test_semantic_assertion_application_canaries() -> None:
-    from skfd.authoring.assertion import apply_assertion, start_draft
-    from skfd.authoring.ids import OwnerId, ProofId
+    from skfd.authoring.assertion import (
+        AssertionSignature,
+        apply_assertion,
+        finalize_proof,
+        start_draft,
+    )
+    from skfd.authoring.catalog import apply_assertion_by_id
+    from skfd.authoring.ids import AssertionSemanticId, OwnerId, ProofId
     from skfd.authoring.judgment import DistinctPair, Judgment
+    from skfd.authoring.replay import build_semantic_replay_plan
     from skfd.authoring.term import VariableRef
 
     from logic.fol.axioms import AX5_SIGNATURE
@@ -109,7 +116,7 @@ def test_semantic_assertion_application_canaries() -> None:
     from logic.fol.language import LANGUAGE, SETVAR_VARIABLE, All, SetVar
     from logic.prop.calculus import PROVABLE
     from logic.prop.language import WFF_VARIABLE, Imp
-    from logic.prop.rules import MP_ASSERTION
+    from logic.prop.rules import ASSERTION_CATALOG, MP_ASSERTION, PROP_CORE_PROFILE
 
     owner = OwnerId("test#assertion-application")
     p_ref = VariableRef("local", owner, "p", WFF_VARIABLE)
@@ -133,6 +140,72 @@ def test_semantic_assertion_application_canaries() -> None:
         tuple(step.id for step in mp_draft.hypotheses),
     )
     assert mp.step.result == Judgment(PROVABLE, (q,))
+
+    theorem_owner = OwnerId("metamath-logic/prop#assertion:mp2b")
+    phi_ref = VariableRef("schema", theorem_owner, "phi", WFF_VARIABLE)
+    psi_ref = VariableRef("schema", theorem_owner, "psi", WFF_VARIABLE)
+    chi_ref = VariableRef("schema", theorem_owner, "chi", WFF_VARIABLE)
+    phi = LANGUAGE.variable(phi_ref)
+    psi = LANGUAGE.variable(psi_ref)
+    chi = LANGUAGE.variable(chi_ref)
+    mp2b_signature = AssertionSignature(
+        id=AssertionSemanticId("metamath-logic/prop#assertion:mp2b"),
+        canonical_label="mp2b",
+        kind="theorem",
+        schema_variables=(phi_ref, psi_ref, chi_ref),
+        premises=(
+            Judgment(PROVABLE, (phi,)),
+            Judgment(PROVABLE, (Imp(phi, psi),)),
+            Judgment(PROVABLE, (Imp(psi, chi),)),
+        ),
+        conclusion=Judgment(PROVABLE, (chi,)),
+    )
+    mp2b_draft = start_draft(
+        ProofId("test#proof:mp2b-semantic"),
+        CALCULUS,
+        mp2b_signature.premises,
+        signature=mp2b_signature,
+    )
+    first = apply_assertion_by_id(
+        mp2b_draft,
+        CALCULUS,
+        ASSERTION_CATALOG,
+        PROP_CORE_PROFILE,
+        MP_ASSERTION.id,
+        (mp2b_draft.hypotheses[0].id, mp2b_draft.hypotheses[1].id),
+    )
+    second = apply_assertion_by_id(
+        first.draft,
+        CALCULUS,
+        ASSERTION_CATALOG,
+        PROP_CORE_PROFILE,
+        MP_ASSERTION.id,
+        (first.step.id, mp2b_draft.hypotheses[2].id),
+    )
+    mp2b = finalize_proof(second.draft, CALCULUS, root=second.step.id)
+    replay = build_semantic_replay_plan(
+        mp2b,
+        CALCULUS,
+        ASSERTION_CATALOG,
+        PROP_CORE_PROFILE,
+    )
+    assert tuple(step.canonical_label for step in replay.applications) == (
+        "ax-mp",
+        "ax-mp",
+    )
+    assert tuple(step.premise_positions for step in replay.applications) == (
+        (0, 1),
+        (3, 2),
+    )
+    assert tuple(step.result for step in replay.applications) == (
+        Judgment(PROVABLE, (psi,)),
+        Judgment(PROVABLE, (chi,)),
+    )
+    assert replay.root_position == 4
+    assert tuple(item.assertion for item in replay.dependency_closure) == (
+        MP_ASSERTION.id,
+    )
+    assert replay.replay_context.active_distinct == ()
 
     ax5_variables = {
         variable.local_key: variable for variable in AX5_SIGNATURE.schema_variables

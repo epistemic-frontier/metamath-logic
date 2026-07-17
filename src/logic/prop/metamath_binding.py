@@ -11,6 +11,7 @@ from skfd.authoring.ids import (
     BackendVocabularyId,
 )
 from skfd.authoring.language import LanguageRequirement
+from skfd.authoring.legacy_replay import LegacyAssertionReplayBinding
 from skfd.authoring.metamath_language import (
     ArgumentPart,
     FormationBinding,
@@ -22,6 +23,7 @@ from skfd.authoring.metamath_language import (
 )
 
 from .language import AND2, AND3, LANGUAGE
+from .rules import MP_ASSERTION
 
 PROP_VOCABULARY = BackendVocabularyId("metamath-logic/prop#vocabulary:setmm")
 SETMM_PROP_BINDING_ID = BackendBindingId("metamath-logic/prop#binding:setmm")
@@ -85,10 +87,17 @@ SETMM_PROP_BINDING = resolve_metamath_language(
 
 SETMM_WA_LABEL = SETMM_PROP_BINDING.formations[AND2].syntax_assertion_label
 SETMM_W3A_LABEL = SETMM_PROP_BINDING.formations[AND3].syntax_assertion_label
+SETMM_MP_REPLAY_BINDING = LegacyAssertionReplayBinding(
+    assertion=MP_ASSERTION.id,
+    backend_label="ax-mp",
+    operation="apply",
+    legacy_rule="mp",
+)
 
 __all__ = [
     "PROP_VOCABULARY",
     "SETMM_AND_TOKEN",
+    "SETMM_MP_REPLAY_BINDING",
     "SETMM_PROP_BINDING",
     "SETMM_PROP_BINDING_ID",
     "SETMM_PROP_BINDING_SPEC",

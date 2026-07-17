@@ -6,6 +6,7 @@ from skfd.authoring.ids import (
     BackendVocabularyId,
 )
 from skfd.authoring.language import LanguageRequirement
+from skfd.authoring.legacy_replay import LegacyAssertionReplayBinding
 from skfd.authoring.metamath_language import (
     ArgumentPart,
     FormationBinding,
@@ -19,6 +20,7 @@ from skfd.authoring.metamath_language import (
 
 from logic.prop.metamath_binding import SETMM_PROP_BINDING
 
+from .axioms import AX5_SIGNATURE
 from .language import ALL, LANGUAGE, SETVAR
 
 FOL_VOCABULARY = BackendVocabularyId("metamath-logic/fol#vocabulary:setmm")
@@ -66,9 +68,15 @@ SETMM_FOL_BINDING = resolve_metamath_language(
 )
 
 SETMM_WAL_LABEL = SETMM_FOL_BINDING.formations[ALL].syntax_assertion_label
+SETMM_AX5_REPLAY_BINDING = LegacyAssertionReplayBinding(
+    assertion=AX5_SIGNATURE.id,
+    backend_label="ax-5",
+    operation="ref",
+)
 
 __all__ = [
     "FOL_VOCABULARY",
+    "SETMM_AX5_REPLAY_BINDING",
     "SETMM_FOL_BINDING",
     "SETMM_FOL_BINDING_ID",
     "SETMM_FOL_BINDING_SPEC",

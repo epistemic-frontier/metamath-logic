@@ -99,6 +99,11 @@ def test_fol_semantic_binder_and_generalization_canary() -> None:
 
 
 def test_semantic_assertion_application_canaries() -> None:
+    from prelude.metamath_binding import (
+        SETMM_IMP_TOKEN,
+        SETMM_LPAREN_TOKEN,
+        SETMM_RPAREN_TOKEN,
+    )
     from skfd.authoring.assertion import (
         AssertionSignature,
         apply_assertion,
@@ -108,14 +113,31 @@ def test_semantic_assertion_application_canaries() -> None:
     from skfd.authoring.catalog import apply_assertion_by_id
     from skfd.authoring.ids import AssertionSemanticId, OwnerId, ProofId
     from skfd.authoring.judgment import DistinctPair, Judgment
+    from skfd.authoring.legacy_replay import LegacyReplayBinding, lower_semantic_replay_plan
     from skfd.authoring.replay import build_semantic_replay_plan
     from skfd.authoring.term import VariableRef
+    from skfd.core.disjoint import normalize_dv_pairs
+    from skfd.core.symbols import SymbolInterner
+    from skfd.proof import Proof, Step
 
-    from logic.fol.axioms import AX5_SIGNATURE
+    from logic.fol._system import System as FolSystem
+    from logic.fol.axioms import AX5, AX5_SIGNATURE
     from logic.fol.calculus import CALCULUS
-    from logic.fol.language import LANGUAGE, SETVAR_VARIABLE, All, SetVar
+    from logic.fol.language import LANGUAGE, SETVAR, SETVAR_VARIABLE, All, SetVar
+    from logic.fol.metamath_binding import (
+        SETMM_AX5_REPLAY_BINDING,
+        SETMM_FOL_BINDING,
+        SETMM_FORALL_TOKEN,
+    )
+    from logic.fol.rules import (
+        ASSERTION_CATALOG as FOL_ASSERTION_CATALOG,
+    )
+    from logic.fol.rules import FOL_CORE_PROFILE
+    from logic.prop._system import make as make_prop_system
     from logic.prop.calculus import PROVABLE
-    from logic.prop.language import WFF_VARIABLE, Imp
+    from logic.prop.core import prove_mp2b
+    from logic.prop.language import WFF, WFF_VARIABLE, Imp
+    from logic.prop.metamath_binding import SETMM_MP_REPLAY_BINDING, SETMM_PROP_BINDING
     from logic.prop.rules import ASSERTION_CATALOG, MP_ASSERTION, PROP_CORE_PROFILE
 
     owner = OwnerId("test#assertion-application")
@@ -207,6 +229,43 @@ def test_semantic_assertion_application_canaries() -> None:
     )
     assert replay.replay_context.active_distinct == ()
 
+    interner = SymbolInterner()
+    prop_system = make_prop_system(interner=interner)
+    expected_mp2b = prove_mp2b(prop_system)
+
+    def variable_symbol(local_name: str, *, tokens: tuple[int, ...] | None = None) -> int:
+        matches = [
+            symbol.id
+            for symbol in interner.symbol_table().values()
+            if symbol.kind == "Var" and symbol.local_name == local_name
+            and (tokens is None or symbol.id in tokens)
+        ]
+        assert len(matches) == 1
+        return int(matches[0])
+
+    lowered_mp2b = lower_semantic_replay_plan(
+        replay,
+        LegacyReplayBinding(
+            language=SETMM_PROP_BINDING,
+            provable_judgment=PROVABLE,
+            assertions=(SETMM_MP_REPLAY_BINDING,),
+            token_symbols={
+                SETMM_LPAREN_TOKEN: prop_system.builtins.lp,
+                SETMM_IMP_TOKEN: prop_system.builtins.imp,
+                SETMM_RPAREN_TOKEN: prop_system.builtins.rp,
+            },
+            variable_symbols={
+                phi_ref: variable_symbol("ph"),
+                psi_ref: variable_symbol("ps"),
+                chi_ref: variable_symbol("ch"),
+            },
+            legacy_sorts={WFF: "wff"},
+            symbol_table=interner.symbol_table(),
+        ),
+        proof_name="mp2b",
+    )
+    assert lowered_mp2b == expected_mp2b
+
     ax5_variables = {
         variable.local_key: variable for variable in AX5_SIGNATURE.schema_variables
     }
@@ -225,6 +284,104 @@ def test_semantic_assertion_application_canaries() -> None:
     )
     assert ax5.step.result == Judgment(PROVABLE, (Imp(p, All(x, p)),))
     assert ax5.step.satisfied_distinct == (DistinctPair(p_ref, x_ref),)
+
+    ax5_owner = OwnerId("metamath-logic/fol#assertion:ax5-lowering-canary")
+    ax5_phi_ref = VariableRef("schema", ax5_owner, "phi", WFF_VARIABLE)
+    ax5_x_ref = VariableRef("schema", ax5_owner, "x", SETVAR_VARIABLE)
+    proof_only_ref = VariableRef("local", ax5_owner, "proof-only", WFF_VARIABLE)
+    ax5_phi = LANGUAGE.variable(ax5_phi_ref)
+    ax5_x = SetVar(ax5_x_ref)
+    ax5_theorem = AssertionSignature(
+        id=AssertionSemanticId("metamath-logic/fol#theorem:ax5-lowering-canary"),
+        canonical_label="ax5-lowering-canary",
+        kind="theorem",
+        schema_variables=(ax5_phi_ref, ax5_x_ref),
+        premises=(),
+        conclusion=Judgment(PROVABLE, (Imp(ax5_phi, All(ax5_x, ax5_phi)),)),
+        mandatory_distinct=(DistinctPair(ax5_phi_ref, ax5_x_ref),),
+    )
+    ax5_theorem_draft = start_draft(
+        ProofId("test#proof:ax5-lowering-canary"),
+        CALCULUS,
+        (),
+        active_distinct=(
+            DistinctPair(ax5_phi_ref, ax5_x_ref),
+            DistinctPair(ax5_x_ref, proof_only_ref),
+        ),
+        signature=ax5_theorem,
+    )
+    ax5_application = apply_assertion_by_id(
+        ax5_theorem_draft,
+        CALCULUS,
+        FOL_ASSERTION_CATALOG,
+        FOL_CORE_PROFILE,
+        AX5_SIGNATURE.id,
+        (),
+        subst={
+            ax5_variables["phi"]: ax5_phi,
+            ax5_variables["x"]: ax5_x,
+        },
+    )
+    ax5_proof = finalize_proof(
+        ax5_application.draft,
+        CALCULUS,
+        root=ax5_application.step.id,
+    )
+    ax5_replay = build_semantic_replay_plan(
+        ax5_proof,
+        CALCULUS,
+        FOL_ASSERTION_CATALOG,
+        FOL_CORE_PROFILE,
+    )
+
+    fol_system = FolSystem.make(
+        interner=interner,
+        names=prop_system.names,
+    )
+    expected_ax5_statement = fol_system.compile(AX5, ctx="ax5-lowering-canary")
+    ph_symbol = variable_symbol("ph", tokens=expected_ax5_statement.tokens)
+    x_symbol = variable_symbol("x", tokens=expected_ax5_statement.tokens)
+    proof_only_symbol = variable_symbol("ps")
+    expected_ax5_distinct = normalize_dv_pairs(
+        ((ph_symbol, x_symbol), (x_symbol, proof_only_symbol)),
+        symtab=interner.symbol_table(),
+    )
+    lowered_ax5 = lower_semantic_replay_plan(
+        ax5_replay,
+        LegacyReplayBinding(
+            language=SETMM_FOL_BINDING,
+            provable_judgment=PROVABLE,
+            assertions=(SETMM_AX5_REPLAY_BINDING,),
+            token_symbols={
+                SETMM_LPAREN_TOKEN: fol_system.builtins.lp,
+                SETMM_IMP_TOKEN: fol_system.builtins.imp,
+                SETMM_RPAREN_TOKEN: fol_system.builtins.rp,
+                SETMM_FORALL_TOKEN: fol_system.builtins.forall,
+            },
+            variable_symbols={
+                ax5_phi_ref: ph_symbol,
+                ax5_x_ref: x_symbol,
+                proof_only_ref: proof_only_symbol,
+            },
+            legacy_sorts={WFF: "wff", SETVAR: "setvar"},
+            symbol_table=interner.symbol_table(),
+        ),
+        proof_name="ax5-lowering-canary",
+    )
+    assert lowered_ax5 == Proof(
+        "ax5-lowering-canary",
+        expected_ax5_statement,
+        (
+            Step(
+                "res",
+                expected_ax5_statement,
+                "ax-5",
+                op="ref",
+                ref="ax-5",
+            ),
+        ),
+        expected_ax5_distinct,
+    )
 
 
 def test_prop_semantic_canary_is_independent_of_legacy_registries() -> None:

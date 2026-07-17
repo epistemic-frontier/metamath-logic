@@ -30,7 +30,9 @@ def test_scoped_public_registries() -> None:
     assert set(fol.__all__) == {"AXIOMS", "RULES", "THEOREMS", "System", "make"}
     assert "ax-1" in prop.AXIOMS
     assert "ax-4" in fol.AXIOMS
-    assert prop.RULES == fol.RULES == {"ax-mp": "mp"}
+    assert prop.RULES == fol.RULES
+    assert set(prop.RULES) == {"ax-mp"}
+    assert prop.RULES["ax-mp"] is prop.CALCULUS.rule(prop.RULES["ax-mp"].id)
     assert prop.THEOREMS and fol.THEOREMS
 
 
@@ -43,8 +45,8 @@ def test_prop_semantic_canary_is_independent_of_legacy_registries() -> None:
     from skfd.core.symbols import SymbolInterner
 
     from logic.prop._builtins import PropositionalBuiltins, w3a, wa
-    from logic.prop.calculus import CALCULUS, PROVABLE
-    from logic.prop.language import AND2, AND3, LANGUAGE, WFF_VARIABLE, And2, And3
+    from logic.prop.calculus import CALCULUS, MODUS_PONENS, PROVABLE
+    from logic.prop.language import AND2, AND3, IMP, LANGUAGE, WFF_VARIABLE, And2, And3
     from logic.prop.metamath_binding import SETMM_PROP_BINDING
     from logic.prop.notation import PROP_UNICODE_NOTATION
 
@@ -62,6 +64,10 @@ def test_prop_semantic_canary_is_independent_of_legacy_registries() -> None:
     assert PROP_UNICODE_NOTATION.parse("phi /\\ psi", refs) == binary
     assert PROP_UNICODE_NOTATION.parse("and3(phi, psi, chi)", refs) == ternary
     assert CALCULUS.judgment(PROVABLE, (binary,)).arguments == (binary,)
+    mp = CALCULUS.rule(MODUS_PONENS)
+    assert tuple(judgment.kind for judgment in mp.premises) == (PROVABLE, PROVABLE)
+    assert mp.premises[1].arguments[0].constructor == IMP
+    assert mp.conclusion.kind == PROVABLE
 
     binary_atoms = SETMM_PROP_BINDING.lower(binary)
     ternary_atoms = SETMM_PROP_BINDING.lower(ternary)

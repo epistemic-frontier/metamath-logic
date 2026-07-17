@@ -133,6 +133,14 @@ def test_semantic_assertion_application_canaries() -> None:
         ASSERTION_CATALOG as FOL_ASSERTION_CATALOG,
     )
     from logic.fol.rules import FOL_CORE_PROFILE
+    from logic.prop import THEOREMS as PROP_THEOREMS
+    from logic.prop._semantic_proofs import (
+        MP2B_PROOF,
+        author_mp2b,
+    )
+    from logic.prop._semantic_proofs import (
+        prove_mp2b as prove_mp2b_semantic,
+    )
     from logic.prop._system import make as make_prop_system
     from logic.prop.calculus import PROVABLE
     from logic.prop.core import prove_mp2b
@@ -232,6 +240,9 @@ def test_semantic_assertion_application_canaries() -> None:
     interner = SymbolInterner()
     prop_system = make_prop_system(interner=interner)
     expected_mp2b = prove_mp2b(prop_system)
+    assert PROP_THEOREMS["mp2b"] is prove_mp2b_semantic
+    assert prove_mp2b_semantic(prop_system) == expected_mp2b
+    assert author_mp2b().semantic_digest == MP2B_PROOF.semantic_digest
 
     def variable_symbol(local_name: str, *, tokens: tuple[int, ...] | None = None) -> int:
         matches = [

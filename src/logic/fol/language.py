@@ -6,6 +6,7 @@ from skfd.authoring.errors import AuthoringSemanticError
 from skfd.authoring.ids import ConstructorId, LanguageId, SortId, VariableKindId
 from skfd.authoring.language import (
     BinderDecl,
+    BindingClause,
     ConstructorDecl,
     LanguageRequirement,
     LanguageSpec,
@@ -37,8 +38,12 @@ LANGUAGE_SPEC = LanguageSpec(
     binders=(
         BinderDecl(
             constructor=ALL,
-            variable_argument=0,
-            scoped_arguments=(1,),
+            bindings=(
+                BindingClause(
+                    variable_argument=0,
+                    scoped_arguments=(1,),
+                ),
+            ),
         ),
     ),
 )

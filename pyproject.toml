@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metamath-logic"
-version = "0.0.7"
+version = "0.0.8"
 description = "Logic definitions for Metamath projects"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
@@ -35,8 +35,8 @@ maintainers = [
 ]
 
 dependencies = [
-    "proof-scaffold==0.0.10",
-    "metamath-prelude==0.0.5",
+    "proof-scaffold==0.0.11",
+    "metamath-prelude==0.0.6",
 ]
 
 [project.urls]
@@ -50,6 +50,10 @@ dev = [
     "pytest>=8",
     "ruff>=0.6",
 ]
+
+[tool.uv.sources]
+proof-scaffold = { git = "https://github.com/epistemic-frontier/proof-scaffold.git", rev = "5694462ed835f57db52f117f7ccdc82c6a1d8d0e" }
+metamath-prelude = { git = "https://github.com/epistemic-frontier/metamath-prelude.git", rev = "bd3178d1a3d7edb80c950c0b6a8f68c58c1955ef" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

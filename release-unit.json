@@ -1,1 +1,1 @@
-{"schema":"knowledge-release-unit-v1","release_unit_id":"logic","python_root":"logic","distribution_name":"metamath-logic","kind":"mathematical","version":"0.0.9","prelude_lock":{"distribution_name":"metamath-prelude","version":"0.0.6"},"modules":["logic.catalog_v1"]}
+{"schema":"knowledge-release-unit-v1","release_unit_id":"logic","python_root":"logic","distribution_name":"metamath-logic","kind":"mathematical","version":"0.0.10","prelude_lock":{"distribution_name":"metamath-prelude","version":"0.0.6"},"modules":["logic.catalog_v1"]}

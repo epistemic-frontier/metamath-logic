@@ -5,7 +5,7 @@ It provides reusable propositional and predicate logic artifacts that downstream
 
 ## Versioning
 
-- Package version: `0.0.9`
+- Package version: `0.0.10`
 - ProofScaffold dependency: `proof-scaffold==0.0.11`
 - Prelude dependency: `metamath-prelude==0.0.6`
 

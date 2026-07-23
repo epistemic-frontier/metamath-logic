@@ -5,9 +5,9 @@ It provides reusable propositional and predicate logic artifacts that downstream
 
 ## Versioning
 
-- Package version: `0.0.6`
-- ProofScaffold dependency: `proof-scaffold==0.0.9`
-- Prelude dependency: `metamath-prelude==0.0.5`
+- Package version: `0.0.9`
+- ProofScaffold dependency: `proof-scaffold==0.0.11`
+- Prelude dependency: `metamath-prelude==0.0.6`
 
 ## Installation
 
@@ -27,6 +27,11 @@ uv add metamath-logic
   proofs, all emitted into the verifier-checked build.
 - Propositional syntax/helpers beyond the foundation frame: `wa`, `wo`, `wb`,
   `wtru`, `wfal`, `mp`, `idi`, `a1ii`.
+- The governed, typed, lazy `logic.catalog_v1` facade for every Set.mm
+  declaration assigned to the logic release unit. Importing it performs no
+  file or provider access; the first query validates the embedded canonical
+  catalog. Declaration replay stays behind the shared, independently verified
+  Mono provider boundary.
 - A migration guide for the logic layer refactor.
 
 ## Migration guide

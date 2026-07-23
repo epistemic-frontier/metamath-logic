@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metamath-logic"
-version = "0.0.8"
+version = "0.0.9"
 description = "Logic definitions for Metamath projects"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
@@ -57,6 +57,12 @@ metamath-prelude = { git = "https://github.com/epistemic-frontier/metamath-prelu
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"logic.catalog_v1" = ["facade.json", "py.typed", "*.pyi"]
+
+[tool.setuptools.data-files]
+"share/metamath-logic" = ["release-unit.json"]
 
 [tool.mypy]
 python_version = "3.10"

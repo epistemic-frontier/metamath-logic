@@ -123,8 +123,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "metamath-prelude", git = "https://github.com/epistemic-frontier/metamath-prelude.git?rev=bd3178d1a3d7edb80c950c0b6a8f68c58c1955ef" },
-    { name = "proof-scaffold", git = "https://github.com/epistemic-frontier/proof-scaffold.git?rev=5694462ed835f57db52f117f7ccdc82c6a1d8d0e" },
+    { name = "metamath-prelude", git = "https://github.com/epistemic-frontier/metamath-prelude.git?rev=99ac2485ea9d72fc4f71548c37bc5585b109df0b" },
+    { name = "proof-scaffold", git = "https://github.com/epistemic-frontier/proof-scaffold.git?rev=5f86fb2678c95358689723331288c2c6b17893cb" },
 ]
 
 [package.metadata.requires-dev]
@@ -137,7 +137,7 @@ dev = [
 [[package]]
 name = "metamath-prelude"
 version = "0.0.6"
-source = { git = "https://github.com/epistemic-frontier/metamath-prelude.git?rev=bd3178d1a3d7edb80c950c0b6a8f68c58c1955ef#bd3178d1a3d7edb80c950c0b6a8f68c58c1955ef" }
+source = { git = "https://github.com/epistemic-frontier/metamath-prelude.git?rev=99ac2485ea9d72fc4f71548c37bc5585b109df0b#99ac2485ea9d72fc4f71548c37bc5585b109df0b" }
 dependencies = [
     { name = "proof-scaffold" },
 ]
@@ -226,8 +226,8 @@ wheels = [
 
 [[package]]
 name = "proof-scaffold"
-version = "0.0.11"
-source = { git = "https://github.com/epistemic-frontier/proof-scaffold.git?rev=5694462ed835f57db52f117f7ccdc82c6a1d8d0e#5694462ed835f57db52f117f7ccdc82c6a1d8d0e" }
+version = "0.0.13"
+source = { git = "https://github.com/epistemic-frontier/proof-scaffold.git?rev=5f86fb2678c95358689723331288c2c6b17893cb#5f86fb2678c95358689723331288c2c6b17893cb" }
 
 [[package]]
 name = "pygments"

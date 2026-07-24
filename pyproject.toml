@@ -35,7 +35,7 @@ maintainers = [
 ]
 
 dependencies = [
-    "proof-scaffold==0.0.11",
+    "proof-scaffold==0.0.13",
     "metamath-prelude==0.0.6",
 ]
 
@@ -52,8 +52,8 @@ dev = [
 ]
 
 [tool.uv.sources]
-proof-scaffold = { git = "https://github.com/epistemic-frontier/proof-scaffold.git", rev = "5694462ed835f57db52f117f7ccdc82c6a1d8d0e" }
-metamath-prelude = { git = "https://github.com/epistemic-frontier/metamath-prelude.git", rev = "bd3178d1a3d7edb80c950c0b6a8f68c58c1955ef" }
+proof-scaffold = { git = "https://github.com/epistemic-frontier/proof-scaffold.git", rev = "5f86fb2678c95358689723331288c2c6b17893cb" }
+metamath-prelude = { git = "https://github.com/epistemic-frontier/metamath-prelude.git", rev = "99ac2485ea9d72fc4f71548c37bc5585b109df0b" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

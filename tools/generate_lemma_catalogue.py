@@ -2,180 +2,126 @@ from __future__ import annotations
 
 import argparse
 import ast
-import inspect
-import sys
-from collections.abc import Callable, Mapping
+import json
 from pathlib import Path
+from typing import Any, cast
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
+AUTHORITY = ROOT / "tests" / "public-source-test-authority-v2.json"
 OUT = ROOT / "LEMMA_CATALOGUE.md"
 
 
-def _source_link(constructor: Callable[..., object]) -> str:
-    source = inspect.getsourcefile(constructor)
-    if source is None:
-        return "—"
-    path = Path(source).resolve().relative_to(ROOT)
-    line = inspect.getsourcelines(constructor)[1]
-    return f"[`{path.as_posix()}`]({path.as_posix()}#L{line})"
+def _document(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise TypeError(f"{path} must contain a JSON object")
+    return cast(dict[str, Any], value)
 
 
-def _proof_constructors() -> dict[str, tuple[Path, ...]]:
-    constructors: dict[str, list[Path]] = {}
-    for path in sorted((SRC / "logic").glob("**/*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
-                "prove_"
-            ):
-                constructors.setdefault(node.name, []).append(path)
-    return {
-        name: tuple(paths)
-        for name, paths in constructors.items()
+def _proof_rows(
+    item: dict[str, Any],
+) -> list[tuple[str, str, str, int]]:
+    path = ROOT / cast(str, item["path"])
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    functions = {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("prove_")
     }
+    expected = cast(list[str], item["proof_functions"])
+    if list(functions) != expected:
+        raise RuntimeError(f"{path} differs from the V2 test authority")
 
+    lazy_import_counts: dict[str, int] = {name: 0 for name in expected}
+    for dependency in cast(list[dict[str, str]], item["external_dependency_imports"]):
+        lazy_import_counts[dependency["proof_function"]] += 1
 
-def _constructor_source(constructor: Callable[..., object]) -> Path:
-    source = inspect.getsourcefile(constructor)
-    if source is None:
-        raise RuntimeError(
-            f"proof constructor has no source file: {constructor.__name__}"
+    rows: list[tuple[str, str, str, int]] = []
+    for name in expected:
+        function = functions[name]
+        handles: list[str] = []
+        for decorator in function.decorator_list:
+            target = decorator.func if isinstance(decorator, ast.Call) else decorator
+            if isinstance(target, ast.Attribute) and target.attr == "proof":
+                handles.append(ast.unparse(target.value))
+        if len(handles) != 1:
+            raise RuntimeError(f"{path}:{function.lineno} must have one proof handle")
+        rows.append(
+            (
+                handles[0],
+                name,
+                f"[`{path.relative_to(ROOT)}`]({path.relative_to(ROOT)}#L{function.lineno})",
+                lazy_import_counts[name],
+            )
         )
-    return Path(source).resolve()
-
-
-def _validate_shadowed_constructors(
-    source_constructors: Mapping[str, tuple[Path, ...]],
-    registries: tuple[Mapping[str, Callable[..., object]], ...],
-) -> None:
-    recognized: dict[str, set[Path]] = {}
-    labels: dict[str, set[str]] = {}
-    for registry in registries:
-        for label, constructor in registry.items():
-            recognized.setdefault(constructor.__name__, set()).add(
-                _constructor_source(constructor)
-            )
-            labels.setdefault(constructor.__name__, set()).add(label)
-
-    for name, paths in source_constructors.items():
-        if len(paths) == 1:
-            continue
-        if len(paths) != len(set(paths)):
-            raise RuntimeError(
-                f"duplicate proof constructor {name} in one source module"
-            )
-        if labels.get(name) is None or len(labels[name]) != 1:
-            raise RuntimeError(
-                f"duplicate proof constructor {name} has ambiguous labels"
-            )
-        if set(paths) != recognized.get(name, set()):
-            locations = ", ".join(str(path) for path in paths)
-            raise RuntimeError(
-                f"duplicate proof constructor {name} is not an audited "
-                f"registry shadow: {locations}"
-            )
+    return rows
 
 
 def render_catalogue() -> str:
-    sys.path.insert(0, str(SRC))
+    authority = _document(AUTHORITY)
+    if authority.get("schema") != "setmm-stage4-public-package-test-authority-v2":
+        raise RuntimeError("unsupported public-source test authority")
+    modules = cast(list[dict[str, Any]], authority["modules"])
+    module_rows: list[tuple[str, str, int, int]] = []
+    proof_sections: list[tuple[str, list[tuple[str, str, str, int]]]] = []
 
-    from logic.fol import AXIOMS as FOL_AXIOMS
-    from logic.fol import THEOREMS as FOL_THEOREMS
-    from logic.fol.theorems import THEOREMS as GENERATED_FOL_THEOREMS
-    from logic.prop import AXIOMS as PROP_AXIOMS
-    from logic.prop import RULES as PROP_RULES
-    from logic.prop import THEOREMS as PROP_THEOREMS
-    from logic.prop.theorems import THEOREMS as GENERATED_PROP_THEOREMS
-
-    registries: tuple[tuple[str, Mapping[str, Callable[..., object]]], ...] = (
-        ("Propositional theorem", PROP_THEOREMS),
-        ("Predicate theorem", FOL_THEOREMS),
-    )
-    registry_functions = {
-        constructor.__name__ for _, registry in registries for constructor in registry.values()
-    }
-    source_constructors = _proof_constructors()
-    _validate_shadowed_constructors(
-        source_constructors,
-        (
-            PROP_THEOREMS,
-            FOL_THEOREMS,
-            GENERATED_PROP_THEOREMS,
-            GENERATED_FOL_THEOREMS,
-        ),
-    )
-    uncovered = set(source_constructors) - registry_functions
-    missing = registry_functions - set(source_constructors)
-
-    if missing:
-        raise RuntimeError(f"registered constructors missing from source audit: {sorted(missing)}")
-    if uncovered:
-        raise RuntimeError(
-            f"source proof constructors outside emission closure: {sorted(uncovered)}"
+    for item in modules:
+        rows = _proof_rows(item)
+        module = cast(str, item["module"])
+        path = cast(str, item["path"])
+        dependency_count = len(
+            cast(list[dict[str, str]], item["external_dependency_imports"])
         )
+        module_rows.append((module, path, len(rows), dependency_count))
+        proof_sections.append((module, rows))
 
-    rows: list[tuple[str, str, str, str, str]] = []
-    axiom_source = "[`src/logic/prop/axioms.py`](src/logic/prop/axioms.py)"
-    rule_source = "[`src/logic/prop/rules.py`](src/logic/prop/rules.py)"
-    build_source = "[`src/logic/_build.py`](src/logic/_build.py)"
-    for label in sorted(PROP_AXIOMS):
-        rows.append((label, label, "Axiom", axiom_source, "emitted"))
-    predicate_axiom_source = "[`src/logic/fol/axioms.py`](src/logic/fol/axioms.py)"
-    for label in sorted(FOL_AXIOMS):
-        rows.append((label, label, "Predicate axiom", predicate_axiom_source, "emitted"))
-    for label, local in sorted(PROP_RULES.items()):
-        rows.append(
-            (
-                label,
-                local.id.value,
-                "Rule",
-                rule_source,
-                "emitted",
-            )
-        )
-    for label in ("wo", "wtru", "wfal"):
-        rows.append((label, label, "Syntax", build_source, "emitted"))
-    for label in ("idi", "a1ii"):
-        rows.append((label, label, "Helper theorem", build_source, "emitted"))
-    for category, registry in registries:
-        for label, constructor in sorted(registry.items()):
-            rows.append(
-                (
-                    label,
-                    constructor.__name__,
-                    category,
-                    _source_link(constructor),
-                    "registered",
-                )
-            )
-
-    md = [
-        "# Lemma Catalogue",
+    proof_count = sum(row[2] for row in module_rows)
+    lazy_import_count = sum(row[3] for row in module_rows)
+    lines = [
+        "# Logic proof catalogue",
         "",
-        "Generated by `uv run --no-sync python tools/generate_lemma_catalogue.py`; do not edit by hand.",
+        "Generated from `tests/public-source-test-authority-v2.json` by "
+        "`uv run --frozen python tools/generate_lemma_catalogue.py`; do not edit by hand.",
         "",
-        "The theorem rows come from both live scoped registries. Source links resolve to the public topic module that owns each directly importable constructor; registry membership is distinct from build emission coverage.",
+        "The public package is organized by ontology-owned modules. Each proof is a top-level "
+        "function decorated by its proof handle; external proof dependencies are imported inside "
+        "the function body and therefore elaborate lazily.",
         "",
-        f"- Registry proofs: {sum(len(registry) for _, registry in registries)}",
-        "- Support-only proofs: 0",
-        f"- Source proof constructors: {len(source_constructors)}",
-        f"- Uncovered source constructors: {len(uncovered)}",
-        "- Latest verified coverage: 2675 declared / 5004 emitted / 213 declared-but-unemitted",
-        "- Verifiers: `mmverify`, `metamath`, and `knife` pass",
+        f"- Semantic modules: {len(module_rows)}",
+        f"- Top-level proof functions: {proof_count}",
+        f"- Function-local external dependency imports: {lazy_import_count}",
+        "- Legacy `catalog_v1` modules: 0",
         "",
-        "| set.mm label | Local name/function | Category | Source module | Registry status |",
-        "|--------------|---------------------|----------|---------------|--------------|",
+        "## Module inventory",
+        "",
+        "| Semantic module | Source | Proof functions | Lazy imports |",
+        "|---|---|---:|---:|",
     ]
-    md.extend(
-        f"| {label} | {local} | {category} | {source} | {status} |"
-        for label, local, category, source, status in rows
+    lines.extend(
+        f"| `{module}` | [`{path}`]({path}) | {proofs} | {imports} |"
+        for module, path, proofs, imports in module_rows
     )
-    return "\n".join(md) + "\n"
+    for module, rows in proof_sections:
+        lines.extend(
+            [
+                "",
+                f"## `{module}`",
+                "",
+                "| Proof handle | Function | Source | Lazy imports |",
+                "|---|---|---|---:|",
+            ]
+        )
+        lines.extend(
+            f"| `{handle}` | `{function}` | {source} | {imports} |"
+            for handle, function, source, imports in rows
+        )
+    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate the emitted lemma catalogue")
+    parser = argparse.ArgumentParser(
+        description="Generate the ontology-owned public proof catalogue"
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -189,7 +135,7 @@ def main() -> None:
         if current != rendered:
             raise SystemExit(
                 "LEMMA_CATALOGUE.md is stale; run "
-                "`uv run --no-sync python tools/generate_lemma_catalogue.py`"
+                "`uv run --frozen python tools/generate_lemma_catalogue.py`"
             )
         return
     OUT.write_text(rendered, encoding="utf-8")

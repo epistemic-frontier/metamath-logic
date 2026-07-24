@@ -1,64 +1,24 @@
 # metamath-logic
 
-`metamath-logic` is a small Python package that exports the “logic” layer used by ProofScaffold-based Metamath projects.
-It provides reusable propositional and predicate logic artifacts that downstream packages can depend on and link against.
+This is the Project 025 V2 public proof-source release for
+`logic`.
 
-## Versioning
+- Python root: `logic`
+- Version: `0.0.11`
+- Governed modules: 26
+- Public proof functions: 2758
+- Runtime provider: `metamath-setmm-provider==0.1.0`
+- Proof authoring runtime: `proof-scaffold==0.0.13`
 
-- Package version: `0.0.10`
-- ProofScaffold dependency: `proof-scaffold==0.0.11`
-- Prelude dependency: `metamath-prelude==0.0.6`
+Assertion handles and formations are owned by the private provider. Proof
+functions are owned by the public taxonomy modules in this repository.
+Direct proof dependencies resolve provider handles inside each proof
+function; this package has no runtime dependency on another public package.
 
-## Installation
+## Development
 
-This package is published on PyPI: https://pypi.org/project/metamath-logic/
-
-With `uv`:
-
-```bash
-uv add metamath-logic
+```console
+uv sync --dev
+uv run ruff check .
+uv run python -m pytest
 ```
-
-## What this package contains
-
-- An internal ProofScaffold `_build.py` entrypoint that emits the logic layer as a linkable unit.
-- Authoring-facing propositional and predicate logic libraries (Hilbert-style systems).
-- Complete propositional and predicate theorem registries: 1,684 declared
-  proofs, all emitted into the verifier-checked build.
-- Propositional syntax/helpers beyond the foundation frame: `wa`, `wo`, `wb`,
-  `wtru`, `wfal`, `mp`, `idi`, `a1ii`.
-- The governed, typed, lazy `logic.catalog_v1` facade for every Set.mm
-  declaration assigned to the logic release unit. Importing it performs no
-  file or provider access; the first query validates the embedded canonical
-  catalog. Declaration replay stays behind the shared, independently verified
-  Mono provider boundary.
-- A migration guide for the logic layer refactor.
-
-## Migration guide
-
-- [`docs/LOGIC_MIGRATION_GUIDE.md`](docs/LOGIC_MIGRATION_GUIDE.md)
-
-## Verification
-
-This repository uses `uv` for reproducible installs and runs `skfd verify --level 1` as the primary correctness gate.
-
-From this repository directory:
-
-```bash
-uv sync --locked --dev
-uv run --frozen ruff check .
-uv run --frozen mypy .
-uv run --frozen python -m pytest
-uv run --frozen skfd verify --level 1 metamath-logic
-```
-
-`skfd verify` builds the package into a verification monolith (under `target/`) and checks it with the configured verifiers.
-
-For a concise verification of the current checkout, run:
-
-```bash
-uv run --no-sync skfd verify --level 1 metamath-logic
-```
-
-Latest result: 1,684 declared proofs, 3,610 emitted proofs, and 0
-declared-but-unemitted; `mmverify`, `metamath`, and `knife` all pass.

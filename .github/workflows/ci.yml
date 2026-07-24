@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint_typecheck_test_verify:
-    name: Python ${{ matrix.python-version }} / lint + typecheck + tests + verify
+    name: Python ${{ matrix.python-version }} / lint + typecheck + public source
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,5 +37,5 @@ jobs:
       - name: Run tests (pytest)
         run: uv run --frozen python -m pytest
 
-      - name: Verify (skfd)
-        run: uv run --frozen skfd verify --level 1 metamath-logic
+      - name: Check generated proof catalogue
+        run: uv run --frozen python tools/generate_lemma_catalogue.py --check

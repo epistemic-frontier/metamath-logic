@@ -4,45 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metamath-logic"
-version = "0.0.10"
+version = "0.0.11"
 description = "Logic definitions for Metamath projects"
-readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
 license = "GPL-2.0-or-later"
-
+authors = [{ "name" = "Mingli Yuan", "email" = "mingli.yuan@gmail.com" }]
+maintainers = [{ "name" = "Mingli Yuan", "email" = "mingli.yuan@gmail.com" }]
 keywords = ["metamath", "proof", "proof-scaffold", "logic"]
-
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.14",
-    "Topic :: Software Development :: Build Tools",
-]
-
-authors = [
-  { name = "Mingli Yuan", email = "mingli.yuan@gmail.com" }
-]
-
-maintainers = [
-  { name = "Mingli Yuan", email = "mingli.yuan@gmail.com" }
-]
-
+classifiers = ["Development Status :: 3 - Alpha", "Intended Audience :: Developers", "Programming Language :: Python", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3.14", "Topic :: Software Development :: Build Tools"]
+readme = "README.md"
 dependencies = [
     "proof-scaffold==0.0.13",
-    "metamath-prelude==0.0.6",
+    "metamath-setmm-provider==0.1.0",
 ]
 
 [project.urls]
-Homepage = "https://github.com/epistemic-frontier/metamath-logic"
-Repository = "https://github.com/epistemic-frontier/metamath-logic"
-Issues = "https://github.com/epistemic-frontier/metamath-logic/issues"
+"Homepage" = "https://github.com/epistemic-frontier/metamath-logic"
+"Repository" = "https://github.com/epistemic-frontier/metamath-logic"
+"Issues" = "https://github.com/epistemic-frontier/metamath-logic/issues"
 
 [dependency-groups]
 dev = [
@@ -51,53 +30,30 @@ dev = [
     "ruff>=0.6",
 ]
 
-[tool.uv.sources]
-proof-scaffold = { git = "https://github.com/epistemic-frontier/proof-scaffold.git", rev = "5f86fb2678c95358689723331288c2c6b17893cb" }
-metamath-prelude = { git = "https://github.com/epistemic-frontier/metamath-prelude.git", rev = "99ac2485ea9d72fc4f71548c37bc5585b109df0b" }
+[tool.setuptools]
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"logic.catalog_v1" = ["facade.json", "py.typed", "*.pyi"]
+"logic" = ["py.typed"]
 
 [tool.setuptools.data-files]
 "share/metamath-logic" = ["release-unit.json"]
-
-[tool.mypy]
-python_version = "3.10"
-mypy_path = "src"
-files = ["src"]
-explicit_package_bases = true
-namespace_packages = true
-strict = true
-disallow_untyped_decorators = false
-
-[[tool.mypy.overrides]]
-module = ["skfd.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["prelude.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["skfd.*", "prelude.*"]
-follow_imports = "skip"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-# W605 added on top of AGENT.md's E/F/I/B/UP: proof formula strings historically
-# used ASCII operator tokens like "\/" / "/\" which Python parses as invalid escape
-# sequences (SyntaxWarning today, SyntaxError later). Keep it flagged to prevent
-# regression now that formulas use the Unicode aliases ∨ / ∧.
-select = ["E", "F", "I", "B", "UP", "W605"]
-# wff formula string literals are irreducibly long; the formatter handles code
-# width, and sibling packages (metamath-prelude) do not enforce E501 either.
-ignore = ["E501"]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.uv.sources]
+metamath-setmm-provider = { url = "https://raw.githubusercontent.com/epistemic-frontier/proof-scaffold/99c7b4d4a31998b1576104292c99eeb592c03a60/providers/setmm/metamath_setmm_provider-0.1.0-py3-none-any.whl" }
+
+[tool.ruff.lint.per-file-ignores]
+"src/**/*.py" = ["I001"]

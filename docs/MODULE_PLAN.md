@@ -7,16 +7,13 @@ for unfinished work.
 
 ## Current status
 
-<<<<<<< HEAD
 The implementation is split into `logic.propositional.hilbert` and
-`logic.predicate.hilbert`. Their registries contain 1,500 and 396 proofs,
-respectively (1,896 total), and the complete registry is emitted.
+`logic.predicate.hilbert`. Their registries contain 1,779 and 902 proofs,
+respectively (2,681 total), and the complete registry is emitted.
 
-## Module Hierarchy
-
-The source closure audit reports 1,896 unique `prove_*` identities, all in the
+The source closure audit reports 2,681 unique `prove_*` identities, all in the
 registries, with 0 support-only and 0 uncovered. Latest verification reports
-1,896 declared, 3,931 emitted, and 0
+2,681 declared, 5,341 emitted, and 0
 declared-but-unemitted proofs. `mmverify`, `metamath`, and `knife` pass.
 
 Propositional mathematical content is divided by connective among
@@ -45,7 +42,8 @@ are only Python-safe Expr identifiers.
 
 The original plan grouped work into propositional core, implication,
 remaining connectives, then predicate calculus (lines 14721–24944 in the
-current local set.mm snapshot). It also
+then-current local set.mm snapshot; the synchronized snapshot now uses
+14761–24984). It also
 proposed finer predicate files such as `quantifiers.py`, `not_free.py`, and
 `equality.py`. Those were planning boundaries, not the final architecture;
 their implemented mathematical content now resides in predicate `axioms.py`,
@@ -61,10 +59,10 @@ the canonical set.mm theorem `mto`.
 ## Verification
 
 ```bash
-uv run --no-sync skfd verify --level 1 metamath-logic
+uv run --frozen skfd verify --level 1 metamath-logic
 ```
 
 The catalogue is a derived release artifact, not part of each theorem change.
 Regenerate it once during release preparation with
-`uv run --no-sync python tools/generate_lemma_catalogue.py`, then validate it
+`uv run --frozen python tools/generate_lemma_catalogue.py`, then validate it
 with the same command plus `--check`.

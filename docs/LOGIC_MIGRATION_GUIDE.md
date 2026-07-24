@@ -4,8 +4,8 @@
 
 This guide currently uses:
 - local file: [set.mm](file:///Users/mingli/MetaMath/set.mm/set.mm)
-- downloaded: **2026-07-11**
-- SHA-256: `131fe655a925826c960e57684fe8a73c5ae46d43814b043a1d64457b01130abd`
+- synchronized: **2026-07-16**, set.mm commit `59f52f87ddf500a370960ae6faeeb472503a9c86`
+- SHA-256: `c95aaddc1ddd765352f8e8ffab89ab434f1de0cf50bd32651b85c9760bf5e25b`
 
 All line numbers below refer to that exact file. If the snapshot changes,
 update the digest and regenerate the line ranges.
@@ -14,27 +14,27 @@ update the digest and regenerate the line ranges.
 
 ### Prelude vs Logic boundary (within first 700 lines)
 
-- Foundation prelude: the ambient part of `set.mm` **lines 1–648**
+- Foundation prelude: the ambient part of `set.mm` **lines 1–649**
   (`wff`, `|-`, schema variables and `$f`, `wn`, `wi`)
 - Logic: ordinary proof/syntax content, including `idi`, `a1ii`, `wo`,
   `wtru`, `wfal`, and the `ax-mp` / `ax-1..3` block.
 
 Reference:
-- `ax-mp` block begins: [set.mm:L649](file:///Users/mingli/MetaMath/set.mm/set.mm#L649)
+- `ax-mp` block begins: [set.mm:L650](file:///Users/mingli/MetaMath/set.mm/set.mm#L650)
 
 ### Logic package boundary inside set.mm (the "set-pred.mm" monolith)
 
 In the upstream modularization scheme, `set.mm` marks “logic” as the virtual file `set-pred.mm`:
-- Begin marker: [set.mm:L311](file:///Users/mingli/MetaMath/set.mm/set.mm#L311)
-- End marker: [set.mm:L24944](file:///Users/mingli/MetaMath/set.mm/set.mm#L24944)
+- Begin marker: [set.mm:L312](file:///Users/mingli/MetaMath/set.mm/set.mm#L312)
+- End marker: [set.mm:L24984](file:///Users/mingli/MetaMath/set.mm/set.mm#L24984)
 
 Operationally, for this project:
 - `metamath-prelude` covers only the global foundation scope: base typecodes,
   schema variables and floating hypotheses, `wn`, and `wi`.
-- `metamath-logic` covers the remainder of `set-pred.mm`, i.e. **649–24944**, including both:
+- `metamath-logic` covers the remainder of `set-pred.mm`, i.e. **650–24984**, including both:
   - propositional calculus library
   - first-order predicate calculus with equality (and the “setvar” language needed by set theory)
-- The helper labels `idi` and `a1ii` are historically before line 649, but are
+- The helper labels `idi` and `a1ii` are historically before line 650, but are
   owned by `metamath-logic` because they use local `$e` hypotheses and are not
   foundation-scope mechanics.
 
@@ -85,10 +85,10 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 1) Propositional calculus core axioms and rule
 
-- **set.mm range**: **649–701**
+- **set.mm range**: **650–702**
 - **Anchor lines**:
-  - `ax-mp` block begins: [set.mm:L649](file:///Users/mingli/MetaMath/set.mm/set.mm#L649)
-  - `ax-1..ax-3`: [set.mm:L679-L701](file:///Users/mingli/MetaMath/set.mm/set.mm#L679-L701)
+  - `ax-mp` block begins: [set.mm:L650](file:///Users/mingli/MetaMath/set.mm/set.mm#L650)
+  - `ax-1..ax-3`: [set.mm:L680-L702](file:///Users/mingli/MetaMath/set.mm/set.mm#L680-L702)
 - **Python**: `logic/propositional/core.py`
 - **Exports**:
   - `ax-mp`, `ax-1`, `ax-2`, `ax-3`
@@ -98,9 +98,9 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 2) Implication-only library (intuitionistic/minimal implicational calculus)
 
-- **set.mm range**: **706–1631**
+- **set.mm range**: **707–1632**
 - **Anchor lines**:
-  - Section header: [set.mm:L706](file:///Users/mingli/MetaMath/set.mm/set.mm#L706)
+  - Section header: [set.mm:L707](file:///Users/mingli/MetaMath/set.mm/set.mm#L707)
   - This region should avoid `ax-3` where possible (set.mm explicitly calls this out).
 - **Python**: `logic/propositional/implication.py`
 - **Exports (minimum recommended)**:
@@ -112,12 +112,12 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 3) True/False constants (and universal quantifier introduced for df-tru)
 
-- **set.mm range**: **12135–12463**
+- **set.mm range**: **12175–12503**
 - **Anchor lines**:
-  - Section header: [set.mm:L12135](file:///Users/mingli/MetaMath/set.mm/set.mm#L12135)
-  - Universal quantifier subsection: [set.mm:L12142](file:///Users/mingli/MetaMath/set.mm/set.mm#L12142)
-  - Equality predicate subsection: [set.mm:L12195](file:///Users/mingli/MetaMath/set.mm/set.mm#L12195)
-  - False constant subsection: [set.mm:L12385](file:///Users/mingli/MetaMath/set.mm/set.mm#L12385)
+  - Section header: [set.mm:L12175](file:///Users/mingli/MetaMath/set.mm/set.mm#L12175)
+  - Universal quantifier subsection: [set.mm:L12182](file:///Users/mingli/MetaMath/set.mm/set.mm#L12182)
+  - Equality predicate subsection: [set.mm:L12235](file:///Users/mingli/MetaMath/set.mm/set.mm#L12235)
+  - False constant subsection: [set.mm:L12425](file:///Users/mingli/MetaMath/set.mm/set.mm#L12425)
 - **Python**: `logic/propositional/truth.py`
 - **Exports**:
   - `T.` / `F.` related definitions (`df-tru`, `df-fal`) and the minimal supporting lemmas you decide to keep
@@ -127,9 +127,9 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 4) Negation
 
-- **set.mm range**: **1632–2410**
+- **set.mm range**: **1633–2411**
 - **Anchor lines**:
-  - Section header: [set.mm:L1632](file:///Users/mingli/MetaMath/set.mm/set.mm#L1632)
+  - Section header: [set.mm:L1633](file:///Users/mingli/MetaMath/set.mm/set.mm#L1633)
 - **Python**: `logic/propositional/negation.py`
 - **Exports (minimum recommended)**:
   - core negation transformations required by later connectives and by predicate calculus: double-negation laws, contraposition helpers, etc.
@@ -139,9 +139,9 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 5) Conjunction
 
-- **set.mm range**: **4049–7376**
+- **set.mm range**: **4050–7377**
 - **Anchor lines**:
-  - Section header: [set.mm:L4049](file:///Users/mingli/MetaMath/set.mm/set.mm#L4049)
+  - Section header: [set.mm:L4050](file:///Users/mingli/MetaMath/set.mm/set.mm#L4050)
 - **Python**: `logic/propositional/conjunction.py`
 - **Exports**:
   - `df-an` and foundational lemmas (only once `df-an` exists)
@@ -150,12 +150,12 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 6) Disjunction (and the remaining propositional library)
 
-- **set.mm range**: **7377–14720**
+- **set.mm range**: **7378–14760**
 - **Anchor lines**:
-  - Disjunction section: [set.mm:L7377](file:///Users/mingli/MetaMath/set.mm/set.mm#L7377)
-  - Other axiomatizations: [set.mm:L13004](file:///Users/mingli/MetaMath/set.mm/set.mm#L13004)
-  - Stoic logic: [set.mm:L14448](file:///Users/mingli/MetaMath/set.mm/set.mm#L14448)
-  - Predicate calculus begins at: [set.mm:L14721](file:///Users/mingli/MetaMath/set.mm/set.mm#L14721)
+  - Disjunction section: [set.mm:L7378](file:///Users/mingli/MetaMath/set.mm/set.mm#L7378)
+  - Other axiomatizations: [set.mm:L13044](file:///Users/mingli/MetaMath/set.mm/set.mm#L13044)
+  - Stoic logic: [set.mm:L14488](file:///Users/mingli/MetaMath/set.mm/set.mm#L14488)
+  - Predicate calculus begins at: [set.mm:L14761](file:///Users/mingli/MetaMath/set.mm/set.mm#L14761)
 - **Python**:
   - `logic/propositional/disjunction.py`
   - `logic/propositional/alt_axioms.py` (for alternative axiomatizations like Nicod/Meredith/Tarski-Bernays-Wajsberg, etc., if you keep them)
@@ -165,13 +165,13 @@ they are not the current file map. For the implemented layout and status, use
 
 ### 7) Predicate calculus with equality (Tarski’s S2 and supporting schemes)
 
-- **set.mm range**: **14721–24944**
+- **set.mm range**: **14761–24984**
 - **Anchor lines**:
-  - Predicate calculus section header: [set.mm:L14721](file:///Users/mingli/MetaMath/set.mm/set.mm#L14721)
-  - Existential quantifier: [set.mm:L14829](file:///Users/mingli/MetaMath/set.mm/set.mm#L14829)
-  - Generalization rule scheme: [set.mm:L14980](file:///Users/mingli/MetaMath/set.mm/set.mm#L14980)
-  - Auxiliary axiom schemes: [set.mm:L18739](file:///Users/mingli/MetaMath/set.mm/set.mm#L18739)
-  - End marker: [set.mm:L24944](file:///Users/mingli/MetaMath/set.mm/set.mm#L24944)
+  - Predicate calculus section header: [set.mm:L14761](file:///Users/mingli/MetaMath/set.mm/set.mm#L14761)
+  - Existential quantifier: [set.mm:L14869](file:///Users/mingli/MetaMath/set.mm/set.mm#L14869)
+  - Generalization rule scheme: [set.mm:L15020](file:///Users/mingli/MetaMath/set.mm/set.mm#L15020)
+  - Auxiliary axiom schemes: [set.mm:L18779](file:///Users/mingli/MetaMath/set.mm/set.mm#L18779)
+  - End marker: [set.mm:L24984](file:///Users/mingli/MetaMath/set.mm/set.mm#L24984)
 - **Python** (suggested split):
   - `logic/fol/syntax.py` (setvar pool + wff formation rules for `A.`/`E.` and atomic predicates)
   - `logic/fol/quantifiers.py` (df-ex and quantifier manipulation lemmas)
@@ -203,6 +203,6 @@ For each chunk:
 - Keep all syntax/primitive tokens interned under a global stable module id (the prelude already does this for base tokens).
 - When lowering proofs, use dependency-provided label `SymbolId`s where applicable (to avoid accidental duplicate labels).
 
-The migration is now fully emitted: the latest verification reports 1,896
-declared proofs, 3,931 emitted proofs, and 0 declared-but-unemitted;
+The migration is now fully emitted: the latest verification reports 2,681
+declared proofs, 5,341 emitted proofs, and 0 declared-but-unemitted;
 `mmverify`, `metamath`, and `knife` all pass.

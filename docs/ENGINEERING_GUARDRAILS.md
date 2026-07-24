@@ -101,7 +101,7 @@ release artifact. Before a release, regenerate it once with
 `uv run --no-sync python tools/generate_lemma_catalogue.py` and validate the
 checked-in result with the same command plus `--check`.
 
-The current gate is expected to report 1,896 declared, 3,931 emitted, and 0
+The current gate is expected to report 2,681 declared, 5,341 emitted, and 0
 declared-but-unemitted proofs.
 
 ## Counting and Roadmap Guardrails

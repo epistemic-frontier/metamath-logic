@@ -24,7 +24,7 @@ canonical set.mm names `ax-5` through `ax-13` (and likewise for `ax-4`).
 
 ## Current status
 
-- `SETMM_TO_PREDICATE_THEOREMS` contains 396 proofs.
+- `SETMM_TO_PREDICATE_THEOREMS` contains 902 proofs.
 - Predicate syntax and axioms are integrated into `logic.build`.
 - Every predicate registry proof is emitted; none is registered-only.
 - Predicate theorem constructors live in `lemmas.py`, and the catalogue links
@@ -32,12 +32,12 @@ canonical set.mm names `ax-5` through `ax-13` (and likewise for `ax-4`).
 - New migrations are registered in the local `MIGRATION_THEOREMS` map in
   `lemmas.py`. `theorems.py` deterministically merges it with the frozen
   `_LEGACY_PREDICATE_THEOREMS` bucket and rejects duplicate labels.
-- Together with 1,500 propositional registry proofs, the build declares all
-  1,896 registry proofs.
+- Together with 1,779 propositional registry proofs, the build declares all
+  2,681 registry proofs.
 
-The complete source audit finds 1,896 unique `prove_*` constructors, all in the
+The complete source audit finds 2,681 unique `prove_*` constructors, all in the
 registries, with 0 support-only and 0 uncovered. Latest verification emitted
-3,931 proofs with 0 declared-but-unemitted;
+5,341 proofs with 0 declared-but-unemitted;
 `mmverify`, `metamath`, and `knife` all pass.
 
 ## Boundaries

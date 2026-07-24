@@ -269,7 +269,7 @@ The expected “green path” for this repository:
 - `proof-scaffold`: `uv run --no-sync pytest`
 - `metamath-logic`: `uv run --no-sync skfd verify --level 1 metamath-logic`
 
-The latest run reports 1,684 declared, 3,610 emitted, and 0
+The latest run reports 2,681 declared, 5,341 emitted, and 0
 declared-but-unemitted proofs; all three configured verifiers pass.
 
 Note: `verify` targets the dist/project name from `pyproject.toml`, not the module name.

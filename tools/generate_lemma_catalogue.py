@@ -21,18 +21,60 @@ def _source_link(constructor: Callable[..., object]) -> str:
     return f"[`{path.as_posix()}`]({path.as_posix()}#L{line})"
 
 
-def _proof_constructors() -> dict[str, Path]:
-    constructors: dict[str, Path] = {}
+def _proof_constructors() -> dict[str, tuple[Path, ...]]:
+    constructors: dict[str, list[Path]] = {}
     for path in sorted((SRC / "logic").glob("**/*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith(
                 "prove_"
             ):
-                if node.name in constructors:
-                    raise RuntimeError(f"duplicate proof constructor {node.name}: {path}")
-                constructors[node.name] = path
-    return constructors
+                constructors.setdefault(node.name, []).append(path)
+    return {
+        name: tuple(paths)
+        for name, paths in constructors.items()
+    }
+
+
+def _constructor_source(constructor: Callable[..., object]) -> Path:
+    source = inspect.getsourcefile(constructor)
+    if source is None:
+        raise RuntimeError(
+            f"proof constructor has no source file: {constructor.__name__}"
+        )
+    return Path(source).resolve()
+
+
+def _validate_shadowed_constructors(
+    source_constructors: Mapping[str, tuple[Path, ...]],
+    registries: tuple[Mapping[str, Callable[..., object]], ...],
+) -> None:
+    recognized: dict[str, set[Path]] = {}
+    labels: dict[str, set[str]] = {}
+    for registry in registries:
+        for label, constructor in registry.items():
+            recognized.setdefault(constructor.__name__, set()).add(
+                _constructor_source(constructor)
+            )
+            labels.setdefault(constructor.__name__, set()).add(label)
+
+    for name, paths in source_constructors.items():
+        if len(paths) == 1:
+            continue
+        if len(paths) != len(set(paths)):
+            raise RuntimeError(
+                f"duplicate proof constructor {name} in one source module"
+            )
+        if labels.get(name) is None or len(labels[name]) != 1:
+            raise RuntimeError(
+                f"duplicate proof constructor {name} has ambiguous labels"
+            )
+        if set(paths) != recognized.get(name, set()):
+            locations = ", ".join(str(path) for path in paths)
+            raise RuntimeError(
+                f"duplicate proof constructor {name} is not an audited "
+                f"registry shadow: {locations}"
+            )
 
 
 def render_catalogue() -> str:
@@ -40,9 +82,11 @@ def render_catalogue() -> str:
 
     from logic.fol import AXIOMS as FOL_AXIOMS
     from logic.fol import THEOREMS as FOL_THEOREMS
+    from logic.fol.theorems import THEOREMS as GENERATED_FOL_THEOREMS
     from logic.prop import AXIOMS as PROP_AXIOMS
     from logic.prop import RULES as PROP_RULES
     from logic.prop import THEOREMS as PROP_THEOREMS
+    from logic.prop.theorems import THEOREMS as GENERATED_PROP_THEOREMS
 
     registries: tuple[tuple[str, Mapping[str, Callable[..., object]]], ...] = (
         ("Propositional theorem", PROP_THEOREMS),
@@ -52,6 +96,15 @@ def render_catalogue() -> str:
         constructor.__name__ for _, registry in registries for constructor in registry.values()
     }
     source_constructors = _proof_constructors()
+    _validate_shadowed_constructors(
+        source_constructors,
+        (
+            PROP_THEOREMS,
+            FOL_THEOREMS,
+            GENERATED_PROP_THEOREMS,
+            GENERATED_FOL_THEOREMS,
+        ),
+    )
     uncovered = set(source_constructors) - registry_functions
     missing = registry_functions - set(source_constructors)
 
@@ -72,7 +125,15 @@ def render_catalogue() -> str:
     for label in sorted(FOL_AXIOMS):
         rows.append((label, label, "Predicate axiom", predicate_axiom_source, "emitted"))
     for label, local in sorted(PROP_RULES.items()):
-        rows.append((label, local, "Rule", rule_source, "emitted"))
+        rows.append(
+            (
+                label,
+                local.id.value,
+                "Rule",
+                rule_source,
+                "emitted",
+            )
+        )
     for label in ("wo", "wtru", "wfal"):
         rows.append((label, label, "Syntax", build_source, "emitted"))
     for label in ("idi", "a1ii"):

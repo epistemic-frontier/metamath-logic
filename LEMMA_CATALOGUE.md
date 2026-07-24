@@ -39,7 +39,7 @@ The theorem rows come from both live scoped registries. Source links resolve to 
 | ax-7 | ax-7 | Predicate axiom | [`src/logic/fol/axioms.py`](src/logic/fol/axioms.py) | emitted |
 | ax-8 | ax-8 | Predicate axiom | [`src/logic/fol/axioms.py`](src/logic/fol/axioms.py) | emitted |
 | ax-9 | ax-9 | Predicate axiom | [`src/logic/fol/axioms.py`](src/logic/fol/axioms.py) | emitted |
-| ax-mp | mp | Rule | [`src/logic/prop/rules.py`](src/logic/prop/rules.py) | emitted |
+| ax-mp | metamath-logic/prop#rule:modus-ponens | Rule | [`src/logic/prop/rules.py`](src/logic/prop/rules.py) | emitted |
 | wo | wo | Syntax | [`src/logic/_build.py`](src/logic/_build.py) | emitted |
 | wtru | wtru | Syntax | [`src/logic/_build.py`](src/logic/_build.py) | emitted |
 | wfal | wfal | Syntax | [`src/logic/_build.py`](src/logic/_build.py) | emitted |
@@ -909,7 +909,7 @@ The theorem rows come from both live scoped registries. Source links resolve to 
 | mp2an | prove_mp2an | Propositional theorem | [`src/logic/prop/conjunction.py`](src/logic/prop/conjunction.py#L3091) | registered |
 | mp2and | prove_mp2and | Propositional theorem | [`src/logic/prop/conjunction.py`](src/logic/prop/conjunction.py#L3172) | registered |
 | mp2ani | prove_mp2ani | Propositional theorem | [`src/logic/prop/conjunction.py`](src/logic/prop/conjunction.py#L3160) | registered |
-| mp2b | prove_mp2b | Propositional theorem | [`src/logic/prop/core.py`](src/logic/prop/core.py#L23) | registered |
+| mp2b | prove_mp2b | Propositional theorem | [`src/logic/prop/_semantic_proofs.py`](src/logic/prop/_semantic_proofs.py#L72) | registered |
 | mp2d | prove_mp2d | Propositional theorem | [`src/logic/prop/core.py`](src/logic/prop/core.py#L506) | registered |
 | mp3an | prove_mp3an | Propositional theorem | [`src/logic/prop/ternary.py`](src/logic/prop/ternary.py#L3886) | registered |
 | mp3an1 | prove_mp3an1 | Propositional theorem | [`src/logic/prop/ternary.py`](src/logic/prop/ternary.py#L3737) | registered |
